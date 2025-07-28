@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OHSS Performance Dashboard</title>
+
+  <!-- Font Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css " />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js "></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com "></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'primary-blue': '#0A4D9E',
+            'header-footer-bg': '#e53935',
+            'background-color': '#f4f7fa',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        },
+      },
+    };
+  </script>
+</head>
+<body class="bg-background-color text-gray-800 font-sans min-h-screen flex flex-col">
+
+<!-- Loader Spinner Merah -->
+<div id="loader-bg" style="position:fixed;z-index:9999;top:0;left:0;right:0;bottom:0;background:#f4f7fa;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s;">
+  <div class="loader" style="border:6px solid #e0e7ef;border-top:6px solid #e53935;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;"></div>
+</div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-header-footer-bg text-white shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col pt-0 rounded-r-3xl border-r-4 border-header-footer-bg">
+    <button id="sidebarBackBtn" class="absolute top-4 left-4 bg-white text-header-footer-bg rounded-full shadow-lg w-10 h-10 flex items-center justify-center hover:bg-header-footer-bg hover:text-white transition focus:outline-none border-2 border-header-footer-bg" title="Tutup Sidebar">
+      <i class="fas fa-arrow-left text-xl"></i>
+    </button>
+    <div class="flex flex-col gap-2 px-6 pt-20">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="font-bold text-lg tracking-wide text-white drop-shadow">OHSS</span>
+      </div>  
+      <a href="index.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md text-base">
+        <i class="fas fa-home text-lg"></i> Dashboard
+    </a>
+      <a href="OHS.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+        <i class="fas fa-shield-alt"></i> OHSS
+      </a>
+      <a href="security.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+        <i class="fas fa-user-shield"></i> Security
+      </a>
+      <a href="firesafety.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+        <i class="fas fa-fire-extinguisher"></i> Fire Safety
+      </a>
+      <a href="surveillance.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+        <i class="fas fa-video"></i> Surveillance
+      </a>
+      <div class="mt-8 text-xs text-white/80 px-2">
+        <span class="block">&copy; 2025 Batamindo Investment Cakrawala. All Rights Reserved.</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="bg-header-footer-bg text-white px-2 py-1 flex items-center justify-between mb-3 min-h-0 h-12 relative">
+    <!-- Menu Button -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white hover:text-gray-200 focus:outline-none" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="w-5 h-5">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Logo -->
+    <div class="flex items-center flex-grow justify-center">
+      <img src="img/batamindo.png" alt="Batamindo Investment Cakrawala Logo" class="h-6 object-contain">
+    </div>
+
+    <!-- Title & Date -->
+    <div class="text-right hidden sm:block">
+      <div class="text-sm font-semibold leading-tight">Report OHSS Monthly</div>
+      <div class="text-[10px] opacity-80 mt-0.5 leading-tight">
+        BIC / OHSS-25-034-006-142 | Cut of date: 01 June – 30 June 2025
+      </div>
+    </div>
+
+    <!-- Fullscreen Buttons -->
+    <button id="fullscreenBtn" class="fixed bottom-4 right-4 z-50 bg-header-footer-bg text-white rounded-full shadow-lg p-4 hover:bg-primary-blue transition-colors duration-200 flex items-center justify-center w-14 h-14" title="Full Screen">
+      <i class="fas fa-expand text-2xl"></i>
+    </button>
+    <button id="exitFullscreenBtn" class="fixed bottom-4 right-4 z-50 bg-header-footer-bg text-white rounded-full shadow-lg p-4 hover:bg-primary-blue transition-colors duration-200 flex items-center justify-center w-14 h-14 hidden" title="Exit Full Screen">
+      <i class="fas fa-compress text-2xl"></i>
+    </button>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content flex-1 fadein">
+    <div class="container mx-auto px-4 max-w-7xl">
+
+    <!-- KPI Cards (horizontal, lebih kecil) -->
+    <div class="flex flex-row gap-4 mb-4">
+      <div class="bg-white p-4 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[120px] h-[110px]">
+        <div class="text-2xl font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
+          <i class="fas fa-user-shield text-primary-blue text-xl"></i> 6,062,744
+        </div>
+        <div class="mt-1 text-black-600 text-xs font-semibold">Total Safe Manhours (To date)</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[120px] h-[110px]">
+        <div class="text-2xl font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
+          <i class="fas fa-calendar-check text-primary-blue text-xl"></i> 1,495,968
+        </div>
+        <div class="mt-1 text-black-600 text-xs font-semibold">Safe Manhours (2025)</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[120px] h-[110px]">
+        <div class="text-2xl font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
+          <i class="fas fa-users text-primary-blue text-xl"></i> 1,354
+        </div>
+        <div class="mt-1 text-black-600 text-xs font-semibold">Total Manpower (Last Month)</div>
+      </div>
+    </div>
+      <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 my-2 items-stretch">
+        <!-- KPI Leading & Lagging (besar, kiri) -->
+        <div class="bg-white p-4 rounded-xl shadow-md border border-blue-100 flex flex-col justify-center">
+          <h3 class="font-bold text-base mb-2">KPI Leading & Lagging</h3>
+          <canvas id="kpiCombinedBar" height="160"></canvas>
+        </div>
+        <!-- Life Saving Rules Carousel (tengah) -->
+        <div class="bg-white p-4 rounded-xl shadow-md border border-blue-100 flex flex-col items-center justify-center">
+          <div class="carousel rounded-box w-full max-w-xs mx-auto h-52 overflow-hidden relative">
+            <div class="carousel-item w-full h-52 absolute inset-0 transition-opacity duration-700 opacity-100" style="z-index:1;">
+              <img src="img/BASCOM.jpg" class="w-full h-full object-contain rounded-lg shadow-2xl" alt="Life Saving Rules 1" />
+            </div>
+            <div class="carousel-item w-full h-52 absolute inset-0 transition-opacity duration-700 opacity-0" style="z-index:0;">
+              <img src="img/LIFE.png" class="w-full h-full object-contain rounded-lg shadow-2xl" alt="Life Saving Rules 2" />
+            </div>
+            <div class="carousel-item w-full h-52 absolute inset-0 transition-opacity duration-700 opacity-0" style="z-index:0;">
+              <img src="img/QR-BASCOM.jpg" class="w-full h-full object-contain rounded-lg shadow-2xl" alt="Life Saving Rules 3" />
+            </div>
+          </div>
+          <div class="flex justify-center mt-2 gap-2" id="lifeSavingDots">
+            <span class="w-2 h-2 bg-primary-blue rounded-full inline-block cursor-pointer" data-idx="0"></span>
+            <span class="w-2 h-2 bg-gray-300 rounded-full inline-block cursor-pointer" data-idx="1"></span>
+            <span class="w-2 h-2 bg-gray-300 rounded-full inline-block cursor-pointer" data-idx="2"></span>
+          </div>
+          <div id="lifeSavingCaption" class="text-center text-xs text-gray-700 mt-2 min-h-[24px]">
+            Gunakan alat pelindung diri (APD) yang sesuai sebelum memasuki area kerja.
+          </div>
+        </div>
+        <!-- Performance of the Month (kanan) -->
+        <div class="bg-white p-4 rounded-xl shadow-md border border-blue-100 flex flex-col justify-right">
+          <h3 class="font-bold text-base mb-2">Performance of the Month</h3>  
+          <div class="flex-1 flex flex-col justify-end">
+            <canvas id="positiveNegativeChart" class="flex-1"></canvas>
+          </div>
+        </div>
+      </section>
+      <!-- Carousel -->
+      <section class="mb-1">
+        <h3 class="font-bold text-sm mb-1 text-primary-blue flex items-right">
+          <i class="fas fa-calendar-alt mr-2 text-yellow-600"></i> Activities of the Month
+        </h3>
+        <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 h-64 overflow-hidden">
+          <div id="activitiesCarousel" class="flex gap-6 px-4 min-w-fit items-end h-56 snap-x snap-mandatory animate-carousel">
+            <!-- Gambar asli -->
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 1" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Briefing pagi bersama tim OHSS</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 2" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Simulasi evakuasi kebakaran</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/p.jpg" alt="Activity 3" class="object-cover h-52 w-full rounded-xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Pengecekan alat pemadam api ringan</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/p.jpg" alt="Activity 4" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Sosialisasi Golden Rules ke pekerja</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/p.jpg" alt="Activity 5" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Pelatihan penggunaan APAR</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 6" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Rapat koordinasi keselamatan kerja</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 7" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Inspeksi area kerja oleh supervisor</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 8" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Pelatihan pertolongan pertama (P3K)</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <!-- Duplikasi gambar untuk infinite loop -->
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 1" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Briefing pagi bersama tim OHSS</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 2" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Simulasi evakuasi kebakaran</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/p.jpg" alt="Activity 3" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Pengecekan alat pemadam api ringan</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/p.jpg" alt="Activity 4" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Sosialisasi Golden Rules ke pekerja</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/p.jpg" alt="Activity 5" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Pelatihan penggunaan APAR</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 6" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Rapat koordinasi keselamatan kerja</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 7" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Inspeksi area kerja oleh supervisor</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+            <div class="relative h-52 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
+              <img src="img/a.jpg" alt="Activity 8" class="object-cover h-52 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white text-base p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+                <span class="block truncate">Pelatihan pertolongan pertama (P3K)</span>
+                <span class="block text-xs text-gray-200 mt-1 upload-date"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-header-footer-bg text-white text-center py-2 mt-3 text-xs">
+    <p>&copy; 2025 Batamindo Investment Cakrawala. All rights reserved</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // KPI Leading & Lagging Combined Bar Chart
+    new Chart(document.getElementById('kpiCombinedBar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['Safety', 'Security', 'Fire Safety', 'Surveillance'],
+        datasets: [
+          {
+            label: 'Leading',
+            data: [120, 80, 60, 40],
+            backgroundColor: 'rgba(10,77,158,0.7)',
+            borderColor: 'rgba(10,77,158,1)',
+            borderWidth: 2
+          },
+          {
+            label: 'Lagging',
+            data: [2, 1, 0, 0],
+            backgroundColor: 'rgba(229,57,53,0.7)',
+            borderColor: 'rgba(229,57,53,1)',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    // Positive vs Negative Chart
+    new Chart(document.getElementById('positiveNegativeChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['Positive', 'Negative'],
+        datasets: [{
+          label: '',
+          data: [90, 10],
+          backgroundColor: [
+            'rgba(46,204,113,0.8)', // green
+            'rgba(231,76,60,0.8)'   // red
+          ],
+          borderColor: [
+            'rgba(39,174,96,1)',
+            'rgba(192,57,43,1)'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function(context) {
+                return 'Total: ' + context.parsed.y;
+              }
+            }
+          }
+        },
+        scales: { 
+          y: { 
+            beginAtZero: true, 
+            max: 100,
+            ticks: {
+              stepSize: 10,
+              callback: function(value) { return value; }
+            }
+          } 
+        }
+      }
+    });
+
+    // Tanggal upload untuk gambar carousel
+function setUploadDates() {
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const dateStr = today.toLocaleDateString('en-GB', options);
+  document.querySelectorAll('#activitiesCarousel .upload-date').forEach(function(el) {
+    el.textContent = 'Uploaded: ' + dateStr;
+  });
+}
+document.addEventListener('DOMContentLoaded', setUploadDates);
+
+    // Fullscreen toggle logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+      fullscreenBtn.addEventListener('click', () => {
+        const docElm = document.documentElement;
+        if (docElm.requestFullscreen) {
+          docElm.requestFullscreen();
+        } else if (docElm.mozRequestFullScreen) {
+          docElm.mozRequestFullScreen();
+        } else if (docElm.webkitRequestFullscreen) {
+          docElm.webkitRequestFullscreen();
+        } else if (docElm.msRequestFullscreen) {
+          docElm.msRequestFullscreen();
+        }
+      });
+      exitFullscreenBtn.addEventListener('click', () => {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          fullscreenBtn.classList.add('hidden');
+          exitFullscreenBtn.classList.remove('hidden');
+        } else {
+          fullscreenBtn.classList.remove('hidden');
+          exitFullscreenBtn.classList.add('hidden');
+        }
+      });
+    });
+
+    // Sidebar toggle logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const sidebarBackBtn = document.getElementById('sidebarBackBtn');
+      menuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.toggle('-translate-x-full');
+      });
+      document.addEventListener('click', function(e) {
+        if (!sidebar.classList.contains('-translate-x-full')) {
+          sidebar.classList.add('-translate-x-full');
+        }
+      });
+      sidebar.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+      sidebarBackBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.add('-translate-x-full');
+      });
+    });
+
+    // Loader Spinner Merah
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        document.getElementById('loader-bg').style.opacity = 0;
+        setTimeout(function() {
+          document.getElementById('loader-bg').style.display = 'none';
+          var main = document.querySelector('main.main-content');
+          if (main) main.classList.add('show');
+        }, 500);
+      }, 900);
+    });
+
+    // Life Saving Rules Carousel Logic (DaisyUI style, auto-slide, no button)
+    document.addEventListener('DOMContentLoaded', function() {
+      const items = document.querySelectorAll('.carousel-item');
+      const dots = document.querySelectorAll('#lifeSavingDots span');
+      const captions = [
+        'Gunakan alat pelindung diri (APD) yang sesuai sebelum memasuki area kerja.',
+        'Pastikan area kerja aman dari potensi bahaya sebelum memulai aktivitas.',
+        'Laporkan segera setiap kondisi tidak aman atau insiden yang terjadi.'
+      ];
+      const captionEl = document.getElementById('lifeSavingCaption');
+      let current = 0;
+      let autoSlideInterval;
+
+      function showSlide(idx) {
+        items.forEach((item, i) => {
+          item.style.opacity = (i === idx) ? '1' : '0';
+          item.style.zIndex = (i === idx) ? '1' : '0';
+        });
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('bg-primary-blue', i === idx);
+          dot.classList.toggle('bg-gray-300', i !== idx);
+        });
+        if (captionEl) captionEl.textContent = captions[idx];
+      }
+      function nextSlide() {
+        current = (current + 1) % items.length;
+        showSlide(current);
+      }
+      function startAutoSlide() {
+        autoSlideInterval = setInterval(nextSlide, 3500);
+      }
+      function stopAutoSlide() {
+        clearInterval(autoSlideInterval);
+      }
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', function() {
+          current = i;
+          showSlide(current);
+          stopAutoSlide();
+          startAutoSlide();
+        });
+      });
+      // Pause auto-slide on hover
+      items.forEach(item => {
+        item.addEventListener('mouseenter', stopAutoSlide);
+        item.addEventListener('mouseleave', startAutoSlide);
+      });
+      showSlide(current);
+      startAutoSlide();
+    });
+  </script>
+
+  <!-- Golden Rules Animation Style -->
+  <style>
+@keyframes blinkRedGray {
+  0%, 100% { color: #f40000; }
+  50% { color: #2c08d1; }
+}
+.animate-blink {
+  animation: blinkRedGray 1s infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.fadein {
+  opacity: 0;
+  transition: opacity 1s;
+}
+.fadein.show {
+  opacity: 1;
+}
+@keyframes carousel {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-carousel {
+  animation: carousel 32s linear infinite;
+}
+  </style>
+</body>
+</html>
