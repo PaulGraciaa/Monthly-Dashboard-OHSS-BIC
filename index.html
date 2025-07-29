@@ -161,13 +161,14 @@
         <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
           <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
             <i class="fas fa-shield-alt text-sm text-primary-blue"></i>
-            <h3 class="font-bold text-xs mb-0.5 text-primary-blue">Life Saving Rules</h3>
+            <h3 class="font-bold text-xs mb-0.5 text-primary-blue">Life Saving Rules & BASCOM</h3>
           </div>
           <div class="flex-1 flex flex-col justify-center items-center">
             <div id="lifeCarousel" class="relative w-full flex justify-center items-center h-72">
               <img id="lifeImage1" src="img/LIFE.png" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-100 absolute" />
               <img id="lifeImage2" src="img/BASCOM.jpg" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
               <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
+              <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
             </div>
           </div>
         </div>
@@ -763,7 +764,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const lifeImages = [
         document.getElementById('lifeImage1'),
         document.getElementById('lifeImage2'),
-        document.getElementById('lifeImage3')
+        document.getElementById('lifeImage3'),
+        document.getElementById('lifeImage4')
       ];
       
       let currentLifeIndex = 0;
