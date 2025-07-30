@@ -172,16 +172,75 @@
             </div>
           </div>
         </div>
-        <!-- Kolom 3: Performance (Kanan) -->
-        <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card">
-          <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
-            <i class="fas fa-chart-pie text-sm text-primary-blue"></i>
-            <h3 class="font-bold text-xs mb-0.5 text-primary-blue">Performance of the Month</h3>
+        <!-- Kolom 3: Performance dan Kotak Baru (Kanan) -->
+        <div class="flex flex-col gap-3 h-full">
+          <!-- Performance -->
+          <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card flex-1">
+            <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
+              <i class="fas fa-chart-pie text-sm text-primary-blue"></i>
+              <h3 class="font-bold text-xs mb-0.5 text-primary-blue">Performance of the Month</h3>
+            </div>
+            <div class="flex-1 flex flex-col justify-center items-center">
+              <canvas id="positiveNegativeChart" width="120" height="120" style="width:120px;height:120px;" class="mx-auto"></canvas>
+            </div>
           </div>
-          <div class="flex-1 flex flex-col justify-end">
-            <canvas id="positiveNegativeChart" width="180" height="30" style="width:100%;height:45px;" class="flex-1"></canvas>
+          <!-- News -->
+          <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card flex-1">
+            <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
+              <i class="fas fa-newspaper text-sm text-primary-blue"></i>
+              <h3 class="font-bold text-xs mb-0.5 text-primary-blue">News</h3>
+            </div>
+            <div class="flex-1 flex flex-col justify-center items-center relative">
+              <!-- News Carousel -->
+              <div id="newsCarousel" class="w-full h-full relative overflow-hidden">
+                <!-- News Item 1 -->
+                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 opacity-100 transition-opacity duration-500">
+                  <div class="bg-blue-50 rounded-lg p-2 mb-2 w-full">
+                    <div class="text-[8px] text-gray-500 mb-1">28 Juni 2025</div>
+                    <h4 class="text-xs font-bold text-primary-blue mb-1">Pencapaian Safety Award</h4>
+                    <p class="text-[10px] text-gray-700 leading-tight">Tim OHSS berhasil meraih Safety Excellence Award 2025 untuk kategori Best Safety Performance</p>
+                  </div>
+                </div>
+                
+                <!-- News Item 2 -->
+                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 opacity-0 transition-opacity duration-500">
+                  <div class="bg-green-50 rounded-lg p-2 mb-2 w-full">
+                    <div class="text-[8px] text-gray-500 mb-1">25 Juni 2025</div>
+                    <h4 class="text-xs font-bold text-primary-blue mb-1">Pelatihan APAR Sukses</h4>
+                    <p class="text-[10px] text-gray-700 leading-tight">Pelatihan penggunaan APAR telah selesai dengan 100% peserta lulus ujian praktik</p>
+                  </div>
+                </div>
+                
+                <!-- News Item 3 -->
+                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 opacity-0 transition-opacity duration-500">
+                  <div class="bg-orange-50 rounded-lg p-2 mb-2 w-full">
+                    <div class="text-[8px] text-gray-500 mb-1">20 Juni 2025</div>
+                    <h4 class="text-xs font-bold text-primary-blue mb-1">Safety Committee Meeting</h4>
+                    <p class="text-[10px] text-gray-700 leading-tight">Rapat P2K3 bulanan akan dilaksanakan pada tanggal 15 Juni 2025 di ruang meeting utama</p>
+                  </div>
+                </div>
+                
+                <!-- News Item 4 -->
+                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 opacity-0 transition-opacity duration-500">
+                  <div class="bg-purple-50 rounded-lg p-2 mb-2 w-full">
+                    <div class="text-[8px] text-gray-500 mb-1">15 Juni 2025</div>
+                    <h4 class="text-xs font-bold text-primary-blue mb-1">Update PPE Standard</h4>
+                    <p class="text-[10px] text-gray-700 leading-tight">Standar PPE telah diperbarui sesuai dengan regulasi terbaru K3 Indonesia</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Navigation Dots -->
+              <div class="flex justify-center gap-1 mt-2">
+                <button class="news-dot w-2 h-2 rounded-full bg-primary-blue opacity-100 transition-opacity duration-300" data-index="0"></button>
+                <button class="news-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="1"></button>
+                <button class="news-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="2"></button>
+                <button class="news-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="3"></button>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
       </section>
 
       <!-- Carousel -->
@@ -350,7 +409,7 @@
             display: true,
             position: 'bottom',
             labels: {
-              font: { size: 10 },
+              font: { size: 7 },
               usePointStyle: true
             }
           },
@@ -366,7 +425,7 @@
             display: true,
             color: '#0A4D9E',
             font: {
-              size: 16,
+              size: 9,
               weight: 'bold'
             },
             formatter: function(value, context) {
@@ -745,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   function startAutoSlide() {
-    autoSlideInterval = setInterval(nextSlide, 3000);
+    autoSlideInterval = setInterval(nextSlide, 10000);
   }
   function stopAutoSlide() {
     clearInterval(autoSlideInterval);
@@ -788,6 +847,72 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Mulai dengan gambar pertama
       showLifeImage(0);
+    });
+
+    // News Carousel
+    document.addEventListener('DOMContentLoaded', function() {
+      const newsItems = document.querySelectorAll('.news-item');
+      const newsDots = document.querySelectorAll('.news-dot');
+      let currentNewsIndex = 0;
+      let newsAutoSlideInterval;
+
+      function showNewsItem(index) {
+        // Hide all news items
+        newsItems.forEach((item, i) => {
+          item.style.opacity = (i === index) ? '1' : '0';
+        });
+        
+        // Update dots
+        newsDots.forEach((dot, i) => {
+          if (i === index) {
+            dot.classList.add('bg-primary-blue', 'opacity-100');
+            dot.classList.remove('bg-gray-300', 'opacity-50');
+          } else {
+            dot.classList.add('bg-gray-300', 'opacity-50');
+            dot.classList.remove('bg-primary-blue', 'opacity-100');
+          }
+        });
+      }
+
+      function nextNewsItem() {
+        currentNewsIndex = (currentNewsIndex + 1) % newsItems.length;
+        showNewsItem(currentNewsIndex);
+      }
+
+      function startNewsAutoSlide() {
+        newsAutoSlideInterval = setInterval(nextNewsItem, 4000);
+      }
+
+      function stopNewsAutoSlide() {
+        clearInterval(newsAutoSlideInterval);
+      }
+
+      function restartNewsAutoSlide() {
+        stopNewsAutoSlide();
+        startNewsAutoSlide();
+      }
+
+      // Add click event to dots
+      newsDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          currentNewsIndex = index;
+          showNewsItem(currentNewsIndex);
+          restartNewsAutoSlide();
+        });
+      });
+
+      // Add hover pause functionality
+      const newsCarousel = document.getElementById('newsCarousel');
+      if (newsCarousel) {
+        newsCarousel.addEventListener('mouseenter', stopNewsAutoSlide);
+        newsCarousel.addEventListener('mouseleave', startNewsAutoSlide);
+      }
+
+      // Start auto slide
+      startNewsAutoSlide();
+      
+      // Initialize with first item
+      showNewsItem(0);
     });
 </script>
 </body>
