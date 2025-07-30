@@ -96,7 +96,7 @@
 
     <!-- Title & Date -->
     <div class="text-right hidden sm:block">
-      <div class="text-sm font-semibold leading-tight">Report OHSS Monthly</div>
+      <div class="text-sm font-semibold leading-tight"><strong>Report OHSS Monthly</strong></div>
       <div class="text-[10px] opacity-80 mt-0.5 leading-tight">
         BIC / OHSS-25-034-006-142 | Cut of date: 01 June – 30 June 2025
       </div>
@@ -120,25 +120,25 @@
         <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
           <i class="fas fa-user-shield text-primary-blue text-sm"></i> 6,062,744
         </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold">Total Safe Manhours (To date)</div>
+        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Total Safe Manhours (To date)</strong></div>
       </div>
       <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
         <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
           <i class="fas fa-calendar-check text-primary-blue text-sm"></i> 1,495,968
         </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold">Safe Manhours (2025)</div>
+        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Safe Manhours (2025)</strong></div>
       </div>
       <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
         <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
           <i class="fas fa-users text-primary-blue text-sm"></i> 1,354
         </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold">Total Manpower (Last Month)</div>
+        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Total Manpower (Last Month)</strong></div>
       </div>
     </div>
       <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-3 my-1 items-stretch">
-        <!-- Kolom 1: KPI -->
-        <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 my-1 items-stretch">
+        <!-- Kolom 1: KPI (diperpanjang) -->
+        <div class="lg:col-span-6 bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
           <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
             <i class="fas fa-chart-bar text-sm text-primary-blue"></i>
             <h3 class="font-bold text-xs mb-0.5 text-primary-blue">KPI OHSS</h3>
@@ -146,10 +146,10 @@
           <!-- Tab Navigation -->
           <div class="flex mb-2 border-b border-gray-200">
             <button id="leadingTab" class="flex-1 py-1 px-3 text-xs font-semibold text-primary-blue border-b-2 border-primary-blue bg-blue-50 rounded-t-lg transition-all duration-200">
-              Leading Indicators
+              <strong>Leading Indicators</strong>
             </button>
             <button id="laggingTab" class="flex-1 py-1 px-3 text-xs font-semibold text-gray-500 border-b-2 border-transparent hover:text-primary-blue transition-all duration-200">
-              Lagging Indicators
+              <strong>Lagging Indicators</strong>
             </button>
           </div>
           <div class="flex-1 flex flex-col justify-end">
@@ -157,28 +157,35 @@
             <canvas id="kpiLaggingChart" width="400" height="280" style="width:100%;height:280px;display:none;"></canvas>
           </div>
         </div>
-        <!-- Kolom 2: Life Saving Rules (Tengah) -->
-        <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
+        <!-- Kolom 2: Life Saving Rules (diperkecil) -->
+        <div class="lg:col-span-3 bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
           <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
             <i class="fas fa-shield-alt text-sm text-primary-blue"></i>
-            <h3 class="font-bold text-xs mb-0.5 text-primary-blue">Life Saving Rules & BASCOM</h3>
+            <h3 class="font-bold text-xs mb-0.5 text-primary-blue"><strong>Life Saving Rules & BASCOM</strong></h3>
           </div>
           <div class="flex-1 flex flex-col justify-center items-center">
             <div id="lifeCarousel" class="relative w-full flex justify-center items-center h-72">
-              <img id="lifeImage1" src="img/LIFE.png" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-100 absolute" />
-              <img id="lifeImage2" src="img/BASCOM.jpg" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
-              <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
-              <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-64 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
+              <img id="lifeImage1" src="img/LIFE.png" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-100 absolute" />
+              <img id="lifeImage2" src="img/BASCOM.jpg" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
+              <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
+              <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
+            </div>
+            <!-- Navigation Dots untuk Life Saving Rules -->
+            <div class="flex justify-center gap-1 mt-2">
+              <button class="life-dot w-2 h-2 rounded-full bg-primary-blue opacity-100 transition-opacity duration-300" data-index="0"></button>
+              <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="1"></button>
+              <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="2"></button>
+              <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="3"></button>
             </div>
           </div>
         </div>
-        <!-- Kolom 3: Performance dan Kotak Baru (Kanan) -->
-        <div class="flex flex-col gap-3 h-full">
+        <!-- Kolom 3: Performance dan News (Kanan) -->
+        <div class="lg:col-span-3 flex flex-col gap-3 h-full">
           <!-- Performance -->
           <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card flex-1">
             <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
               <i class="fas fa-chart-pie text-sm text-primary-blue"></i>
-              <h3 class="font-bold text-xs mb-0.5 text-primary-blue">Performance of the Month</h3>
+              <h3 class="font-bold text-xs mb-0.5 text-primary-blue"><strong>Performance of the Month</strong></h3>
             </div>
             <div class="flex-1 flex flex-col justify-center items-center">
               <canvas id="positiveNegativeChart" width="120" height="120" style="width:120px;height:120px;" class="mx-auto"></canvas>
@@ -188,7 +195,7 @@
           <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card flex-1">
             <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
               <i class="fas fa-newspaper text-sm text-primary-blue"></i>
-              <h3 class="font-bold text-xs mb-0.5 text-primary-blue">News</h3>
+              <h3 class="font-bold text-xs mb-0.5 text-primary-blue"><strong>News</strong></h3>
             </div>
             <div class="flex-1 flex flex-col justify-center items-center relative">
               <!-- News Carousel -->
@@ -247,7 +254,7 @@
       <section class="mb-1">
         <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 overflow-hidden p-3">
           <div class="flex items-center justify-center mb-1">
-            <h3 class="text-lg font-bold text-primary-blue tracking-wide">Activities of the Month</h3>
+            <h3 class="text-lg font-bold text-primary-blue tracking-wide"><strong>Activities of the Month</strong></h3>
           </div>
           <div class="w-full h-36">
             <div id="activitiesCarousel" class="flex gap-6 px-4 min-w-fit items-center h-36 snap-x snap-mandatory animate-carousel">
@@ -678,8 +685,8 @@ document.addEventListener('DOMContentLoaded', setUploadDates);
           }
         },
         scales: { 
-          y: { beginAtZero: true, ticks: { font: { size: 8 }, autoSkip: false } },
-          x: { beginAtZero: true, ticks: { font: { size: 8 } } }
+          y: { beginAtZero: true, ticks: { font: { size: 8, weight: 'bold' }, autoSkip: false } },
+          x: { beginAtZero: true, ticks: { font: { size: 8, weight: 'bold' } } }
         }
       }
     });
@@ -733,8 +740,8 @@ document.addEventListener('DOMContentLoaded', setUploadDates);
           }
         },
         scales: { 
-          y: { beginAtZero: true, ticks: { font: { size: 8 }, autoSkip: false } },
-          x: { beginAtZero: true, ticks: { font: { size: 8 } } }
+          y: { beginAtZero: true, ticks: { font: { size: 8, weight: 'bold' }, autoSkip: false } },
+          x: { beginAtZero: true, ticks: { font: { size: 8, weight: 'bold' } } }
         }
       }
     });
@@ -826,13 +833,26 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('lifeImage3'),
         document.getElementById('lifeImage4')
       ];
-      
+      const lifeDots = document.querySelectorAll('.life-dot');
       let currentLifeIndex = 0;
+      let lifeAutoSlideInterval;
       
       function showLifeImage(index) {
+        // Show/hide images
         lifeImages.forEach((img, i) => {
           if (img) {
             img.style.opacity = (i === index) ? '1' : '0';
+          }
+        });
+        
+        // Update dots
+        lifeDots.forEach((dot, i) => {
+          if (i === index) {
+            dot.classList.add('bg-primary-blue', 'opacity-100');
+            dot.classList.remove('bg-gray-300', 'opacity-50');
+          } else {
+            dot.classList.add('bg-gray-300', 'opacity-50');
+            dot.classList.remove('bg-primary-blue', 'opacity-100');
           }
         });
       }
@@ -841,9 +861,38 @@ document.addEventListener('DOMContentLoaded', function() {
         currentLifeIndex = (currentLifeIndex + 1) % lifeImages.length;
         showLifeImage(currentLifeIndex);
       }
+
+      function startLifeAutoSlide() {
+        lifeAutoSlideInterval = setInterval(nextLifeImage, 10000);
+      }
+
+      function stopLifeAutoSlide() {
+        clearInterval(lifeAutoSlideInterval);
+      }
+
+      function restartLifeAutoSlide() {
+        stopLifeAutoSlide();
+        startLifeAutoSlide();
+      }
+
+      // Add click event to dots
+      lifeDots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          currentLifeIndex = index;
+          showLifeImage(currentLifeIndex);
+          restartLifeAutoSlide();
+        });
+      });
+
+      // Add hover pause functionality
+      const lifeCarousel = document.getElementById('lifeCarousel');
+      if (lifeCarousel) {
+        lifeCarousel.addEventListener('mouseenter', stopLifeAutoSlide);
+        lifeCarousel.addEventListener('mouseleave', startLifeAutoSlide);
+      }
       
-      // Auto slide setiap 3 detik
-      setInterval(nextLifeImage, 3000);
+      // Start auto slide
+      startLifeAutoSlide();
       
       // Mulai dengan gambar pertama
       showLifeImage(0);
