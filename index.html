@@ -165,12 +165,35 @@
           </div>
           <div class="flex-1 flex flex-col justify-center items-center">
             <div id="lifeCarousel" class="relative w-full flex justify-center items-center h-72">
-              <img id="lifeImage1" src="img/LIFE.png" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-100 absolute" />
-              <img id="lifeImage2" src="img/BASCOM.jpg" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
-              <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
-              <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-60 object-contain mx-auto transition-opacity duration-1000 opacity-0 absolute" />
+              <div id="lifeContent1" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100">
+                <img id="lifeImage1" src="img/LIFE.png" class="h-48 object-contain mx-auto" />
+                <div class="text-center mt-2 px-2">
+                  <h4 class="text-xs font-bold text-primary-blue mb-1">Life Saving Rules</h4>
+                  <p class="text-[10px] text-gray-600 leading-tight">Aturan keselamatan wajib yang harus dipatuhi untuk mencegah kecelakaan fatal di tempat kerja</p>
+                </div>
+              </div>
+              <div id="lifeContent2" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
+                <img id="lifeImage2" src="img/BASCOM.jpg" class="h-48 object-contain mx-auto" />
+                <div class="text-center mt-2 px-2">
+                  <h4 class="text-xs font-bold text-primary-blue mb-1">BASCOM Guidelines</h4>
+                  <p class="text-[10px] text-gray-600 leading-tight">Panduan keselamatan BASCOM untuk memastikan standar keselamatan tertinggi di lingkungan kerja</p>
+                </div>
+              </div>
+              <div id="lifeContent3" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
+                <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-48 object-contain mx-auto" />
+                <div class="text-center mt-2 px-2">
+                  <h4 class="text-xs font-bold text-primary-blue mb-1">QR Code BASCOM</h4>
+                  <p class="text-[10px] text-gray-600 leading-tight">Scan QR code untuk mengakses informasi lengkap panduan keselamatan BASCOM</p>
+                </div>
+              </div>
+              <div id="lifeContent4" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
+                <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-48 object-contain mx-auto" />
+                <div class="text-center mt-2 px-2">
+                  <h4 class="text-xs font-bold text-primary-blue mb-1">Emergency Contact</h4>
+                  <p class="text-[10px] text-gray-600 leading-tight">Informasi kontak darurat dan prosedur evakuasi untuk situasi emergency</p>
+                </div>
+              </div>
             </div>
-            <!-- Navigation Dots untuk Life Saving Rules -->
             <div class="flex justify-center gap-1 mt-2">
               <button class="life-dot w-2 h-2 rounded-full bg-primary-blue opacity-100 transition-opacity duration-300" data-index="0"></button>
               <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="1"></button>
@@ -559,7 +582,7 @@ document.addEventListener('DOMContentLoaded', setUploadDates);
   100% { transform: translateX(-50%); }
 }
 .animate-carousel {
-  animation: carousel 32s linear infinite;
+  animation: carousel 60s linear infinite;
 }
 @keyframes blinkBorderRedBlue {
   0%, 100% { border-color: #f40000; }
@@ -825,23 +848,22 @@ document.addEventListener('DOMContentLoaded', function() {
   startAutoSlide();
 });
 
-    // Life Saving Rules Carousel
     document.addEventListener('DOMContentLoaded', function() {
-      const lifeImages = [
-        document.getElementById('lifeImage1'),
-        document.getElementById('lifeImage2'),
-        document.getElementById('lifeImage3'),
-        document.getElementById('lifeImage4')
+      const lifeContents = [
+        document.getElementById('lifeContent1'),
+        document.getElementById('lifeContent2'),
+        document.getElementById('lifeContent3'),
+        document.getElementById('lifeContent4')
       ];
       const lifeDots = document.querySelectorAll('.life-dot');
       let currentLifeIndex = 0;
       let lifeAutoSlideInterval;
       
-      function showLifeImage(index) {
-        // Show/hide images
-        lifeImages.forEach((img, i) => {
-          if (img) {
-            img.style.opacity = (i === index) ? '1' : '0';
+      function showLifeContent(index) {
+        // Show/hide content
+        lifeContents.forEach((content, i) => {
+          if (content) {
+            content.style.opacity = (i === index) ? '1' : '0';
           }
         });
         
@@ -857,13 +879,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
-      function nextLifeImage() {
-        currentLifeIndex = (currentLifeIndex + 1) % lifeImages.length;
-        showLifeImage(currentLifeIndex);
+      function nextLifeContent() {
+        currentLifeIndex = (currentLifeIndex + 1) % lifeContents.length;
+        showLifeContent(currentLifeIndex);
       }
 
       function startLifeAutoSlide() {
-        lifeAutoSlideInterval = setInterval(nextLifeImage, 10000);
+        lifeAutoSlideInterval = setInterval(nextLifeContent, 10000);
       }
 
       function stopLifeAutoSlide() {
@@ -879,7 +901,7 @@ document.addEventListener('DOMContentLoaded', function() {
       lifeDots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
           currentLifeIndex = index;
-          showLifeImage(currentLifeIndex);
+          showLifeContent(currentLifeIndex);
           restartLifeAutoSlide();
         });
       });
@@ -891,11 +913,8 @@ document.addEventListener('DOMContentLoaded', function() {
         lifeCarousel.addEventListener('mouseleave', startLifeAutoSlide);
       }
       
-      // Start auto slide
       startLifeAutoSlide();
-      
-      // Mulai dengan gambar pertama
-      showLifeImage(0);
+      showLifeContent(0);
     });
 
     // News Carousel
