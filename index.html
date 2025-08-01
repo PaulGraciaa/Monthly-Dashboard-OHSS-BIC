@@ -132,7 +132,7 @@
         <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
           <i class="fas fa-users text-primary-blue text-sm"></i> 1,354
         </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Total Manpower (Last Month)</strong></div>
+        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Total Manpower (To Date)</strong></div>
       </div>
     </div>
       <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
@@ -167,29 +167,31 @@
           <div class="flex-1 flex flex-col justify-center items-center">
             <div id="lifeCarousel" class="relative w-full flex justify-center items-center h-72">
               <div id="lifeContent1" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100">
-                <img id="lifeImage1" src="img/LIFE.png" class="h-48 object-contain mx-auto" />
-                <div class="text-center mt-2 px-2">
+                <img id="lifeImage1" src="img/LIFE.png" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
+                <div class="text-center px-2 mt-auto">
                   <h4 class="text-xs font-bold text-primary-blue mb-1">Life Saving Rules</h4>
                   <p class="text-[10px] text-gray-600 leading-tight">Aturan keselamatan wajib yang harus dipatuhi untuk mencegah kecelakaan fatal di tempat kerja</p>
                 </div>
               </div>
               <div id="lifeContent2" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
-                <img id="lifeImage2" src="img/BASCOM.jpg" class="h-48 object-contain mx-auto" />
-                <div class="text-center mt-2 px-2">
+                <img id="lifeImage2" src="img/BASCOM.jpg" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
+                <div class="text-center px-2 mt-auto">
                   <h4 class="text-xs font-bold text-primary-blue mb-1">BASCOM Guidelines</h4>
                   <p class="text-[10px] text-gray-600 leading-tight">Panduan keselamatan BASCOM untuk memastikan standar keselamatan tertinggi di lingkungan kerja</p>
                 </div>
               </div>
               <div id="lifeContent3" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
-                <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-48 object-contain mx-auto" />
-                <div class="text-center mt-2 px-2">
+                <a href="https://get-qr.com/dpD5wA" target="_blank" class="cursor-pointer hover:scale-105 transition-transform duration-300">
+                  <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-56 object-contain mx-auto mb-2 life-image-hover" alt="QR Code BASCOM - Click to open" />
+                </a>
+                <div class="text-center px-2 mt-auto">
                   <h4 class="text-xs font-bold text-primary-blue mb-1">QR Code BASCOM</h4>
-                  <p class="text-[10px] text-gray-600 leading-tight">Scan QR atau klik link untuk mengakses Bascom Card</p>
+                  <p class="text-[10px] text-gray-600 leading-tight">Scan QR atau klik gambar untuk mengakses Bascom Card</p>
                 </div>
               </div>
               <div id="lifeContent4" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
-                <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-48 object-contain mx-auto" />
-                <div class="text-center mt-2 px-2">
+                <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
+                <div class="text-center px-2 mt-auto">
                   <h4 class="text-xs font-bold text-primary-blue mb-1">Emergency Contact</h4>
                   <p class="text-[10px] text-gray-600 leading-tight">Informasi kontak darurat dan prosedur evakuasi untuk situasi emergency</p>
                 </div>
@@ -693,6 +695,16 @@ document.addEventListener('DOMContentLoaded', setUploadDates);
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(239,68,68,0.2);
 }
+
+
+
+/* QR Code link styles */
+#lifeContent3 a {
+  pointer-events: auto !important;
+  z-index: 100 !important;
+  position: relative;
+  display: inline-block;
+}
   </style>
   <script>
     // KPI Leading Chart
@@ -901,50 +913,7 @@ document.addEventListener('DOMContentLoaded', setUploadDates);
       laggingTab.style.transition = 'all 0.5s ease-in-out';
     });
 
-document.addEventListener('DOMContentLoaded', function() {
-  const slides = document.querySelectorAll('#customCarousel .carousel-slide');
-  let current = 0;
-  let autoSlideInterval;
 
-  function showSlide(idx) {
-    slides.forEach((slide, i) => {
-      slide.style.opacity = (i === idx) ? '1' : '0';
-      slide.style.zIndex = (i === idx) ? '1' : '0';
-    });
-  }
-
-  function nextSlide() {
-    current = (current + 1) % slides.length;
-    showSlide(current);
-  }
-  function prevSlide() {
-    current = (current - 1 + slides.length) % slides.length;
-    showSlide(current);
-  }
-
-  document.getElementById('prevBtn').onclick = function() {
-    prevSlide();
-    restartAutoSlide();
-  };
-  document.getElementById('nextBtn').onclick = function() {
-    nextSlide();
-    restartAutoSlide();
-  };
-
-  function startAutoSlide() {
-    autoSlideInterval = setInterval(nextSlide, 10000);
-  }
-  function stopAutoSlide() {
-    clearInterval(autoSlideInterval);
-  }
-  function restartAutoSlide() {
-    stopAutoSlide();
-    startAutoSlide();
-  }
-
-  showSlide(current);
-  startAutoSlide();
-});
 
     document.addEventListener('DOMContentLoaded', function() {
       const lifeContents = [
@@ -1013,6 +982,20 @@ document.addEventListener('DOMContentLoaded', function() {
       
       startLifeAutoSlide();
       showLifeContent(0);
+
+      // QR Code link handler
+      const qrLink = document.querySelector('#lifeContent3 a');
+      if (qrLink) {
+        qrLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          window.open('https://get-qr.com/dpD5wA', '_blank');
+          return false;
+        });
+      }
+
+
     });
 
     // News Carousel
