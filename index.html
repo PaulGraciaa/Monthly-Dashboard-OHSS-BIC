@@ -285,17 +285,19 @@
     new Chart(document.getElementById('positiveNegativeChart').getContext('2d'), {
       type: 'doughnut',
       data: {
-        labels: ['Positive', 'Negative'],
+        labels: ['Positive', 'Negative', 'Others'],
         datasets: [{
           label: '',
-          data: [87,13 ],
+          data: [75, 15, 10],
           backgroundColor: [
             'rgba(46,204,113,0.8)', // green
-            'rgba(231,76,60,0.8)'   // red
+            'rgba(231,76,60,0.8)',   // red
+            'rgba(155,155,155,0.8)'  // gray
           ],
           borderColor: [
             'rgba(39,174,96,1)',
-            'rgba(192,57,43,1)'
+            'rgba(192,57,43,1)',
+            'rgba(100,100,100,1)'
           ],
           borderWidth: 2
         }]
@@ -307,9 +309,13 @@
           legend: { 
             display: true,
             position: 'bottom',
+            align: 'center',
             labels: {
               font: { size: 7 },
-              usePointStyle: true
+              usePointStyle: true,
+              padding: 4,
+              boxWidth: 6,
+              boxHeight: 6
             }
           },
           tooltip: {
@@ -329,9 +335,11 @@
             },
             formatter: function(value, context) {
               if (context.dataIndex === 0) {
-                return '87%';
+                return '75%';
               } else if (context.dataIndex === 1) {
-                return '13%';
+                return '15%';
+              } else if (context.dataIndex === 2) {
+                return '10%';
               }
               return '';
             }
@@ -563,6 +571,30 @@
   z-index: 100 !important;
   position: relative;
   display: inline-block;
+}
+
+/* Chart Legend Alignment */
+#positiveNegativeChart {
+  position: relative;
+}
+
+#positiveNegativeChart canvas {
+  margin: 0 auto;
+}
+
+/* Custom Legend Styling */
+.chartjs-legend {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.chartjs-legend-item {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 4px !important;
 }
   </style>
   <script>
