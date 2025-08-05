@@ -288,7 +288,7 @@
         labels: ['Positive', 'Negative', 'Others'],
         datasets: [{
           label: '',
-          data: [75, 15, 10],
+          data: [90,5, 5],
           backgroundColor: [
             'rgba(46,204,113,0.8)', // green
             'rgba(231,76,60,0.8)',   // red
@@ -335,11 +335,11 @@
             },
             formatter: function(value, context) {
               if (context.dataIndex === 0) {
-                return '75%';
+                return '90%';
               } else if (context.dataIndex === 1) {
-                return '15%';
+                return '5%';
               } else if (context.dataIndex === 2) {
-                return '10%';
+                return '5%';
               }
               return '';
             }
