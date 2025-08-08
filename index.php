@@ -1,3 +1,29 @@
+<?php
+session_start();
+require_once 'config/database.php';
+
+// Get dashboard statistics
+$stats = $pdo->query("SELECT * FROM dashboard_stats WHERE is_active = 1 ORDER BY display_order")->fetchAll();
+
+// Get KPI Leading data
+$kpiLeading = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->fetchAll();
+
+// Get KPI Lagging data
+$kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
+
+// Get activities
+$activities = $pdo->query("SELECT * FROM activities WHERE status = 'active' ORDER BY activity_date DESC")->fetchAll();
+
+// Get news
+$news = $pdo->query("SELECT * FROM news WHERE status = 'published' ORDER BY publish_date DESC")->fetchAll();
+
+// Get configuration
+$config = [];
+$configData = $pdo->query("SELECT * FROM config")->fetchAll();
+foreach ($configData as $item) {
+    $config[$item['config_key']] = $item['config_value'];
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -54,23 +80,23 @@
       <div class="mb-4 flex items-center gap-2">
         <span class="font-bold text-lg tracking-wide text-white drop-shadow">OHSS</span>
       </div>  
-      <a href="index.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md text-base">
+      <a href="index.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md text-base">
         <i class="fas fa-home text-lg"></i> Dashboard
     </a>
-      <a href="OHS.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="OHS.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-shield-alt"></i> OHSS
       </a>
-      <a href="security.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="security.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-user-shield"></i> Security
       </a>
-      <a href="firesafety.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="firesafety.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-fire-extinguisher"></i> Fire Safety
       </a>
-      <a href="surveillance.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="surveillance.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-video"></i> Surveillance
       </a>
       <div class="mt-8 text-xs text-white/80 px-2">
-        <span class="block">&copy; 2025 Batamindo Investment Cakrawala. All Rights Reserved.</span>
+        <span class="block">&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All Rights Reserved.</span>
       </div>
     </div>
   </aside>
@@ -96,9 +122,9 @@
 
     <!-- Title & Date -->
     <div class="text-right hidden sm:block">
-      <div class="text-sm font-semibold leading-tight"><strong>Dashboard OHSS Monthly</strong></div>
+      <div class="text-sm font-semibold leading-tight"><strong><?php echo $config['dashboard_title'] ?? 'Dashboard OHSS Monthly'; ?></strong></div>
       <div class="text-[10px] opacity-80 mt-0.5 leading-tight">
-        BIC / OHSS-25-034-006-179 | Cut of date: 01 July –31 July 2025
+        <?php echo $config['report_code'] ?? 'BIC / OHSS-25-034-006-179'; ?> | Cut of date: <?php echo $config['cut_off_date'] ?? '01 July –31 July 2025'; ?>
       </div>
     </div>
 
@@ -116,24 +142,14 @@
     <div class="container mx-auto px-4 max-w-7xl">
     <!-- KPI Cards (horizontal, lebih kecil) -->
     <div class="flex flex-row gap-3 mb-3">
+      <?php foreach ($stats as $stat): ?>
       <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
         <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
-          <i class="fas fa-user-shield text-primary-blue text-sm"></i> 6,280,088
+          <i class="<?php echo $stat['stat_icon']; ?> text-primary-blue text-sm"></i> <?php echo $stat['stat_value']; ?>
         </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Total Safe Manhours (To date)</strong></div>
+        <div class="mt-1 text-black-600 text-xs font-semibold"><strong><?php echo $stat['stat_name']; ?></strong></div>
       </div>
-      <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
-        <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
-          <i class="fas fa-calendar-check text-primary-blue text-sm"></i> 1,713,312         
-        </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Safe Manhours (2025)</strong></div>
-      </div>
-      <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
-        <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
-          <i class="fas fa-users text-primary-blue text-sm"></i> 1,132
-        </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold"><strong>Total Manpower (To Date)</strong></div>
-      </div>
+      <?php endforeach; ?>
     </div>
       <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 my-1 items-stretch">
@@ -177,7 +193,7 @@
                 <img id="lifeImage2" src="img/BASCOM.jpg" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
                 <div class="text-center px-2 mt-auto">
                   <h4 class="text-xs font-bold text-primary-blue mb-1">BASCOM Guidelines</h4>
-                  <p class="text-[10px] text-gray-600 leading-tight">Kartu komunikasi  untuk memastikan standar keselamatan tertinggi di Kawasan Batamindo</p>
+                  <p class="text-[10px] text-gray-600 leading-tight">Kartu komunikasi untuk memastikan standar keselamatan tertinggi di Kawasan Batamindo</p>
                 </div>
               </div>
               <div id="lifeContent3" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
@@ -226,30 +242,19 @@
             <div class="flex-1 flex flex-col justify-center items-center relative">
               <!-- News Carousel -->
               <div id="newsCarousel" class="w-full h-full relative overflow-hidden">
-                <!-- News Item 1 -->
-                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 opacity-100 transition-opacity duration-500">
+                <?php foreach ($news as $index => $newsItem): ?>
+                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 <?php echo $index === 0 ? 'opacity-100' : 'opacity-0'; ?> transition-opacity duration-500">
                   <div class="bg-blue-50 rounded-lg p-2 mb-2 w-full">
-                    <div class="text-[8px] text-gray-500 mb-1">17 Agustus 2025</div>
-                    <h4 class="text-xs font-bold text-primary-blue mb-1">Perayaan Kemerdekaan Indonesia</h4>
-                    <p class="text-[10px] text-gray-700 leading-tight">Perayaan Kemerdekaan Indonesia akan dilaksanakan pada tanggal 17 Agustus 2025 di Kawasan Batamindo</p>
+                    <div class="text-[8px] text-gray-500 mb-1"><?php echo date('d F Y', strtotime($newsItem['publish_date'])); ?></div>
+                    <h4 class="text-xs font-bold text-primary-blue mb-1"><?php echo $newsItem['title']; ?></h4>
+                    <p class="text-[10px] text-gray-700 leading-tight"><?php echo $newsItem['content']; ?></p>
                   </div>
                 </div>
-                
-                <!-- News Item 2 -->
-                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 opacity-0 transition-opacity duration-500">
-                  <div class="bg-green-50 rounded-lg p-2 mb-2 w-full">
-                    <div class="text-[8px] text-gray-500 mb-1">To be announced</div>
-                    <h4 class="text-xs font-bold text-primary-blue mb-1">Safety road campaign</h4>
-                    <p class="text-[10px] text-gray-700 leading-tight">Safety road campaign yang akan dilaksanaka di Kawasan Batamindo</p>
-                  </div>
-                </div>
-         
-              
-
+                <?php endforeach; ?>
+              </div>
             </div>
           </div>
         </div>
-      </section>
       </section>
 
       <!-- Carousel -->
@@ -274,12 +279,20 @@
 
   <!-- Footer -->
   <footer class="bg-header-footer-bg text-white text-center py-2 mt-3 text-xs">
-    <p>&copy; 2025 Batamindo Investment Cakrawala. All rights reserved</p>
+    <p>&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All rights reserved</p>
   </footer>
 
   <!-- Scripts -->
   <script>
-
+    // KPI Data from PHP
+    const kpiLeadingData = <?php echo json_encode($kpiLeading); ?>;
+    const kpiLaggingData = <?php echo json_encode($kpiLagging); ?>;
+    const activitiesData = <?php echo json_encode($activities); ?>;
+    const performanceData = {
+      positive: <?php echo $config['performance_positive'] ?? 90; ?>,
+      negative: <?php echo $config['performance_negative'] ?? 5; ?>,
+      others: <?php echo $config['performance_others'] ?? 5; ?>
+    };
 
     // Positive vs Negative Chart
     new Chart(document.getElementById('positiveNegativeChart').getContext('2d'), {
@@ -288,7 +301,7 @@
         labels: ['Positive', 'Negative', 'Others'],
         datasets: [{
           label: '',
-          data: [90,5, 5],
+          data: [performanceData.positive, performanceData.negative, performanceData.others],
           backgroundColor: [
             'rgba(46,204,113,0.8)', // green
             'rgba(231,76,60,0.8)',   // red
@@ -334,14 +347,7 @@
               weight: 'bold'
             },
             formatter: function(value, context) {
-              if (context.dataIndex === 0) {
-                return '90%';
-              } else if (context.dataIndex === 1) {
-                return '5%';
-              } else if (context.dataIndex === 2) {
-                return '5%';
-              }
-              return '';
+              return value + '%';
             }
           }
         },
@@ -349,284 +355,14 @@
       }
     });
 
-
-
-    // Fullscreen toggle logic
-    document.addEventListener('DOMContentLoaded', function() {
-      const fullscreenBtn = document.getElementById('fullscreenBtn');
-      const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
-      fullscreenBtn.addEventListener('click', () => {
-        const docElm = document.documentElement;
-        if (docElm.requestFullscreen) {
-          docElm.requestFullscreen();
-        } else if (docElm.mozRequestFullScreen) {
-          docElm.mozRequestFullScreen();
-        } else if (docElm.webkitRequestFullscreen) {
-          docElm.webkitRequestFullscreen();
-        } else if (docElm.msRequestFullscreen) {
-          docElm.msRequestFullscreen();
-        }
-      });
-      exitFullscreenBtn.addEventListener('click', () => {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-      });
-      document.addEventListener('fullscreenchange', () => {
-        if (document.fullscreenElement) {
-          fullscreenBtn.classList.add('hidden');
-          exitFullscreenBtn.classList.remove('hidden');
-        } else {
-          fullscreenBtn.classList.remove('hidden');
-          exitFullscreenBtn.classList.add('hidden');
-        }
-      });
-    });
-
-    // Sidebar toggle logic
-    document.addEventListener('DOMContentLoaded', function() {
-      const sidebar = document.getElementById('sidebar');
-      const menuBtn = document.getElementById('menuBtn');
-      const sidebarBackBtn = document.getElementById('sidebarBackBtn');
-      menuBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sidebar.classList.toggle('-translate-x-full');
-      });
-      document.addEventListener('click', function(e) {
-        if (!sidebar.classList.contains('-translate-x-full')) {
-          sidebar.classList.add('-translate-x-full');
-        }
-      });
-      sidebar.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
-      sidebarBackBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sidebar.classList.add('-translate-x-full');
-      });
-    });
-
-    // Loader Spinner Merah
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        document.getElementById('loader-bg').style.opacity = 0;
-        setTimeout(function() {
-          document.getElementById('loader-bg').style.display = 'none';
-          var main = document.querySelector('main.main-content');
-          if (main) main.classList.add('show');
-        }, 500);
-      }, 900);
-    });
-  </script>
-
-  <!-- Golden Rules Animation Style -->
-  <style>
-@keyframes blinkRedGray {
-  0%, 100% { color: #f40000; }
-  50% { color: #2c08d1; }
-}
-.animate-blink {
-  animation: blinkRedGray 1s infinite;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.fadein {
-  opacity: 0;
-  transition: opacity 1s;
-}
-.fadein.show {
-  opacity: 1;
-}
-
-@keyframes blinkBorderRedBlue {
-  0%, 100% { border-color: #f40000; }
-  50% { border-color: #2c08d1; }
-}
-.animate-blink-border {
-  animation: blinkBorderRedBlue 1s infinite;
-  border-style: solid;
-}
-/* Tombol carousel lebih bagus */
-.btn-carousel-custom {
-  box-shadow: 0 2px 8px rgba(10,77,158,0.18);
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-}
-.btn-carousel-custom:hover {
-  transform: scale(1.15);
-  background: #0A4D9E;
-  box-shadow: 0 4px 16px rgba(10,77,158,0.28);
-}
-/* Percantik tombol carousel merah */
-.btn-carousel-red {
-  background: #e53935;
-  color: #fff;
-  border: 2px solid #fff;
-  box-shadow: 0 4px 16px rgba(229,57,53,0.25), 0 1.5px 8px 0 rgba(0,0,0,0.10);
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-}
-.btn-carousel-red:hover {
-  transform: scale(1.18);
-  background: #c62828;
-  box-shadow: 0 8px 32px rgba(229,57,53,0.35);
-  border-color: #fff;
-}
-/* Smooth slide transition */
-.carousel-item {
-  transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
-}
-
-/* Infinite Carousel Smooth Transitions */
-#activityItemsContainer {
-  transition: transform 0.1s ease-out;
-  will-change: transform;
-  display: flex;
-  gap: 24px;
-}
-
-/* KPI Card Hover Effects */
-.kpi-card {
-  transition: all 0.3s ease;
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-/* Smooth Tab Transitions */
-#leadingTab, #laggingTab {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  transform: translateY(0);
-}
-
-#leadingTab:hover, #laggingTab:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(10, 77, 158, 0.15);
-}
-
-#leadingTab::before, #laggingTab::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(10, 77, 158, 0.1), transparent);
-  transition: left 0.6s ease-in-out;
-}
-
-#leadingTab:hover::before, #laggingTab:hover::before {
-  left: 100%;
-}
-
-/* Tab Indicator Animation */
-#tabIndicator {
-  box-shadow: 0 2px 4px rgba(10, 77, 158, 0.3);
-}
-
-/* Chart Container Smooth Transitions */
-.chart-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.chart-container canvas {
-  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.kpi-leading-item {
-  transition: all 0.2s ease;
-}
-
-.kpi-leading-item:hover {
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(10,77,158,0.2);
-}
-
-.kpi-lagging-item {
-  transition: all 0.2s ease;
-}
-
-
-.kpi-lagging-item:hover {
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(239,68,68,0.2);
-}
-
-
-
-/* QR Code link styles */
-#lifeContent3 a {
-  pointer-events: auto !important;
-  z-index: 100 !important;
-  position: relative;
-  display: inline-block;
-}
-
-/* Chart Legend Alignment */
-#positiveNegativeChart {
-  position: relative;
-}
-
-#positiveNegativeChart canvas {
-  margin: 0 auto;
-}
-
-/* Custom Legend Styling */
-.chartjs-legend {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-}
-
-.chartjs-legend-item {
-  display: flex !important;
-  align-items: center !important;
-  margin: 0 4px !important;
-}
-  </style>
-  <script>
     // KPI Leading Chart
     const leadingChart = new Chart(document.getElementById('kpiLeadingChart').getContext('2d'), {
       type: 'bar',
       data: {
-        labels: [
-          'OHSS Meeting',
-          'OHSS Daily Toolbox Talk',
-          'General Security & ERT Briefing',
-          'Top Management Evaluation (Visit)',
-          'Action Tracking Register',
-          'Annual Internal Audit',
-          'Annual External Audit',
-          'PPE Compliance',
-          'HIRADC/JRA/JSA',
-          'Permit to work (PTW)',
-          'Daily OHS Report',
-          'OHSS weekly Report',
-          'OHSS Monthly Report',
-          'OHSS Inspection',
-          'OHSS Induction',
-          'Safety Committee meeting (P2K3)',
-          'Emergency Drill',
-          'ERT Report (Fire Safety)',
-          'Surveillance',
-          'Contractor Safety Report'
-        ],
+        labels: kpiLeadingData.map(item => item.indicator_name),
         datasets: [{
           label: 'Leading Indicators',
-          data: [17,215,722,0,7,1,2,8,201,856,371,43,14,13,114,2,59,7,10,129],
+          data: kpiLeadingData.map(item => item.actual_value),
           backgroundColor: 'rgba(10,77,158,0.8)',
           borderColor: 'rgba(10,77,158,1)',
           borderWidth: 2
@@ -673,23 +409,10 @@
     const laggingChart = new Chart(document.getElementById('kpiLaggingChart').getContext('2d'), {
       type: 'bar',
       data: {
-        labels: [
-          'Fatality Accident',
-          'Lost Time Injury',
-          'Restricted Workday Case',
-          'Medical Treatment',
-          'First aid case',
-          'Traffic Accident',
-          'Property Damage',
-          'fire case',
-          'environmental case',
-          'Near Miss',
-          'occupational disease',
-          'security case'
-        ],
+        labels: kpiLaggingData.map(item => item.indicator_name),
         datasets: [{
           label: 'Lagging Indicators',
-          data: [0,0,0,0,0,0,1,2,0,1,0,0],
+          data: kpiLaggingData.map(item => item.actual_value),
           backgroundColor: 'rgba(229,57,53,0.8)',
           borderColor: 'rgba(229,57,53,1)',
           borderWidth: 2
@@ -732,52 +455,80 @@
       }
     });
 
-    // Tab Navigation for KPI Charts with Auto Switch
+    // Initialize activities carousel
+    function initActivitiesCarousel() {
+      const container = document.getElementById('activityItemsContainer');
+      if (!container) return;
+
+      activitiesData.forEach((activity, index) => {
+        const item = document.createElement('div');
+        item.className = 'relative h-32 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start';
+        item.innerHTML = `
+          <img src="${activity.image_path}" alt="${activity.title}" class="object-cover h-32 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
+          <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
+            <span class="block truncate text-[10px] font-medium leading-tight">${activity.title}</span>
+            <span class="block text-[8px] text-gray-200 mt-0.5">Date: ${new Date(activity.activity_date).toLocaleDateString('en-GB')}</span>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize activities carousel
+      initActivitiesCarousel();
+      
+      // Initialize other components
+      setTimeout(function() {
+        document.getElementById('loader-bg').style.opacity = 0;
+        setTimeout(function() {
+          document.getElementById('loader-bg').style.display = 'none';
+          var main = document.querySelector('main.main-content');
+          if (main) main.classList.add('show');
+        }, 500);
+      }, 900);
+    });
+
+    // Tab Navigation for KPI Charts
     document.addEventListener('DOMContentLoaded', function() {
       const leadingTab = document.getElementById('leadingTab');
       const laggingTab = document.getElementById('laggingTab');
       const leadingChart = document.getElementById('kpiLeadingChart');
       const laggingChart = document.getElementById('kpiLaggingChart');
       
-      let currentTab = 'leading'; // Track current tab
+      let currentTab = 'leading';
       let autoSwitchInterval;
 
       function showLeadingChart() {
-        // Update tab styles
         leadingTab.classList.add('text-primary-blue', 'bg-blue-50');
         leadingTab.classList.remove('text-gray-500');
         laggingTab.classList.add('text-gray-500');
         laggingTab.classList.remove('text-primary-blue', 'bg-blue-50');
         
-        // Move tab indicator
         const tabIndicator = document.getElementById('tabIndicator');
         tabIndicator.style.transform = 'translateX(0%)';
         
-        // Smooth transition with fade effect
         leadingChart.style.opacity = '1';
         laggingChart.style.opacity = '0';
         currentTab = 'leading';
       }
 
       function showLaggingChart() {
-        // Update tab styles
         laggingTab.classList.add('text-primary-blue', 'bg-blue-50');
         laggingTab.classList.remove('text-gray-500');
         leadingTab.classList.add('text-gray-500');
         leadingTab.classList.remove('text-primary-blue', 'bg-blue-50');
         
-        // Move tab indicator
         const tabIndicator = document.getElementById('tabIndicator');
         tabIndicator.style.transform = 'translateX(100%)';
         
-        // Smooth transition with fade effect
         laggingChart.style.opacity = '1';
         leadingChart.style.opacity = '0';
         currentTab = 'lagging';
       }
 
       function switchTab() {
-        // Add a small delay for smoother transition
         setTimeout(() => {
           if (currentTab === 'leading') {
             showLaggingChart();
@@ -788,40 +539,29 @@
       }
 
       function startAutoSwitch() {
-        autoSwitchInterval = setInterval(switchTab, 15000); // Switch every 15 seconds
-      }
-
-      function stopAutoSwitch() {
-        clearInterval(autoSwitchInterval);
+        autoSwitchInterval = setInterval(switchTab, 15000);
       }
 
       function restartAutoSwitch() {
-        stopAutoSwitch();
+        clearInterval(autoSwitchInterval);
         startAutoSwitch();
       }
 
-      // Manual click handlers
       leadingTab.addEventListener('click', function() {
         showLeadingChart();
-        restartAutoSwitch(); // Restart timer when manually clicked
+        restartAutoSwitch();
       });
       
       laggingTab.addEventListener('click', function() {
         showLaggingChart();
-        restartAutoSwitch(); // Restart timer when manually clicked
+        restartAutoSwitch();
       });
 
-      // Initialize with Leading chart visible and start auto switch
       showLeadingChart();
       startAutoSwitch();
-      
-      // Add smooth tab transition styles
-      leadingTab.style.transition = 'all 0.5s ease-in-out';
-      laggingTab.style.transition = 'all 0.5s ease-in-out';
     });
 
-
-
+    // Life Saving Rules Carousel
     document.addEventListener('DOMContentLoaded', function() {
       const lifeContents = [
         document.getElementById('lifeContent1'),
@@ -834,14 +574,12 @@
       let lifeAutoSlideInterval;
       
       function showLifeContent(index) {
-        // Show/hide content
         lifeContents.forEach((content, i) => {
           if (content) {
             content.style.opacity = (i === index) ? '1' : '0';
           }
         });
         
-        // Update dots
         lifeDots.forEach((dot, i) => {
           if (i === index) {
             dot.classList.add('bg-primary-blue', 'opacity-100');
@@ -871,7 +609,6 @@
         startLifeAutoSlide();
       }
 
-      // Add click event to dots
       lifeDots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
           currentLifeIndex = index;
@@ -880,7 +617,6 @@
         });
       });
 
-      // Add hover pause functionality
       const lifeCarousel = document.getElementById('lifeCarousel');
       if (lifeCarousel) {
         lifeCarousel.addEventListener('mouseenter', stopLifeAutoSlide);
@@ -889,20 +625,6 @@
       
       startLifeAutoSlide();
       showLifeContent(0);
-
-      // QR Code link handler
-      const qrLink = document.querySelector('#lifeContent3 a');
-      if (qrLink) {
-        qrLink.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          window.open('https://get-qr.com/dpD5wA', '_blank');
-          return false;
-        });
-      }
-
-
     });
 
     // News Carousel
@@ -912,7 +634,6 @@
       let newsAutoSlideInterval;
 
       function showNewsItem(index) {
-        // Hide all news items
         newsItems.forEach((item, i) => {
           item.style.opacity = (i === index) ? '1' : '0';
         });
@@ -931,222 +652,148 @@
         clearInterval(newsAutoSlideInterval);
       }
 
-      // Add hover pause functionality
       const newsCarousel = document.getElementById('newsCarousel');
       if (newsCarousel) {
         newsCarousel.addEventListener('mouseenter', stopNewsAutoSlide);
         newsCarousel.addEventListener('mouseleave', startNewsAutoSlide);
       }
 
-      // Start auto slide
       startNewsAutoSlide();
-      
-      // Initialize with first item
       showNewsItem(0);
     });
 
-    // Infinite Carousel
-    function initInfiniteCarousel() {
-      // Activity data array
-      const activities = [
-        {
-          image: 'img/activity one.png',
-          title: 'Safety induction PT Niscala indo nusa',
-          date: 'Date: 03 July 2025',
-          scale: 'group-hover:scale-110'
-        },
-        {
-          image: 'img/2.png',
-          title: 'Monitoring project lift lot 517 PT dynacast',
-          date: 'Date: 03 July 2025',
-          scale: 'group-hover:scale-105'
-        },
-        {
-          image: 'img/meeting.png',
-          title: 'OHSS Monthly Meeting',
-          date: 'Date: 29 July 2025',
-          scale: 'group-hover:scale-105'
-        },
-        {
-          image: 'img/p.jpg',
-          title: 'Meeting regarding OHSS Dashboard & Safety Induction revision',
-          date: 'Date: 09 July 2025',
-          scale: 'group-hover:scale-105'
-        },
-        {
-          image: 'img/primajasa.png',
-          title: 'Stop work Primajasa worker at lot 302',
-          date: 'Date: 03 July 2025',
-          scale: 'group-hover:scale-105'
-        },
-        {
-          image: 'img/binsik.png',
-          title: 'Physical fitness training (Binsik) for the Security Team, directly attended and supervised by the CSO',
-          date: 'Date: 5&7 July 2025',
-          scale: 'group-hover:scale-105'
-        },
-        {
-          image: 'img/indoma.png',
-          title: 'Installation of a \'No Parking\' banner at the rear side of Indomaret',
-          date: 'Date: 05 July 2025',
-          scale: 'group-hover:scale-105'
-        },
-        {
-          image: 'img/stall.png',
-          title: 'Emergency Response to Fire Incident at Stall Jakarta (16), Pujasera Town Centre',
-          date: 'Date: 05 july 2025',
-          scale: 'group-hover:scale-105'
-        }
-      ];
-
-      const container = document.getElementById('activityItemsContainer');
-      if (!container) {
-        console.error('Activity container not found');
-        return;
-      }
-
-      const itemWidth = 320; // Width of each item including gap
-      const totalSet = 3; // Total sets (original + 2 clones)
-      const setWidth = activities.length * itemWidth;
-      let currentPosition = -setWidth; // Start at set 2 (middle)
-      let animationId;
-      let isAnimating = false;
-
-      // Function to create activity item HTML
-      function createActivityItem(activity, index) {
-        return `
-          <div class="relative h-32 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start" data-index="${index}">
-            <img src="${activity.image}" alt="Activity ${index + 1}" class="object-cover h-32 w-full rounded-2xl shadow-xl ${activity.scale} transition-transform duration-300" />
-            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
-              <span class="block truncate text-[10px] font-medium leading-tight">${activity.title}</span>
-              <span class="block text-[8px] text-gray-200 mt-0.5 activity-date">${activity.date}</span>
-            </div>
-          </div>
-        `;
-      }
-
-      // Function to populate carousel with items
-      function populateCarousel() {
-        container.innerHTML = ''; // Clear container first
-        
-        // Create 3 sets of items for seamless loop
-        for (let set = 0; set < totalSet; set++) {
-          activities.forEach((activity, index) => {
-            container.innerHTML += createActivityItem(activity, index);
-          });
-        }
-      }
-
-      // Function to animate carousel with truly seamless loop
-      function animateCarousel() {
-        if (!isAnimating) return;
-        
-        currentPosition -= 0.8; // Speed of animation
-        
-        // If we've moved past set 3, reset to set 2 (middle) without transition
-        if (currentPosition <= -setWidth * 2) {
-          // Disable transition for instant reset
-          container.style.transition = 'none';
-          currentPosition = -setWidth; // Reset to set 2
-          container.style.transform = `translateX(${currentPosition}px)`;
-          
-          // Re-enable transition after 1 frame
-          requestAnimationFrame(() => {
-            container.style.transition = 'transform 0.1s ease-out';
-          });
-        } else {
-          // Normal animation
-          container.style.transform = `translateX(${currentPosition}px)`;
-        }
-        
-        animationId = requestAnimationFrame(animateCarousel);
-      }
-
-      // Function to pause animation on hover
-      function pauseAnimation() {
-        isAnimating = false;
-        cancelAnimationFrame(animationId);
-      }
-
-      // Function to resume animation
-      function resumeAnimation() {
-        isAnimating = true;
-        animationId = requestAnimationFrame(animateCarousel);
-      }
-
-      // Initialize carousel
-      function initCarousel() {
-        try {
-          console.log('Initializing seamless carousel...');
-          populateCarousel();
-          
-          // Set initial position to set 2 (middle)
-          currentPosition = -setWidth;
-          container.style.transform = `translateX(${currentPosition}px)`;
-          
-          // Start animation after a delay
-          setTimeout(() => {
-            console.log('Starting seamless carousel animation...');
-            isAnimating = true;
-            animateCarousel();
-          }, 500);
-          
-          // Add hover pause functionality
-          const carousel = document.getElementById('activitiesCarousel');
-          if (carousel) {
-            carousel.addEventListener('mouseenter', pauseAnimation);
-            carousel.addEventListener('mouseleave', resumeAnimation);
-            console.log('Hover events added');
-          }
-          
-          console.log('Seamless carousel initialized successfully');
-        } catch (error) {
-          console.error('Error initializing carousel:', error);
-        }
-      }
-
-      // Start the carousel
-      initCarousel();
-    }
-
-    // Initialize carousel after page loads
+    // Sidebar toggle logic
     document.addEventListener('DOMContentLoaded', function() {
-      // Wait for loader to finish
-      setTimeout(() => {
-        try {
-          initInfiniteCarousel();
-        } catch (error) {
-          console.error('Failed to initialize carousel:', error);
-          // Fallback: simple static display
-          const container = document.getElementById('activityItemsContainer');
-          if (container) {
-            container.innerHTML = `
-              <div class="relative h-32 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
-                <img src="img/activity one.png" alt="Activity 1" class="object-cover h-32 w-full rounded-2xl shadow-xl group-hover:scale-110 transition-transform duration-300" />
-                <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
-                  <span class="block truncate text-[10px] font-medium leading-tight">Safety induction PT Niscala indo nusa</span>
-                  <span class="block text-[8px] text-gray-200 mt-0.5 activity-date">Date: 03 July 2025</span>
-                </div>
-              </div>
-              <div class="relative h-32 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
-                <img src="img/2.png" alt="Activity 2" class="object-cover h-32 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
-                <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
-                  <span class="block truncate text-[10px] font-medium leading-tight">Monitoring project lift lot 517 PT dynacast</span>
-                  <span class="block text-[8px] text-gray-200 mt-0.5 activity-date">Date: 03 July 2025</span>
-                </div>
-              </div>
-              <div class="relative h-32 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start">
-                <img src="img/meeting.png" alt="Activity 3" class="object-cover h-32 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
-                <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
-                  <span class="block truncate text-[10px] font-medium leading-tight">OHSS Monthly Meeting</span>
-                  <span class="block text-[8px] text-gray-200 mt-0.5 activity-date">Date: 29 July 2025</span>
-                </div>
-              </div>
-            `;
-          }
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const sidebarBackBtn = document.getElementById('sidebarBackBtn');
+      
+      menuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.toggle('-translate-x-full');
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!sidebar.classList.contains('-translate-x-full')) {
+          sidebar.classList.add('-translate-x-full');
         }
-      }, 1500);
+      });
+      
+      sidebar.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+      
+      sidebarBackBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.add('-translate-x-full');
+      });
     });
-</script>
+
+    // Fullscreen toggle logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+      
+      fullscreenBtn.addEventListener('click', () => {
+        const docElm = document.documentElement;
+        if (docElm.requestFullscreen) {
+          docElm.requestFullscreen();
+        } else if (docElm.mozRequestFullScreen) {
+          docElm.mozRequestFullScreen();
+        } else if (docElm.webkitRequestFullscreen) {
+          docElm.webkitRequestFullscreen();
+        } else if (docElm.msRequestFullscreen) {
+          docElm.msRequestFullscreen();
+        }
+      });
+      
+      exitFullscreenBtn.addEventListener('click', () => {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      });
+      
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          fullscreenBtn.classList.add('hidden');
+          exitFullscreenBtn.classList.remove('hidden');
+        } else {
+          fullscreenBtn.classList.remove('hidden');
+          exitFullscreenBtn.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+
+  <!-- Styles -->
+  <style>
+@keyframes blinkRedGray {
+  0%, 100% { color: #f40000; }
+  50% { color: #2c08d1; }
+}
+.animate-blink {
+  animation: blinkRedGray 1s infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.fadein {
+  opacity: 0;
+  transition: opacity 1s;
+}
+.fadein.show {
+  opacity: 1;
+}
+
+@keyframes blinkBorderRedBlue {
+  0%, 100% { border-color: #f40000; }
+  50% { border-color: #2c08d1; }
+}
+.animate-blink-border {
+  animation: blinkBorderRedBlue 1s infinite;
+  border-style: solid;
+}
+
+.kpi-card {
+  transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.chart-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-container canvas {
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#leadingTab, #laggingTab {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+}
+
+#leadingTab:hover, #laggingTab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(10, 77, 158, 0.15);
+}
+
+#tabIndicator {
+  box-shadow: 0 2px 4px rgba(10, 77, 158, 0.3);
+}
+  </style>
 </body>
-</html>
+</html> 

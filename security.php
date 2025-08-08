@@ -1,3 +1,26 @@
+<?php
+require_once 'config/database.php';
+
+// Get security personnel data
+$stmt = $pdo->query("SELECT * FROM security_personnel WHERE is_active = 1 ORDER BY display_order, id");
+$personnel = $stmt->fetchAll();
+
+// Get security gallery data
+$stmt = $pdo->query("SELECT * FROM security_gallery WHERE is_active = 1 ORDER BY display_order, id");
+$gallery = $stmt->fetchAll();
+?>
+
+<?php
+require_once 'config/database.php';
+
+// Get security personnel data
+$stmt = $pdo->query("SELECT * FROM security_personnel WHERE is_active = 1 ORDER BY display_order, id");
+$personnel = $stmt->fetchAll();
+
+// Get security gallery data
+$stmt = $pdo->query("SELECT * FROM security_gallery WHERE is_active = 1 ORDER BY display_order, id");
+$gallery = $stmt->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -298,47 +321,20 @@
           </tr>
         </thead>
         <tbody class="text-xs">
-          <tr class="bg-blue-50 hover:bg-blue-100 transition text-center font-semibold">
-            <td class="py-2 px-2 border-b border-gray-200">1</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Executive</td>
-            <td class="py-2 px-2 border-b border-gray-200">5 personel</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Juanris Saragih<br>YuhendrizaI<br>Afrizal M<br>Arif Kuswandi<br>Dessy Syofinai</td>
-          </tr>
-          <tr class="bg-white hover:bg-blue-50 transition text-center font-semibold">
-            <td class="py-2 px-2 border-b border-gray-200">2</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Inspector</td>
-            <td class="py-2 px-2 border-b border-gray-200">4 personel</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Juah Sembiring<br>Umar Baki<br>Agus Widarto<br>Nelwan</td>
-          </tr>
-          <tr class="bg-blue-50 hover:bg-blue-100 transition text-center font-semibold">
-            <td class="py-2 px-2 border-b border-gray-200">3</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Investigator</td>
-            <td class="py-2 px-2 border-b border-gray-200">4 personel</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Zakaria<br>Said Syafi’il<br>Ratno<br>Lukman Nur Arifi</td>
-          </tr>
-          <tr class="bg-white hover:bg-blue-50 transition text-center font-semibold">
-            <td class="py-2 px-2 border-b border-gray-200">4</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Patrol team</td>
-            <td class="py-2 px-2 border-b border-gray-200">28 personel</td>
+          <?php foreach ($personnel as $index => $item): ?>
+          <tr class="<?= $index % 2 == 0 ? 'bg-blue-50' : 'bg-white' ?> hover:bg-blue-100 transition text-center font-semibold">
+            <td class="py-2 px-2 border-b border-gray-200"><?= $index + 1 ?></td>
+            <td class="py-2 px-2 border-b border-gray-200 text-left"><?= htmlspecialchars($item['position']) ?></td>
+            <td class="py-2 px-2 border-b border-gray-200"><?= $item['personnel_count'] ?> personel</td>
             <td class="py-2 px-2 border-b border-gray-200 text-left">
-              Team A: 7 personel<br>
-              Team B: 7 personel<br>
-              Team C: 7 personel<br>
-              Team D: 7 personel
+              <?php if ($item['personnel_names']): ?>
+                <?= nl2br(htmlspecialchars($item['personnel_names'])) ?>
+              <?php else: ?>
+                <?= htmlspecialchars($item['description'] ?? '') ?>
+              <?php endif; ?>
             </td>
           </tr>
-          <tr class="bg-blue-50 hover:bg-blue-100 transition text-center font-semibold">
-            <td class="py-2 px-2 border-b border-gray-200">5</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Radio Operator</td>
-            <td class="py-2 px-2 border-b border-gray-200">4 personel</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Baharuddin<br>Syamsul Huda<br>Noorkholiq<br>Jonson Manalu</td>
-          </tr>
-          <tr class="bg-white hover:bg-blue-50 transition text-center font-semibold">
-            <td class="py-6 px-6 border-b border-gray-200">6</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Security</td>
-            <td class="py-2 px-2 border-b border-gray-200">124 personel</td>
-            <td class="py-2 px-2 border-b border-gray-200 text-left">Sumber Daya Dian (SDM)</td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -349,42 +345,16 @@
   <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center">Dokumentasi</h2>
   <h3 class="text-xl md:text-2xl font-semibold mb-4 text-center">(Dokumentasi Security Monitoring & Sweeping DLL)</h3>
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <?php foreach ($gallery as $item): ?>
     <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/a.jpg" alt="Patroli 1" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Patroli siang hari di area tower, memastikan keamanan lingkungan.</div>
+      <img src="<?= htmlspecialchars($item['photo_path']) ?>" 
+           alt="<?= htmlspecialchars($item['photo_alt'] ?? $item['title']) ?>" 
+           class="object-cover w-full h-48 gallery-photo">
+      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">
+        <?= htmlspecialchars($item['description']) ?>
+      </div>
     </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/p.jpg" alt="Patroli 2" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Pemeriksaan rutin panel listrik oleh dua personel security.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/a.jpg" alt="Patroli 3" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Sweeping area pagar pembatas untuk mencegah akses tidak sah.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/p.jpg" alt="Patroli 4" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Monitoring malam hari, patroli keliling area tower.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/a.jpg" alt="Patroli 5" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Koordinasi tim security sebelum patroli dimulai.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/p.jpg" alt="Patroli 6" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Pengecekan kondisi sekitar tower dan fasilitas pendukung.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/a.jpg" alt="Patroli 7" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Patroli motor di jalur akses utama menuju tower.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/p.jpg" alt="Patroli 8" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Pemeriksaan area belakang tower pada sore hari.</div>
-    </div>
-    <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="img/a.jpg" alt="Patroli 9" class="object-cover w-full h-48 gallery-photo">
-      <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">Sweeping area terbuka untuk deteksi potensi gangguan.</div>
-    </div>
+    <?php endforeach; ?>
   </div>
 </section>
 
