@@ -15,6 +15,7 @@ requireAdminLogin();
     <style>
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        .tab-btn.active { background-color: #1f2937; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -28,19 +29,19 @@ requireAdminLogin();
             </div>
         </header>
         <div class="container mx-auto px-6 py-8">
-            <div class="mb-6">
-                <button class="tab-btn bg-primary-blue text-white px-4 py-2 rounded-l-lg" onclick="showTab('personnel')">Personnel</button>
-                <button class="tab-btn bg-primary-blue text-white px-4 py-2" onclick="showTab('gallery')">Gallery</button>
-                <button class="tab-btn bg-primary-blue text-white px-4 py-2 rounded-r-lg" onclick="showTab('content')">Content</button>
+            <div class="mb-6 flex gap-2">
+                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('personnel')">
+                    <i class="fas fa-users-cog mr-2"></i>Personnel
+                </button>
+                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('gallery')">
+                    <i class="fas fa-images mr-2"></i>Gallery
+                </button>
             </div>
             <div id="personnel" class="tab-content active">
                 <?php include 'security_management.php'; ?>
             </div>
             <div id="gallery" class="tab-content">
                 <?php include 'add_security_gallery.php'; ?>
-            </div>
-            <div id="content" class="tab-content">
-                <?php include 'security_content.php'; ?>
             </div>
         </div>
     </div>
@@ -49,8 +50,17 @@ requireAdminLogin();
             document.querySelectorAll('.tab-content').forEach(function(el) {
                 el.classList.remove('active');
             });
+            document.querySelectorAll('.tab-btn').forEach(function(btn){
+                btn.classList.remove('active');
+            });
             document.getElementById(tab).classList.add('active');
+            const indexMap = { personnel: 0, gallery: 1 };
+            const buttons = document.querySelectorAll('.tab-btn');
+            const idx = indexMap[tab];
+            if (buttons[idx]) buttons[idx].classList.add('active');
         }
+        // default
+        showTab('personnel');
     </script>
 </body>
 </html>

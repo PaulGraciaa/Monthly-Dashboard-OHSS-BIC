@@ -323,21 +323,21 @@ $rows = $stmt->fetchAll();
 
     <div class="bg-white rounded-lg shadow p-4 mb-4">
       <form class="flex flex-wrap items-end gap-3">
-        <div>
-          <label class="block text-sm">Pencarian</label>
-          <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" class="border rounded px-3 py-2 w-64" placeholder="Judul / ringkasan..." />
-        </div>
-        <div>
-          <label class="block text-sm">Status</label>
-          <select name="status" class="border rounded px-3 py-2">
-            <option value="">Semua</option>
-            <?php foreach (["draft","published","archived"] as $st): ?>
-              <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+      <div>
+        <label class="block text-sm">Pencarian</label>
+        <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" class="border rounded px-3 py-2 w-64" placeholder="Judul / ringkasan..." />
+      </div>
+      <div>
+        <label class="block text-sm">Status</label>
+        <select name="status" class="border rounded px-3 py-2">
+          <option value="">Semua</option>
+          <?php foreach (["draft","published","archived"] as $st): ?>
+            <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
         <button class="bg-gray-800 text-white px-4 py-2 rounded inline-flex items-center gap-2"><i class="fas fa-filter"></i>Filter</button>
-      </form>
+    </form>
     </div>
 
     <div class="overflow-x-auto bg-white rounded-lg shadow">

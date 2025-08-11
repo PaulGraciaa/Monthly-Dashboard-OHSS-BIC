@@ -68,7 +68,7 @@ $gallery = $stmt->fetchAll();
         <header class="bg-header-footer-bg text-white px-6 py-4">
             <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-bold">Security Management</h1>
-                <a href="dashboard.php" class="bg-white text-header-footer-bg px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                <a href="../dashboard.php" class="bg-white text-header-footer-bg px-4 py-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
                 </a>
             </div>
