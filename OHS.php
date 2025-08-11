@@ -1,17 +1,38 @@
 <?php
-session_start();
-require_once 'config/database.php';
+require_once __DIR__ . '/config/database.php';
+$month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
+$year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 
-// Get configuration
-$config = [];
-$configData = $pdo->query("SELECT * FROM config")->fetchAll();
-foreach ($configData as $item) {
-    $config[$item['config_key']] = $item['config_value'];
+// Ambil data PTW untuk bulan/tahun yang diminta
+$stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month=? AND year=? ORDER BY display_order, contractor_name');
+$stmt->execute([$month, $year]);
+$ptwRecords = $stmt->fetchAll();
+
+// Jika kosong, fallback ke bulan-tahun terbaru yang tersedia di tabel
+if (!$ptwRecords) {
+  $latestStmt = $pdo->query('SELECT year, month FROM ptw_records ORDER BY year DESC, month DESC LIMIT 1');
+  $latest = $latestStmt ? $latestStmt->fetch() : null;
+  if ($latest) {
+    $year = (int)$latest['year'];
+    $month = (int)$latest['month'];
+    $stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month=? AND year=? ORDER BY display_order, contractor_name');
+    $stmt->execute([$month, $year]);
+    $ptwRecords = $stmt->fetchAll();
+  }
 }
 
-// Get KPI data
-$kpiLeading = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->fetchAll();
-$kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
+// Hitung total dan data untuk chart
+$totals = ['num_ptw'=>0,'general'=>0,'hot_work'=>0,'lifting'=>0,'excavation'=>0,'electrical'=>0,'work_high'=>0,'radiography'=>0,'manpower'=>0];
+foreach ($ptwRecords as $r) {
+  foreach ($totals as $k=>$_) { $totals[$k] += (int)$r[$k]; }
+}
+$labels = array_map(function($r){ return $r['contractor_name']; }, $ptwRecords);
+$ptwCounts = array_map(function($r){ return (int)$r['num_ptw']; }, $ptwRecords);
+
+// Info bulan untuk header
+$monthNames = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
+$monthName = $monthNames[$month] ?? date('F', mktime(0,0,0,$month,1,$year));
+$cutoff = sprintf('01 %s – %s %s %d', $monthName, date('t', mktime(0,0,0,$month,1,$year)), $monthName, $year);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -113,6 +134,126 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
         width: 100% !important;
         max-width: 100% !important;
       }
+      
+      /* Pengaturan tabel */
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: avoid !important;
+        font-size: 8px !important;
+      }
+      th, td {
+        padding: 4px 5px !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+      }
+      th {
+        background-color: #0A4D9E !important;
+        color: #fff !important;
+      }
+      tr:nth-child(even) {
+        background-color: #f2f2f2 !important;
+      }
+
+      /* Override warna dan style lainnya */
+      .bg-primary-blue { background-color: #0A4D9E !important; }
+      .bg-blue-100 { background-color: #DBEAFE !important; }
+      .bg-blue-50 { background-color: #EFF6FF !important; }
+      .bg-green-200 { background-color: #BBF7D0 !important; }
+      .text-white { color: #fff !important; }
+      .text-black { color: #000 !important; }
+      .rounded-lg { border-radius: 0 !important; }
+      .shadow { box-shadow: none !important; }
+      .overflow-x-auto { overflow: visible !important; }
+      .font-bold { font-weight: bold !important; }
+      .font-extrabold { font-weight: 800 !important; }
+      h2 { color: #000 !important; }
+      
+      /* Perbaikan untuk grafik */
+      canvas {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 300px !important;
+      }
+      
+      /* Halaman baru untuk setiap bagian */
+      .page-break {
+        page-break-before: always;
+      }
+      
+      .page-break-inside-avoid {
+        page-break-inside: avoid;
+      }
+    }
+    
+    .incident-box {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(10,77,158,0.08);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .chart-container {
+      height: 300px;
+      position: relative;
+    }
+    
+    /* Styling tambahan */
+    .logo-placeholder {
+      background-color: #0A4D9E;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 4px;
+      height: 35px;
+    }
+    
+    .photo-placeholder {
+      background-color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-weight: bold;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    
+    /* Penanda halaman untuk cetakan */
+    .page-section {
+      margin-bottom: 2rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .fadein {
+      opacity: 0;
+      transition: opacity 1s;
+    }
+    .fadein.show {
+      opacity: 1;
+    }
+    
+    /* Perbaikan sidebar */
+    #sidebar {
+      transition: transform 0.3s ease-in-out;
+      z-index: 100;
+    }
+    
+    /* Header footer */
+    header, footer {
+      z-index: 50;
+    }
+    
+    /* Sticky button */
+    .sticky {
+      z-index: 40;
     }
   </style>
 </head>
@@ -123,39 +264,51 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
   <div class="loader" style="border:6px solid #e0e7ef;border-top:6px solid #e53935;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;"></div>
 </div>
 
-  <!-- Sidebar -->
-  <aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-header-footer-bg text-white shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col pt-0 rounded-r-3xl border-r-4 border-header-footer-bg">
+<div class="print-only-header">
+  <div class="print-header-top">
+    <span id="print-datetime"></span>
+    <span class="title">OHSS Performance Dashboard</span>
+    <span id="print-datetime-spacer" style="visibility: hidden;"></span>
+  </div>
+  <div class="print-header-bottom">
+    <img src="img/batamindo.png" alt="Batamindo Investment Cakrawala Logo" class="logo w-32 h-8 object-contain">
+    <div class="report-info">
+             <div class="main-title">Report OHSS Monthly</div>
+       <div class="sub-title">BIC / OHSS-25-034-006-179 | Cut of date: <?php echo $cutoff; ?></div>
+    </div>
+  </div>
+</div>
+
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-header-footer-bg text-white shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col pt-0 rounded-r-3xl border-r-4 border-header-footer-bg">
     <button id="sidebarBackBtn" class="absolute top-4 left-4 bg-white text-header-footer-bg rounded-full shadow-lg w-10 h-10 flex items-center justify-center hover:bg-header-footer-bg hover:text-white transition focus:outline-none border-2 border-header-footer-bg" title="Tutup Sidebar">
       <i class="fas fa-arrow-left text-xl"></i>
     </button>
     <div class="flex flex-col gap-2 px-6 pt-20">
       <div class="mb-4 flex items-center gap-2">
         <span class="font-bold text-lg tracking-wide text-white drop-shadow">OHSS</span>
-      </div>  
-      <a href="index.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md text-base">
+      </div>
+      <a href="index.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md text-base">
         <i class="fas fa-home text-lg"></i> Dashboard
-    </a>
-      <a href="OHS.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      </a>
+      <a href="OHS.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-shield-alt"></i> OHSS
       </a>
-      <a href="security.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="security.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-user-shield"></i> Security
       </a>
-      <a href="firesafety.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="firesafety.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-fire-extinguisher"></i> Fire Safety
       </a>
-      <a href="surveillance.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
+      <a href="surveillance.html" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-video"></i> Surveillance
       </a>
       <div class="mt-8 text-xs text-white/80 px-2">
-        <span class="block">&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All Rights Reserved.</span>
+        <span class="block">&copy; 2025 Batamindo Investment Cakrawala.</span>
       </div>
     </div>
-  </aside>
+</aside>
 
-  <!-- Header -->
   <header class="bg-header-footer-bg text-white px-2 py-1 flex items-center justify-between mb-3 min-h-0 h-12 relative">
-    <!-- Menu Button -->
     <div class="relative">
       <button id="menuBtn" class="text-white hover:text-gray-200 focus:outline-none" aria-label="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -166,242 +319,184 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
         </svg>
       </button>
     </div>
-
-    <!-- Logo -->
     <div class="flex items-center flex-grow justify-center">
       <img src="img/batamindo.png" alt="Batamindo Investment Cakrawala Logo" class="h-6 object-contain">
     </div>
+     <div class="text-right hidden sm:block">
+             <div class="text-sm font-semibold leading-tight">Report OHSS Monthly</div>
+       <div class="text-[10px] opacity-80 mt-0.5 leading-tight">
+         BIC / OHSS-25-034-006-179 | Cut of date: <?php echo $cutoff; ?>
+       </div>
+    </div>
+  </header>
+  
+  <div class="sticky top-2 z-30 flex justify-end mb-2 px-2 print-hidden">
+    <button onclick="window.print()" class="bg-primary-blue hover:bg-blue-800 text-white font-bold py-2 px-6 rounded-lg shadow transition-all duration-200 border border-blue-900 flex items-center gap-2">
+      <i class='fas fa-file-pdf text-lg'></i> Export ke PDF
+    </button>
+  </div>
+  
+  <button id="fullscreenBtn" class="fixed bottom-4 right-4 z-50 bg-header-footer-bg text-white rounded-full shadow-lg p-4 hover:bg-primary-blue transition-colors duration-200 flex items-center justify-center w-14 h-14" title="Full Screen">
+    <i class="fas fa-expand text-2xl"></i>
+  </button>
+  <button id="exitFullscreenBtn" class="fixed bottom-4 right-4 z-50 bg-header-footer-bg text-white rounded-full shadow-lg p-4 hover:bg-primary-blue transition-colors duration-200 flex items-center justify-center w-14 h-14 hidden" title="Exit Full Screen">
+    <i class="fas fa-compress text-2xl"></i>
+  </button>
 
-    <!-- Title & Date -->
-    <div class="text-right hidden sm:block">
-      <div class="text-sm font-semibold leading-tight"><strong><?php echo $config['dashboard_title'] ?? 'Dashboard OHSS Monthly'; ?></strong></div>
-      <div class="text-[10px] opacity-80 mt-0.5 leading-tight">
-        <?php echo $config['report_code'] ?? 'BIC / OHSS-25-034-006-179'; ?> | Cut of date: <?php echo $config['cut_off_date'] ?? '01 July –31 July 2025'; ?>
+  <main class="main-content flex-1 px-4 py-6 fadein">
+    <!-- Halaman 1: Tabel -->
+    <div class="page-section">
+      <h2 class="text-center text-primary-blue font-extrabold text-xl mb-2">
+        1. PTW- IJIN KERJA AMAN (Permit Register)
+      </h2>
+      <div class="overflow-x-auto" style="width:100%">
+        <table class="w-full max-w-none mx-auto border border-gray-400 rounded-lg bg-white shadow text-xs">
+          <thead>
+            <tr class="bg-primary-blue text-white text-center">
+              <th colspan="2" class="py-1 px-2 border-b border-gray-400 border-r border-l text-base font-bold">LIST <?php echo $year; ?></th>
+                             <th colspan="8" class="py-1 px-2 border-b border-gray-400 border-r text-base font-bold">MONTH OF : <?php echo strtoupper($monthName); ?></th>
+              <th rowspan="2" class="py-1 px-2 border-b border-gray-400 border-r text-base font-bold align-middle">MAN-POWER</th>
+            </tr>
+            <tr class="bg-primary-blue text-white text-center">
+              <th class="py-1 px-2 border-b border-gray-400 border-r border-l">No</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">BIC CONTRACTORS ON PROJECT</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">NUMBER OF PTW</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">GENERAL</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">HOT WORK</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">LIFTING</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">EXCAVATION</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">ELECTRICAL</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">WORK HIGH</th>
+              <th class="py-1 px-2 border-b border-gray-400 border-r">RADIOGRAPHY</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs">
+            <?php foreach ($ptwRecords as $i=>$row): ?>
+            <tr class="<?php echo $i % 2 === 0 ? 'bg-blue-50' : 'bg-white'; ?> text-center font-bold">
+              <td class="py-1 px-2 border-b border-gray-400 border-r border-l"><?php echo $i+1; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r text-left"><?php echo htmlspecialchars($row['contractor_name']); ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['num_ptw']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['general']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['hot_work']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['lifting']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['excavation']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['electrical']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['work_high']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400 border-r"><?php echo (int)$row['radiography']; ?></td>
+              <td class="py-1 px-2 border-b border-gray-400"><?php echo (int)$row['manpower']; ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <tr class="bg-green-200 text-center font-bold">
+              <td colspan="2" class="py-1 px-2 border-b-0 border-gray-400 border-r border-l text-right">Total</td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['num_ptw']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['general']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['hot_work']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['lifting']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['excavation']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['electrical']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['work_high']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400 border-r"><?php echo $totals['radiography']; ?></td>
+              <td class="py-1 px-2 border-b-0 border-gray-400"><?php echo $totals['manpower']; ?></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Fullscreen Buttons -->
-    <button id="fullscreenBtn" class="fixed bottom-4 right-4 z-50 bg-header-footer-bg text-white rounded-full shadow-lg p-4 hover:bg-primary-blue transition-colors duration-200 flex items-center justify-center w-14 h-14" title="Full Screen">
-      <i class="fas fa-expand text-2xl"></i>
-    </button>
-    <button id="exitFullscreenBtn" class="fixed bottom-4 right-4 z-50 bg-header-footer-bg text-white rounded-full shadow-lg p-4 hover:bg-primary-blue transition-colors duration-200 flex items-center justify-center w-14 h-14 hidden" title="Exit Full Screen">
-      <i class="fas fa-compress text-2xl"></i>
-    </button>
-  </header>
-
-  <!-- Main Content -->
-  <main class="main-content flex-1 fadein">
-    <div class="container mx-auto px-4 max-w-7xl">
-      <!-- KPI Charts -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Leading Indicators -->
-        <div class="bg-white rounded-xl shadow-md border border-blue-100 p-4">
-          <h3 class="text-lg font-bold text-primary-blue mb-4">Leading Indicators</h3>
-          <canvas id="leadingChart" width="400" height="300"></canvas>
-        </div>
-        
-        <!-- Lagging Indicators -->
-        <div class="bg-white rounded-xl shadow-md border border-blue-100 p-4">
-          <h3 class="text-lg font-bold text-primary-blue mb-4">Lagging Indicators</h3>
-          <canvas id="laggingChart" width="400" height="300"></canvas>
+    <!-- Halaman 2: Grafik -->
+    <div class="page-break page-break-inside-avoid">
+      <div class="w-full bg-white rounded-lg shadow p-4" style="margin-top:0;">
+        <h2 class="text-center text-lg font-bold mb-4">2. TOTAL NUMBER PTW STATISTIC SUBMISSION</h2>
+        <div class="chart-container" style="width:100%;">
+          <canvas id="ptwBarChart" style="width:100% !important; height:300px !important; max-width:none !important;"></canvas>
         </div>
       </div>
+    </div>
 
-      <!-- KPI Tables -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Leading Indicators Table -->
-        <div class="bg-white rounded-xl shadow-md border border-blue-100 p-4">
-          <h3 class="text-lg font-bold text-primary-blue mb-4">Leading Indicators Detail</h3>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead class="bg-blue-50">
-                <tr>
-                  <th class="px-3 py-2 text-left font-semibold text-primary-blue">Indicator</th>
-                  <th class="px-3 py-2 text-center font-semibold text-primary-blue">Target</th>
-                  <th class="px-3 py-2 text-center font-semibold text-primary-blue">Actual</th>
-                  <th class="px-3 py-2 text-center font-semibold text-primary-blue">%</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($kpiLeading as $kpi): ?>
-                <tr class="border-b border-gray-100">
-                  <td class="px-3 py-2 text-gray-700"><?php echo $kpi['indicator_name']; ?></td>
-                  <td class="px-3 py-2 text-center text-gray-600"><?php echo number_format($kpi['target_value']); ?></td>
-                  <td class="px-3 py-2 text-center font-semibold text-primary-blue"><?php echo number_format($kpi['actual_value']); ?></td>
-                  <td class="px-3 py-2 text-center">
-                    <?php 
-                    $percentage = $kpi['target_value'] > 0 ? ($kpi['actual_value'] / $kpi['target_value']) * 100 : 0;
-                    $color = $percentage >= 80 ? 'text-green-600' : ($percentage >= 60 ? 'text-yellow-600' : 'text-red-600');
-                    echo '<span class="font-bold ' . $color . '">' . number_format($percentage, 1) . '%</span>';
-                    ?>
-                  </td>
-                </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
+    <!-- Halaman 3: Laporan Insiden -->
+    <div class="page-break page-break-inside-avoid">
+      <div class="incident-box bg-white rounded-xl p-6 mt-8">
+        <div class="font-extrabold text-lg mb-2">
+          3. INCIDENT & ACCIDENT REPORT & SHARING LESSON LEARNT (if any)
+        </div>
+        <div class="font-bold text-xl mb-1">Lesson Learned: Incident at Trash Storage Checkpoint B (First Aid Case)</div>
+                 <div class="italic text-base mb-3">Date: 4 July 2025 | Time: 21:05 WIB</div>
+        <div class="flex flex-col md:flex-row gap-4">
+          <!-- Kiri: Foto -->
+          <div class="flex flex-col gap-2 md:w-1/2">
+            <div class="photo-placeholder w-full h-72 rounded">INCIDENT MAP</div>
+            <div class="photo-placeholder w-full h-72 rounded">PHOTO EVIDENCE</div>
+          </div>
+          <!-- Kanan: Ringkasan & Detail -->
+          <div class="md:w-1/2 flex flex-col gap-2">
+            <div>
+              <div class="font-bold mb-1">Incident Summary:</div>
+              <ul class="list-disc ml-5 text-sm">
+                <li><b>Who:</b> Security Officer Didit Cahyono (NPK: 25567)</li>
+                <li><b>What Happened:</b> Officer attempted to close a <b>damaged metal door</b> (~40–50kg) at Checkpoint B. Door collapsed, trapping his right thumb and ring finger → <b>laceration injuries</b>.</li>
+                <li><b>Result:</b> Treated at BIP Clinic. <b>No property damage or lost time reported.</b></li>
+              </ul>
+            </div>
+            <div>
+              <div class="font-bold mb-1">Root Causes:</div>
+              <ol class="list-decimal ml-5 text-sm">
+                <li><b>Lack of pre-task hazard assessment</b> and lighting check during night shift.</li>
+                <li>Checkpoint placed near a known hazard (damaged structure).</li>
+                <li>Inadequate hazard reporting and delayed action on known damage.</li>
+                <li>No barricade/warning signs on damaged infrastructure.</li>
+                <li>Lack of training in handling damaged or unstable equipment.</li>
+              </ol>
+            </div>
+            <div>
+              <div class="font-bold mb-1">Key Takeaways:</div>
+              <ul class="list-disc ml-5 text-sm">
+                <li>Always <b>assess risk before acting</b>, especially on damaged equipment.</li>
+                <li>Ensure <b>hazard reporting is immediate</b> and followed up.</li>
+                <li>Night shift operations must be supported by <b>adequate lighting and supervision</b>.</li>
+                <li><b>Checkpoint placement</b> must avoid hazardous zones.</li>
+                <li><b>Preventive maintenance</b> and housekeeping are critical to safety.</li>
+              </ul>
+            </div>
           </div>
         </div>
-
-        <!-- Lagging Indicators Table -->
-        <div class="bg-white rounded-xl shadow-md border border-blue-100 p-4">
-          <h3 class="text-lg font-bold text-primary-blue mb-4">Lagging Indicators Detail</h3>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead class="bg-red-50">
-                <tr>
-                  <th class="px-3 py-2 text-left font-semibold text-red-600">Indicator</th>
-                  <th class="px-3 py-2 text-center font-semibold text-red-600">Target</th>
-                  <th class="px-3 py-2 text-center font-semibold text-red-600">Actual</th>
-                  <th class="px-3 py-2 text-center font-semibold text-red-600">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($kpiLagging as $kpi): ?>
-                <tr class="border-b border-gray-100">
-                  <td class="px-3 py-2 text-gray-700"><?php echo $kpi['indicator_name']; ?></td>
-                  <td class="px-3 py-2 text-center text-gray-600"><?php echo number_format($kpi['target_value']); ?></td>
-                  <td class="px-3 py-2 text-center font-semibold text-red-600"><?php echo number_format($kpi['actual_value']); ?></td>
-                  <td class="px-3 py-2 text-center">
-                    <?php 
-                    $status = $kpi['actual_value'] <= $kpi['target_value'] ? 'Good' : 'Warning';
-                    $color = $status == 'Good' ? 'text-green-600' : 'text-red-600';
-                    echo '<span class="font-bold ' . $color . '">' . $status . '</span>';
-                    ?>
-                  </td>
-                </tr>
-                <?php endforeach; ?>
-              </tbody>
-            </table>
-          </div>
+        <!-- Corrective Actions -->
+        <div class="mt-4">
+          <div class="font-bold mb-1">✔️ Corrective Actions:</div>
+          <ul class="text-sm ml-5">
+            <li>✅ Barricade and signage installed on damaged structures (<span class="text-green-600 font-bold">Done</span>)</li>
+            <li>🕒 Refresher training on <b>line of fire</b> awareness (<span class="text-yellow-600 font-bold">In Progress</span>)</li>
+            <li>📢 Protocol for quick hazard reporting under development (<span class="text-green-600 font-bold">Done</span>)</li>
+            <li>✅ Barcode scanner relocated to safer area (<span class="text-green-600 font-bold">Done</span>)</li>
+            <li>🕒 Routine <b>hazard inspection</b> at all checkpoints (<span class="text-yellow-600 font-bold">In Progress</span>)</li>
+          </ul>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="bg-header-footer-bg text-white text-center py-2 mt-3 text-xs">
-    <p>&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All rights reserved</p>
+    <p>&copy; 2025 Batamindo Investment Cakrawala. All rights reserved</p>
   </footer>
 
-  <!-- Scripts -->
   <script>
-    // KPI Data from PHP
-    const kpiLeadingData = <?php echo json_encode($kpiLeading); ?>;
-    const kpiLaggingData = <?php echo json_encode($kpiLagging); ?>;
-
-    // Leading Indicators Chart
-    new Chart(document.getElementById('leadingChart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: kpiLeadingData.map(item => item.indicator_name),
-        datasets: [{
-          label: 'Target',
-          data: kpiLeadingData.map(item => item.target_value),
-          backgroundColor: 'rgba(10,77,158,0.3)',
-          borderColor: 'rgba(10,77,158,1)',
-          borderWidth: 1
-        }, {
-          label: 'Actual',
-          data: kpiLeadingData.map(item => item.actual_value),
-          backgroundColor: 'rgba(10,77,158,0.8)',
-          borderColor: 'rgba(10,77,158,1)',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          }
-        },
-        scales: {
-          x: {
-            display: false
-          },
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-
-    // Lagging Indicators Chart
-    new Chart(document.getElementById('laggingChart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: kpiLaggingData.map(item => item.indicator_name),
-        datasets: [{
-          label: 'Target',
-          data: kpiLaggingData.map(item => item.target_value),
-          backgroundColor: 'rgba(229,57,53,0.3)',
-          borderColor: 'rgba(229,57,53,1)',
-          borderWidth: 1
-        }, {
-          label: 'Actual',
-          data: kpiLaggingData.map(item => item.actual_value),
-          backgroundColor: 'rgba(229,57,53,0.8)',
-          borderColor: 'rgba(229,57,53,1)',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          }
-        },
-        scales: {
-          x: {
-            display: false
-          },
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-
-    // Sidebar toggle logic
     document.addEventListener('DOMContentLoaded', function() {
-      const sidebar = document.getElementById('sidebar');
-      const menuBtn = document.getElementById('menuBtn');
-      const sidebarBackBtn = document.getElementById('sidebarBackBtn');
-      
-      menuBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sidebar.classList.toggle('-translate-x-full');
-      });
-      
-      document.addEventListener('click', function(e) {
-        if (!sidebar.classList.contains('-translate-x-full')) {
-          sidebar.classList.add('-translate-x-full');
+      // Sembunyikan loader setelah 1.5 detik
+      setTimeout(function() {
+        const loaderBg = document.getElementById('loader-bg');
+        if (loaderBg) {
+          loaderBg.style.opacity = '0';
+          setTimeout(function() {
+            loaderBg.style.display = 'none';
+            // Tampilkan konten utama dengan efek fade in
+            const mainContent = document.querySelector('.fadein');
+            if (mainContent) {
+              mainContent.classList.add('show');
+            }
+          }, 500);
         }
-      });
+      }, 1500);
       
-      sidebar.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
-      
-      sidebarBackBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sidebar.classList.add('-translate-x-full');
-      });
-    });
-
-    // Fullscreen toggle logic
-    document.addEventListener('DOMContentLoaded', function() {
+      // Fullscreen toggle logic
       const fullscreenBtn = document.getElementById('fullscreenBtn');
       const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
       
@@ -409,11 +504,11 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
         const docElm = document.documentElement;
         if (docElm.requestFullscreen) {
           docElm.requestFullscreen();
-        } else if (docElm.mozRequestFullScreen) {
+        } else if (docElm.mozRequestFullScreen) { /* Firefox */
           docElm.mozRequestFullScreen();
-        } else if (docElm.webkitRequestFullscreen) {
+        } else if (docElm.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
           docElm.webkitRequestFullscreen();
-        } else if (docElm.msRequestFullscreen) {
+        } else if (docElm.msRequestFullscreen) { /* IE/Edge */
           docElm.msRequestFullscreen();
         }
       });
@@ -421,11 +516,11 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
       exitFullscreenBtn.addEventListener('click', () => {
         if (document.exitFullscreen) {
           document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
+        } else if (document.mozCancelFullScreen) { /* Firefox */
           document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
+        } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
           document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
+        } else if (document.msExitFullscreen) { /* IE/Edge */
           document.msExitFullscreen();
         }
       });
@@ -439,33 +534,90 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
           exitFullscreenBtn.classList.add('hidden');
         }
       });
+
+      // Sidebar toggle logic
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      const sidebarBackBtn = document.getElementById('sidebarBackBtn');
+      
+      menuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.remove('-translate-x-full');
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+          sidebar.classList.add('-translate-x-full');
+        }
+      });
+      
+      sidebarBackBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        sidebar.classList.add('-translate-x-full');
+      });
+      
+      // Grafik PTW Statistic
+      const ctx = document.getElementById('ptwBarChart');
+      if (ctx) {
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+                         labels: <?php echo json_encode($labels); ?>,
+             datasets: [{
+               label: 'Number of PTW',
+               data: <?php echo json_encode($ptwCounts); ?>,
+               backgroundColor: 'rgba(37, 99, 235, 0.7)',
+               borderColor: 'rgba(37, 99, 235, 1)',
+               borderWidth: 1
+             }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              title: { display: false }
+            },
+            scales: {
+              x: {
+                ticks: { 
+                  font: { 
+                    size: 9
+                  }, 
+                  maxRotation: 45,
+                  minRotation: 45,
+                  autoSkip: false
+                },
+                grid: { display: false }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 2 },
+                grid: { color: '#e5e7eb' }
+              }
+            },
+            layout: {
+              padding: {
+                left: 10,
+                right: 10,
+                top: 10,
+                bottom: 20
+              }
+            }
+          }
+        });
+      }
     });
 
-    // Loader
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        document.getElementById('loader-bg').style.opacity = 0;
-        setTimeout(function() {
-          document.getElementById('loader-bg').style.display = 'none';
-          var main = document.querySelector('main.main-content');
-          if (main) main.classList.add('show');
-        }, 500);
-      }, 900);
-    });
+    // Script untuk tanggal dinamis di header cetak
+    window.onbeforeprint = function() {
+      const now = new Date();
+      const options = { year: '2-digit', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+      const formattedDateTime = now.toLocaleString('en-US', options).replace(',', '');
+      document.getElementById('print-datetime').textContent = formattedDateTime;
+      document.getElementById('print-datetime-spacer').textContent = formattedDateTime;
+    };
   </script>
 
-  <style>
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .fadein {
-      opacity: 0;
-      transition: opacity 1s;
-    }
-    .fadein.show {
-      opacity: 1;
-    }
-  </style>
 </body>
-</html> 
+</html>

@@ -308,3 +308,81 @@ INSERT INTO surveillance_content (section_name, title, content, display_order) V
 ('incidents', 'Surveillance Incidents', 'Incidents captured through surveillance systems', 2),
 ('maintenance', 'System Maintenance', 'Regular maintenance and updates of surveillance systems', 3),
 ('coverage', 'Coverage Areas', 'Surveillance coverage areas and blind spot analysis', 4); 
+
+-- =============================================
+-- PTW Records (untuk menghubungkan Bagian 1 & 2)
+-- =============================================
+CREATE TABLE IF NOT EXISTS ptw_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    contractor_name VARCHAR(255) NOT NULL,
+    num_ptw INT DEFAULT 0,
+    general INT DEFAULT 0,
+    hot_work INT DEFAULT 0,
+    lifting INT DEFAULT 0,
+    excavation INT DEFAULT 0,
+    electrical INT DEFAULT 0,
+    work_high INT DEFAULT 0,
+    radiography INT DEFAULT 0,
+    manpower INT DEFAULT 0,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    display_order INT DEFAULT 0,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    UNIQUE KEY uniq_record (contractor_name, month, year)
+);
+
+-- Seed PTW untuk July 2025 sesuai tampilan OHS.php saat ini
+INSERT INTO ptw_records (contractor_name, num_ptw, general, hot_work, lifting, excavation, electrical, work_high, radiography, manpower, month, year, display_order)
+VALUES
+('PT.Dredolf Indonesia', 11, 2, 2, 1, 2, 2, 2, 0, 120, 7, 2025, 1),
+('PT Endorshine Energy Solutions', 5, 1, 1, 1, 0, 1, 1, 0, 55, 7, 2025, 2),
+('PT.Cipta Prima jasa', 3, 2, 1, 0, 0, 0, 0, 0, 15, 7, 2025, 3),
+('PT.Mitsubhisi Jaya Elevator and Escalator', 7, 2, 1, 1, 1, 1, 1, 0, 20, 7, 2025, 4),
+('PT.PrimaJasa Tunas Mandiri', 17, 6, 2, 0, 4, 4, 1, 0, 165, 7, 2025, 5),
+('PT.Total Persada Indonesia', 5, 2, 1, 0, 0, 1, 1, 0, 225, 7, 2025, 6),
+('PT.Semarak Kontruksi Batam', 5, 2, 2, 1, 2, 0, 1, 0, 68, 7, 2025, 7),
+('PT.Berkah Alam Tabantang', 10, 4, 3, 0, 2, 1, 1, 0, 30, 7, 2025, 8),
+('PT.Global Karya Bangun', 3, 1, 1, 0, 0, 1, 0, 0, 21, 7, 2025, 9),
+('PT.Marindo alfa sentosa', 3, 1, 0, 0, 1, 1, 0, 0, 15, 7, 2025, 10),
+('PT.Niscala Indonusa', 2, 1, 1, 0, 0, 0, 0, 0, 15, 7, 2025, 11);
+
+-- =============================================
+-- OHS Incidents (Bagian 3 - terpisah)
+-- =============================================
+CREATE TABLE IF NOT EXISTS ohs_incidents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    incident_date DATE NOT NULL,
+    incident_time TIME,
+    who_name VARCHAR(100),
+    who_npk VARCHAR(50),
+    summary TEXT,
+    result TEXT,
+    root_causes TEXT,
+    key_takeaways TEXT,
+    corrective_actions TEXT,
+    map_image_path VARCHAR(255),
+    photo_image_path VARCHAR(255),
+    status ENUM('draft','published','archived') DEFAULT 'published',
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
+);
+
+-- Seed contoh insiden sesuai OHS.php
+INSERT INTO ohs_incidents (
+    title, incident_date, incident_time, who_name, who_npk, summary, result, root_causes, key_takeaways, corrective_actions, map_image_path, photo_image_path, status
+) VALUES (
+    'Lesson Learned: Incident at Trash Storage Checkpoint B (First Aid Case)', '2025-07-04', '21:05:00',
+    'Security Officer Didit Cahyono', '25567',
+    'Officer attempted to close a damaged metal door (~40–50kg) at Checkpoint B. Door collapsed, trapping his right thumb and ring finger → laceration injuries.',
+    'Treated at BIP Clinic. No property damage or lost time reported.',
+    '- Lack of pre-task hazard assessment and lighting check during night shift.\n- Checkpoint placed near a known hazard (damaged structure).\n- Inadequate hazard reporting and delayed action on known damage.\n- No barricade/warning signs on damaged infrastructure.\n- Lack of training in handling damaged or unstable equipment.',
+    '- Always assess risk before acting, especially on damaged equipment.\n- Ensure hazard reporting is immediate and followed up.\n- Night shift operations must be supported by adequate lighting and supervision.\n- Checkpoint placement must avoid hazardous zones.\n- Preventive maintenance and housekeeping are critical to safety.',
+    '✅ Barricade and signage installed on damaged structures (Done)\n🕒 Refresher training on line of fire awareness (In Progress)\n📢 Protocol for quick hazard reporting under development (Done)\n✅ Barcode scanner relocated to safer area (Done)\n🕒 Routine hazard inspection at all checkpoints (In Progress)',
+    NULL, NULL, 'published'
+);
