@@ -1,3 +1,8 @@
+<!-- Loader Spinner Merah -->
+<div id="loader-bg" style="position:fixed;z-index:9999;top:0;left:0;right:0;bottom:0;background:#f4f7fa;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s;">
+  <div class="loader" style="border:6px solid #e0e7ef;border-top:6px solid #e53935;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;"></div>
+</div>
+
 <?php
 session_start();
 require_once 'config/database.php';
@@ -66,10 +71,7 @@ foreach ($configData as $item) {
 </head>
 <body class="bg-background-color text-gray-800 font-sans min-h-screen flex flex-col">
 
-<!-- Loader Spinner Merah -->
-<div id="loader-bg" style="position:fixed;z-index:9999;top:0;left:0;right:0;bottom:0;background:#f4f7fa;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s;">
-  <div class="loader" style="border:6px solid #e0e7ef;border-top:6px solid #e53935;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;"></div>
-</div>
+<!-- Loader removed -->
 
   <!-- Sidebar -->
   <aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-header-footer-bg text-white shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col pt-0 rounded-r-3xl border-r-4 border-header-footer-bg">
@@ -139,17 +141,48 @@ foreach ($configData as $item) {
 
   <!-- Main Content -->
   <main class="main-content flex-1 fadein">
+  <script>
+    // Loader and fade-in logic
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var loader = document.getElementById('loader-bg');
+        if (loader) loader.style.opacity = 0;
+        setTimeout(function() {
+          if (loader) loader.style.display = 'none';
+          var main = document.querySelector('main.main-content');
+          if (main) main.classList.add('show');
+        }, 500);
+      }, 900);
+    });
+  </script>
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .fadein {
+      opacity: 0;
+      transition: opacity 1s;
+    }
+    .fadein.show {
+      opacity: 1;
+    }
+  </style>
     <div class="container mx-auto px-4 max-w-7xl">
     <!-- KPI Cards (horizontal, lebih kecil) -->
     <div class="flex flex-row gap-3 mb-3">
-      <?php foreach ($stats as $stat): ?>
-      <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
-        <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
-          <i class="<?php echo $stat['stat_icon']; ?> text-primary-blue text-sm"></i> <?php echo $stat['stat_value']; ?>
+      <?php if (!empty($stats)): ?>
+        <?php foreach ($stats as $stat): ?>
+        <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
+          <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
+            <i class="<?php echo $stat['stat_icon']; ?> text-primary-blue text-sm"></i> <?php echo $stat['stat_value']; ?>
+          </div>
+          <div class="mt-1 text-black-600 text-xs font-semibold"><strong><?php echo $stat['stat_name']; ?></strong></div>
         </div>
-        <div class="mt-1 text-black-600 text-xs font-semibold"><strong><?php echo $stat['stat_name']; ?></strong></div>
-      </div>
-      <?php endforeach; ?>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="w-full text-center text-gray-400 py-6">Tidak ada data statistik dashboard.</div>
+      <?php endif; ?>
     </div>
       <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 my-1 items-stretch">
@@ -170,6 +203,9 @@ foreach ($configData as $item) {
             </button>
           </div>
           <div class="flex-1 flex flex-col justify-end relative chart-container">
+            <?php if (empty($kpiLeading) && empty($kpiLagging)): ?>
+              <div class="absolute inset-0 flex items-center justify-center text-gray-400">Tidak ada data KPI.</div>
+            <?php endif; ?>
             <canvas id="kpiLeadingChart" width="400" height="280" style="width:100%;height:280px;position:absolute;top:0;left:0;opacity:1;transition:opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></canvas>
             <canvas id="kpiLaggingChart" width="400" height="280" style="width:100%;height:280px;position:absolute;top:0;left:0;opacity:0;transition:opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></canvas>
           </div>
@@ -230,7 +266,11 @@ foreach ($configData as $item) {
               <h3 class="font-bold text-xs mb-0.5 text-primary-blue"><strong>Performance of the Month</strong></h3>
             </div>
             <div class="flex-1 flex flex-col justify-center items-center">
-              <canvas id="positiveNegativeChart" width="120" height="120" style="width:120px;height:120px;" class="mx-auto"></canvas>
+              <?php if (empty($kpiLeading) && empty($kpiLagging)): ?>
+                <div class="text-gray-400">Tidak ada data performa bulan ini.</div>
+              <?php else: ?>
+                <canvas id="positiveNegativeChart" width="120" height="120" style="width:120px;height:120px;" class="mx-auto"></canvas>
+              <?php endif; ?>
             </div>
           </div>
           <!-- News -->
@@ -242,15 +282,19 @@ foreach ($configData as $item) {
             <div class="flex-1 flex flex-col justify-center items-center relative">
               <!-- News Carousel -->
               <div id="newsCarousel" class="w-full h-full relative overflow-hidden">
-                <?php foreach ($news as $index => $newsItem): ?>
-                <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 <?php echo $index === 0 ? 'opacity-100' : 'opacity-0'; ?> transition-opacity duration-500">
-                  <div class="bg-blue-50 rounded-lg p-2 mb-2 w-full">
-                    <div class="text-[8px] text-gray-500 mb-1"><?php echo date('d F Y', strtotime($newsItem['publish_date'])); ?></div>
-                    <h4 class="text-xs font-bold text-primary-blue mb-1"><?php echo $newsItem['title']; ?></h4>
-                    <p class="text-[10px] text-gray-700 leading-tight"><?php echo $newsItem['content']; ?></p>
+                <?php if (!empty($news)): ?>
+                  <?php foreach ($news as $index => $newsItem): ?>
+                  <div class="news-item absolute inset-0 flex flex-col justify-center items-center text-center p-2 <?php echo $index === 0 ? 'opacity-100' : 'opacity-0'; ?> transition-opacity duration-500">
+                    <div class="bg-blue-50 rounded-lg p-2 mb-2 w-full">
+                      <div class="text-[8px] text-gray-500 mb-1"><?php echo date('d F Y', strtotime($newsItem['publish_date'])); ?></div>
+                      <h4 class="text-xs font-bold text-primary-blue mb-1"><?php echo $newsItem['title']; ?></h4>
+                      <p class="text-[10px] text-gray-700 leading-tight"><?php echo $newsItem['content']; ?></p>
+                    </div>
                   </div>
-                </div>
-                <?php endforeach; ?>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <div class="flex items-center justify-center h-full text-gray-400">Tidak ada berita terbaru.</div>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -264,12 +308,16 @@ foreach ($configData as $item) {
             <h3 class="text-lg font-bold text-primary-blue tracking-wide"><strong>Activities of the Month</strong></h3>
           </div>
           <div class="w-full h-36">
-            <div id="activitiesCarousel" class="flex gap-6 px-4 min-w-fit items-center h-36 snap-x snap-mandatory">
-              <!-- Activity Items Container -->
-              <div id="activityItemsContainer" class="flex gap-6">
-                <!-- Activity items will be dynamically generated here -->
+            <?php if (!empty($activities)): ?>
+              <div id="activitiesCarousel" class="flex gap-6 px-4 min-w-fit items-center h-36 snap-x snap-mandatory">
+                <!-- Activity Items Container -->
+                <div id="activityItemsContainer" class="flex gap-6">
+                  <!-- Activity items will be dynamically generated here -->
+                </div>
               </div>
-            </div>
+            <?php else: ?>
+              <div class="flex items-center justify-center h-full text-gray-400">Tidak ada aktivitas bulan ini.</div>
+            <?php endif; ?>
           </div>
         </div>
       </section>
@@ -478,16 +526,7 @@ foreach ($configData as $item) {
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize activities carousel
       initActivitiesCarousel();
-      
-      // Initialize other components
-      setTimeout(function() {
-        document.getElementById('loader-bg').style.opacity = 0;
-        setTimeout(function() {
-          document.getElementById('loader-bg').style.display = 'none';
-          var main = document.querySelector('main.main-content');
-          if (main) main.classList.add('show');
-        }, 500);
-      }, 900);
+      // Loader logic removed
     });
 
     // Tab Navigation for KPI Charts
@@ -744,13 +783,7 @@ foreach ($configData as $item) {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-.fadein {
-  opacity: 0;
-  transition: opacity 1s;
-}
-.fadein.show {
-  opacity: 1;
-}
+
 
 @keyframes blinkBorderRedBlue {
   0%, 100% { border-color: #f40000; }

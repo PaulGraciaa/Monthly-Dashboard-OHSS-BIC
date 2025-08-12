@@ -20,12 +20,12 @@ CREATE TABLE admin_users (
 CREATE TABLE kpi_leading (
     id INT AUTO_INCREMENT PRIMARY KEY,
     indicator_name VARCHAR(255) NOT NULL,
-    target_value INT DEFAULT 0,
+    target_value INT NULL DEFAULT NULL,
     actual_value INT DEFAULT 0,
     month INT NOT NULL,
     year INT NOT NULL,
     status ENUM('on_track', 'behind', 'completed') DEFAULT 'on_track',
-    notes TEXT,
+    notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_indicator_month (indicator_name, month, year)
@@ -35,12 +35,12 @@ CREATE TABLE kpi_leading (
 CREATE TABLE kpi_lagging (
     id INT AUTO_INCREMENT PRIMARY KEY,
     indicator_name VARCHAR(255) NOT NULL,
-    target_value INT DEFAULT 0,
+    target_value INT NULL DEFAULT NULL,
     actual_value INT DEFAULT 0,
     month INT NOT NULL,
     year INT NOT NULL,
     status ENUM('good', 'warning', 'critical') DEFAULT 'good',
-    notes TEXT,
+    notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_indicator_month (indicator_name, month, year)
@@ -386,3 +386,6 @@ INSERT INTO ohs_incidents (
     '✅ Barricade and signage installed on damaged structures (Done)\n🕒 Refresher training on line of fire awareness (In Progress)\n📢 Protocol for quick hazard reporting under development (Done)\n✅ Barcode scanner relocated to safer area (Done)\n🕒 Routine hazard inspection at all checkpoints (In Progress)',
     NULL, NULL, 'published'
 );
+
+ALTER TABLE kpi_leading MODIFY target_value INT NULL, MODIFY notes TEXT NULL;
+ALTER TABLE kpi_lagging MODIFY target_value INT NULL, MODIFY notes TEXT NULL;

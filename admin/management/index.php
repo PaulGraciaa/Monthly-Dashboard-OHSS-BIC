@@ -48,6 +48,9 @@ requireAdminLogin();
                 <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('config')">
                     <i class="fas fa-cog mr-2"></i>Configuration
                 </button>
+                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('dashboard_stats')">
+                    <i class="fas fa-database mr-2"></i>Dashboard Stats
+                </button>
             </div>
 
             <div id="kpi" class="tab-content active">
@@ -62,6 +65,9 @@ requireAdminLogin();
             <div id="config" class="tab-content">
                 <?php include __DIR__ . '/config_tab.php'; ?>
             </div>
+            <div id="dashboard_stats" class="tab-content">
+                <?php include __DIR__ . '/dashboard_stats_tab.php'; ?>
+            </div>
         </div>
     </div>
 
@@ -75,7 +81,7 @@ requireAdminLogin();
             });
             document.getElementById(tabId).classList.add('active');
             // Set active button
-            const indexMap = { kpi: 0, activities: 1, news: 2, config: 3 };
+            const indexMap = { kpi: 0, activities: 1, news: 2, config: 3, dashboard_stats: 4 };
             const buttons = document.querySelectorAll('.tab-btn');
             const idx = indexMap[tabId];
             if (buttons[idx]) buttons[idx].classList.add('active');
