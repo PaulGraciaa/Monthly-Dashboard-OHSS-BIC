@@ -18,76 +18,54 @@ requireAdminLogin();
         .tab-btn.active { background-color: #1f2937; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans">
-    <div class="min-h-screen">
-        <header class="bg-red-600 text-white px-6 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold">Management</h1>
-                <div class="flex items-center gap-3">
-                    <a href="../dashboard.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
-                    </a>
-                    <a href="../logout.php" class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800 transition">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                    </a>
+</body>
+    <!-- Hamburger Menu Navigation -->
+    <nav class="bg-white shadow mb-6">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="font-bold text-lg text-green-700">OHSS Management</span>
+                </div>
+                <div class="hidden md:flex space-x-4">
+                    <a href="activities_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Activities</a>
+                    <a href="kpi_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">KPI</a>
+                    <a href="dashboard_stats_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Stats</a>
+                    <a href="config_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Config</a>
+                    <a href="news_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">News</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="hamburgerBtn" class="text-gray-700 focus:outline-none">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-        </header>
-
-        <div class="container mx-auto px-6 py-8">
-            <div class="flex flex-wrap gap-2 mb-6">
-                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('kpi')">
-                    <i class="fas fa-chart-line mr-2"></i>KPI
-                </button>
-                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('activities')">
-                    <i class="fas fa-calendar-alt mr-2"></i>Activities
-                </button>
-                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('news')">
-                    <i class="fas fa-newspaper mr-2"></i>News
-                </button>
-                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('config')">
-                    <i class="fas fa-cog mr-2"></i>Configuration
-                </button>
-                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('dashboard_stats')">
-                    <i class="fas fa-database mr-2"></i>Dashboard Stats
-                </button>
-            </div>
-
-            <div id="kpi" class="tab-content active">
-                <?php include __DIR__ . '/kpi_tab.php'; ?>
-            </div>
-            <div id="activities" class="tab-content">
-                <?php include __DIR__ . '/activities_tab.php'; ?>
-            </div>
-            <div id="news" class="tab-content">
-                <?php include __DIR__ . '/news_tab.php'; ?>
-            </div>
-            <div id="config" class="tab-content">
-                <?php include __DIR__ . '/config_tab.php'; ?>
-            </div>
-            <div id="dashboard_stats" class="tab-content">
-                <?php include __DIR__ . '/dashboard_stats_tab.php'; ?>
+            <div id="mobileMenu" class="md:hidden hidden flex-col space-y-2 pb-4">
+                <a href="activities_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Activities</a>
+                <a href="kpi_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">KPI</a>
+                <a href="dashboard_stats_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Stats</a>
+                <a href="config_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Config</a>
+                <a href="news_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">News</a>
             </div>
         </div>
+    </nav>
+    <div class="max-w-2xl mx-auto mt-16 text-center">
+        <h1 class="text-3xl font-bold text-green-700 mb-4">Selamat Datang di OHSS Management</h1>
+        <p class="text-gray-600">Silakan pilih menu di atas untuk mengelola data.</p>
     </div>
-
     <script>
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(function(el) {
-                el.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(function(btn) {
-                btn.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
-            // Set active button
-            const indexMap = { kpi: 0, activities: 1, news: 2, config: 3, dashboard_stats: 4 };
-            const buttons = document.querySelectorAll('.tab-btn');
-            const idx = indexMap[tabId];
-            if (buttons[idx]) buttons[idx].classList.add('active');
-        }
-        // Default aktif di kpi
-        showTab('kpi');
+        // Hamburger menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('hamburgerBtn');
+            const menu = document.getElementById('mobileMenu');
+            if (btn && menu) {
+                btn.addEventListener('click', function() {
+                    menu.classList.toggle('hidden');
+                });
+            }
+        });
     </script>
+</body>
 </body>
 </html>

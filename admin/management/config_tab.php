@@ -3,33 +3,29 @@ require_once '../auth.php';
 require_once '../../config/database.php';
 requireAdminLogin();
 
-$message = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] == 'update') {
-        $configs = [
-            'company_name' => sanitize($_POST['company_name']),
-            'dashboard_title' => sanitize($_POST['dashboard_title']),
-            'report_code' => sanitize($_POST['report_code']),
-            'cut_off_date' => sanitize($_POST['cut_off_date']),
-            'performance_positive' => sanitize($_POST['performance_positive']),
-            'performance_negative' => sanitize($_POST['performance_negative']),
-            'performance_others' => sanitize($_POST['performance_others'])
-        ];
-        
-        $success = true;
-        foreach ($configs as $key => $value) {
-            $stmt = $pdo->prepare("UPDATE config SET config_value = ? WHERE config_key = ?");
-            if (!$stmt->execute([$value, $key])) {
-                $success = false;
-            }
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update') {
+    $configs = [
+        'company_name' => isset($_POST['company_name']) ? sanitize($_POST['company_name']) : '',
+        'dashboard_title' => isset($_POST['dashboard_title']) ? sanitize($_POST['dashboard_title']) : '',
+        'report_code' => isset($_POST['report_code']) ? sanitize($_POST['report_code']) : '',
+        'cut_off_date' => isset($_POST['cut_off_date']) ? sanitize($_POST['cut_off_date']) : '',
+        'performance_positive' => isset($_POST['performance_positive']) ? sanitize($_POST['performance_positive']) : 90,
+        'performance_negative' => isset($_POST['performance_negative']) ? sanitize($_POST['performance_negative']) : 5,
+        'performance_others' => isset($_POST['performance_others']) ? sanitize($_POST['performance_others']) : 5
+    ];
+    $success = true;
+    foreach ($configs as $key => $value) {
+        $stmt = $pdo->prepare("UPDATE config SET config_value = ? WHERE config_key = ?");
+        if (!$stmt->execute([$value, $key])) {
+            $success = false;
         }
-        
-        if ($success) {
-            $message = 'Konfigurasi berhasil diperbarui!';
-        } else {
-            $message = 'Terjadi kesalahan saat memperbarui konfigurasi!';
-        }
+    }
+    if ($success) {
+        $message = 'Konfigurasi berhasil diperbarui!';
+    } else {
+        $message = 'Terjadi kesalahan saat memperbarui konfigurasi!';
     }
 }
 
@@ -40,9 +36,42 @@ foreach ($configData as $item) {
 }
 ?>
 
+
+<!-- Hamburger Menu Navigation -->
+<nav class="bg-white shadow mb-6">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16 items-center">
+            <div class="flex-shrink-0 flex items-center">
+                <span class="font-bold text-lg text-green-700">OHSS Management</span>
+            </div>
+            <div class="hidden md:flex space-x-4">
+                <a href="activities_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Activities</a>
+                <a href="kpi_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">KPI</a>
+                <a href="dashboard_stats_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Stats</a>
+                <a href="config_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Config</a>
+                <a href="news_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">News</a>
+            </div>
+            <div class="md:hidden flex items-center">
+                <button id="hamburgerBtn" class="text-gray-700 focus:outline-none">
+                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="md:hidden hidden flex-col space-y-2 pb-4">
+            <a href="activities_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Activities</a>
+            <a href="kpi_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">KPI</a>
+            <a href="dashboard_stats_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Stats</a>
+            <a href="config_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Config</a>
+            <a href="news_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">News</a>
+        </div>
+    </div>
+</nav>
+
 <?php if ($message): ?>
 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-    <?php echo $message; ?>
+        <?php echo $message; ?>
 </div>
 <?php endif; ?>
 
@@ -112,4 +141,16 @@ foreach ($configData as $item) {
             </button>
         </div>
     </form>
+<script>
+// Hamburger menu toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('hamburgerBtn');
+    const menu = document.getElementById('mobileMenu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('hidden');
+        });
+    }
+});
+</script>
 </div>

@@ -22,13 +22,10 @@ CREATE TABLE kpi_leading (
     indicator_name VARCHAR(255) NOT NULL,
     target_value INT NULL DEFAULT NULL,
     actual_value INT DEFAULT 0,
-    month INT NOT NULL,
-    year INT NOT NULL,
     status ENUM('on_track', 'behind', 'completed') DEFAULT 'on_track',
     notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_indicator_month (indicator_name, month, year)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabel KPI Lagging Indicators
@@ -37,13 +34,10 @@ CREATE TABLE kpi_lagging (
     indicator_name VARCHAR(255) NOT NULL,
     target_value INT NULL DEFAULT NULL,
     actual_value INT DEFAULT 0,
-    month INT NOT NULL,
-    year INT NOT NULL,
     status ENUM('good', 'warning', 'critical') DEFAULT 'good',
     notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_indicator_month (indicator_name, month, year)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabel Dashboard Statistics
@@ -204,42 +198,42 @@ INSERT INTO dashboard_stats (stat_name, stat_value, stat_description, stat_icon,
 ('Total Manpower (To Date)', '1,132', 'Total tenaga kerja hingga saat ini', 'fas fa-users', 3);
 
 -- Insert default KPI Leading Indicators
-INSERT INTO kpi_leading (indicator_name, target_value, actual_value, month, year) VALUES 
-('OHSS Meeting', 20, 17, 7, 2025),
-('OHSS Daily Toolbox Talk', 250, 215, 7, 2025),
-('General Security & ERT Briefing', 800, 722, 7, 2025),
-('Top Management Evaluation (Visit)', 5, 0, 7, 2025),
-('Action Tracking Register', 10, 7, 7, 2025),
-('Annual Internal Audit', 2, 1, 7, 2025),
-('Annual External Audit', 2, 2, 7, 2025),
-('PPE Compliance', 15, 8, 7, 2025),
-('HIRADC/JRA/JSA', 250, 201, 7, 2025),
-('Permit to work (PTW)', 1000, 856, 7, 2025),
-('Daily OHS Report', 400, 371, 7, 2025),
-('OHSS weekly Report', 50, 43, 7, 2025),
-('OHSS Monthly Report', 15, 14, 7, 2025),
-('OHSS Inspection', 20, 13, 7, 2025),
-('OHSS Induction', 150, 114, 7, 2025),
-('Safety Committee meeting (P2K3)', 5, 2, 7, 2025),
-('Emergency Drill', 80, 59, 7, 2025),
-('ERT Report (Fire Safety)', 10, 7, 7, 2025),
-('Surveillance', 15, 10, 7, 2025),
-('Contractor Safety Report', 150, 129, 7, 2025);
+INSERT INTO kpi_leading (indicator_name, target_value, actual_value, status) VALUES 
+('OHSS Meeting', 20, 17, 'on_track'),
+('OHSS Daily Toolbox Talk', 250, 215, 'on_track'),
+('General Security & ERT Briefing', 800, 722, 'on_track'),
+('Top Management Evaluation (Visit)', 5, 0, 'behind'),
+('Action Tracking Register', 10, 7, 'on_track'),
+('Annual Internal Audit', 2, 1, 'on_track'),
+('Annual External Audit', 2, 2, 'on_track'),
+('PPE Compliance', 15, 8, 'on_track'),
+('HIRADC/JRA/JSA', 250, 201, 'on_track'),
+('Permit to work (PTW)', 1000, 856, 'on_track'),
+('Daily OHS Report', 400, 371, 'on_track'),
+('OHSS weekly Report', 50, 43, 'on_track'),
+('OHSS Monthly Report', 15, 14, 'on_track'),
+('OHSS Inspection', 20, 13, 'on_track'),
+('OHSS Induction', 150, 114, 'on_track'),
+('Safety Committee meeting (P2K3)', 5, 2, 'on_track'),
+('Emergency Drill', 80, 59, 'on_track'),
+('ERT Report (Fire Safety)', 10, 7, 'on_track'),
+('Surveillance', 15, 10, 'on_track'),
+('Contractor Safety Report', 150, 129, 'on_track');
 
 -- Insert default KPI Lagging Indicators
-INSERT INTO kpi_lagging (indicator_name, target_value, actual_value, month, year) VALUES 
-('Fatality Accident', 0, 0, 7, 2025),
-('Lost Time Injury', 0, 0, 7, 2025),
-('Restricted Workday Case', 0, 0, 7, 2025),
-('Medical Treatment', 0, 0, 7, 2025),
-('First aid case', 0, 0, 7, 2025),
-('Traffic Accident', 0, 0, 7, 2025),
-('Property Damage', 0, 1, 7, 2025),
-('fire case', 0, 2, 7, 2025),
-('environmental case', 0, 0, 7, 2025),
-('Near Miss', 0, 1, 7, 2025),
-('occupational disease', 0, 0, 7, 2025),
-('security case', 0, 0, 7, 2025);
+INSERT INTO kpi_lagging (indicator_name, target_value, actual_value, status) VALUES 
+('Fatality Accident', 0, 0, 'good'),
+('Lost Time Injury', 0, 0, 'good'),
+('Restricted Workday Case', 0, 0, 'good'),
+('Medical Treatment', 0, 0, 'good'),
+('First aid case', 0, 0, 'good'),
+('Traffic Accident', 0, 0, 'good'),
+('Property Damage', 0, 1, 'warning'),
+('fire case', 0, 2, 'critical'),
+('environmental case', 0, 0, 'good'),
+('Near Miss', 0, 1, 'good'),
+('occupational disease', 0, 0, 'good'),
+('security case', 0, 0, 'good');
 
 -- Insert default news
 INSERT INTO news (title, content, publish_date, status, priority) VALUES 

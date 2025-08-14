@@ -3,35 +3,32 @@ require_once '../auth.php';
 require_once '../../config/database.php';
 requireAdminLogin();
 
-$message = '';
 
-// CRUD logic
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
-    $stat_name = trim($_POST['stat_name'] ?? '');
-    $stat_value = trim($_POST['stat_value'] ?? '');
-    $stat_description = trim($_POST['stat_description'] ?? '');
-    $stat_icon = trim($_POST['stat_icon'] ?? '');
-    $display_order = (int)($_POST['display_order'] ?? 0);
+    $stat_name = isset($_POST['stat_name']) ? sanitize($_POST['stat_name']) : '';
+    $stat_value = isset($_POST['stat_value']) ? sanitize($_POST['stat_value']) : '';
+    $stat_description = isset($_POST['stat_description']) ? sanitize($_POST['stat_description']) : '';
+    $stat_icon = isset($_POST['stat_icon']) ? sanitize($_POST['stat_icon']) : '';
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
     $is_active = isset($_POST['is_active']) ? 1 : 0;
-    
-    if (isset($_POST['action'])) {
+    try {
         if ($_POST['action'] === 'add') {
             $stmt = $pdo->prepare("INSERT INTO dashboard_stats (stat_name, stat_value, stat_description, stat_icon, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)");
-            if ($stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active])) {
-                $message = 'Data berhasil ditambahkan!';
-            }
+            $stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active]);
+            $message = 'Data berhasil ditambahkan!';
         } elseif ($_POST['action'] === 'update' && $id) {
             $stmt = $pdo->prepare("UPDATE dashboard_stats SET stat_name=?, stat_value=?, stat_description=?, stat_icon=?, display_order=?, is_active=? WHERE id=?");
-            if ($stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active, $id])) {
-                $message = 'Data berhasil diupdate!';
-            }
+            $stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active, $id]);
+            $message = 'Data berhasil diupdate!';
         } elseif ($_POST['action'] === 'delete' && $id) {
             $stmt = $pdo->prepare("DELETE FROM dashboard_stats WHERE id=?");
-            if ($stmt->execute([$id])) {
-                $message = 'Data berhasil dihapus!';
-            }
+            $stmt->execute([$id]);
+            $message = 'Data berhasil dihapus!';
         }
+    } catch (Exception $e) {
+        $message = 'Terjadi error: ' . $e->getMessage();
     }
 }
 
@@ -48,11 +45,42 @@ $stats = $pdo->query("SELECT * FROM dashboard_stats ORDER BY display_order, id")
 <body class="bg-gray-50 font-sans">
     <div class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-extrabold mb-6 text-primary-blue flex items-center gap-2"><i class="fas fa-database"></i> Dashboard Stats Management</h1>
+        <!-- Hamburger Menu Navigation -->
+        <nav class="bg-white shadow mb-6">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between h-16 items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="font-bold text-lg text-green-700">OHSS Management</span>
+                    </div>
+                    <div class="hidden md:flex space-x-4">
+                        <a href="activities_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Activities</a>
+                        <a href="kpi_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">KPI</a>
+                        <a href="dashboard_stats_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Stats</a>
+                        <a href="config_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Config</a>
+                        <a href="news_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">News</a>
+                    </div>
+                    <div class="md:hidden flex items-center">
+                        <button id="hamburgerBtn" class="text-gray-700 focus:outline-none">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="mobileMenu" class="md:hidden hidden flex-col space-y-2 pb-4">
+                    <a href="activities_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Activities</a>
+                    <a href="kpi_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">KPI</a>
+                    <a href="dashboard_stats_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Stats</a>
+                    <a href="config_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Config</a>
+                    <a href="news_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">News</a>
+                </div>
+            </div>
+        </nav>
         <?php if ($message): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 shadow">
-            <?php echo $message; ?>
-        </div>
-        <?php endif; ?>
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 shadow">
+                                <?php echo $message; ?>
+                        </div>
+                        <?php endif; ?>
     <!-- Form tambah dashboard stats dihapus sesuai permintaan user -->
         <div class="overflow-x-auto">
             <table class="min-w-full table-auto bg-white rounded-xl shadow-lg">
@@ -85,5 +113,17 @@ $stats = $pdo->query("SELECT * FROM dashboard_stats ORDER BY display_order, id")
             </table>
         </div>
     </div>
+<script>
+// Hamburger menu toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('hamburgerBtn');
+    const menu = document.getElementById('mobileMenu');
+    if (btn && menu) {
+        btn.addEventListener('click', function() {
+            menu.classList.toggle('hidden');
+        });
+    }
+});
+</script>
 </body>
 </html>
