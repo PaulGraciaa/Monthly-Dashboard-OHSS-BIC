@@ -86,21 +86,28 @@ $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")-
 <!-- Header mirip dashboard -->
 <header class="bg-red-600 text-white px-6 py-3 shadow">
 
-<!-- Header mirip dashboard -->
-<header class="bg-red-600 text-white px-6 py-3 shadow">
-    <div class="flex justify-between items-center max-w-7xl mx-auto">
-        <div class="flex items-center gap-4">
-            <img src="/img/batamindo.png" alt="Batamindo Logo" class="h-12 w-auto bg-white rounded p-1 shadow" style="object-fit:contain;">
-            <span class="text-2xl font-bold tracking-wide">Admin Dashboard</span>
+<!-- Header and Navigation -->
+<header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Company Header -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4">
+                <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                    <p class="text-red-200">OHS Security System Management</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center space-x-3">
+                <div class="text-right">
+                    <p class="text-sm text-white">Welcome, Admin</p>
+                    <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                </div>
+                <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </a>
+            </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="hidden md:inline">Selamat datang, <b>Administrator</b></span>
-            <a href="/admin/logout.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition flex items-center gap-2 font-semibold">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </div>
-    </div>
-</header>
 
 <!-- Hamburger Menu Navigation (single, clean) -->
 <nav class="bg-white shadow mb-8">
