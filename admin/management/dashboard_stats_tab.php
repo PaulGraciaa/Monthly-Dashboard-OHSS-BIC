@@ -3,8 +3,12 @@ require_once '../auth.php';
 require_once '../../config/database.php';
 requireAdminLogin();
 
+// Initialize variables
 $message = '';
+
+// Process form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
+    // Sanitize and validate inputs
     $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
     $stat_name = isset($_POST['stat_name']) ? sanitize($_POST['stat_name']) : '';
     $stat_value = isset($_POST['stat_value']) ? sanitize($_POST['stat_value']) : '';

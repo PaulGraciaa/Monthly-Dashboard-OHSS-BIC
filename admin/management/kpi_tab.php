@@ -3,6 +3,12 @@ require_once '../auth.php';
 require_once '../../config/database.php';
 requireAdminLogin();
 
+// Simple sanitize function if not already defined
+if (!function_exists('sanitize')) {
+    function sanitize($str) {
+        return htmlspecialchars(trim($str), ENT_QUOTES, 'UTF-8');
+    }
+}
 
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
@@ -64,206 +70,255 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 $leadingKPIs = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->fetchAll();
 $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
 ?>
-
-
-
-
-<!-- HTML HEAD & CSS -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KPI Management</title>
-    <!-- Tailwind CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>KPI Management - Batamindo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-<!-- Header mirip dashboard -->
-<header class="bg-red-600 text-white px-6 py-3 shadow">
-
-<!-- Header and Navigation -->
-<header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">
-    <div class="max-w-7xl mx-auto px-4">
-        <!-- Company Header -->
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-4">
-                <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
-                <div>
-                    <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                    <p class="text-red-200">OHS Security System Management</p>
+<body class="bg-gray-100 font-sans">
+    <!-- Header and Navigation -->
+    <header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                        <p class="text-red-200">OHS Security System Management</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <div class="text-right">
+                        <p class="text-sm text-white">Welcome, Admin</p>
+                        <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                    </div>
+                    <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </a>
                 </div>
             </div>
-            <div class="hidden md:flex items-center space-x-3">
-                <div class="text-right">
-                    <p class="text-sm text-white">Welcome, Admin</p>
-                    <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+            <nav class="flex items-center justify-between">
+                <div class="text-xl font-bold">KPI</div>
+                <div class="md:hidden">
+                    <button id="menuBtn" class="text-white focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
                 </div>
-                <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
-                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                </a>
+                <div id="mobileMenu" class="hidden md:flex space-x-4">
+                    <a href="index.php" class="text-white hover:text-red-200 px-3 py-2">OHS</a>
+                    <a href="news_tab.php" class="text-white hover:text-red-200 px-3 py-2">News</a>
+                    <a href="activities_tab.php" class="text-white hover:text-red-200 px-3 py-2">Activities</a>
+                    <a href="config_tab.php" class="text-white hover:text-red-200 px-3 py-2">Config</a>
+                    <a href="kpi_tab.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">KPI</a>
+                    <a href="dashboard_stats_tab.php" class="text-white hover:text-red-200 px-3 py-2">Dashboard Stats</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <?php if ($message): ?>
+        <div class="mb-6">
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                    <p><?php echo $message; ?></p>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <?php 
+            $total_leading = count($leadingKPIs);
+            $total_lagging = count($laggingKPIs);
+            ?>
+            <!-- Total Leading -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Total Leading</h3>
+                    <i class="fas fa-chart-line text-2xl opacity-75"></i>
+                </div>
+                <div class="text-3xl font-bold"><?php echo $total_leading; ?></div>
+                <div class="text-blue-100 text-sm mt-2">Total leading indicators</div>
+            </div>
+            <!-- Total Lagging -->
+            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Total Lagging</h3>
+                    <i class="fas fa-exclamation-triangle text-2xl opacity-75"></i>
+                </div>
+                <div class="text-3xl font-bold"><?php echo $total_lagging; ?></div>
+                <div class="text-red-100 text-sm mt-2">Total lagging indicators</div>
+            </div>
+            <!-- Add New Leading -->
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white cursor-pointer hover:from-green-600 hover:to-green-700 transition-all duration-300" onclick="openLeadingModal()">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Add Leading</h3>
+                    <i class="fas fa-plus-circle text-2xl opacity-75"></i>
+                </div>
+                <div class="text-xl font-bold">Create Leading</div>
+                <div class="text-green-100 text-sm mt-2">Click to add new leading</div>
+            </div>
+            <!-- Add New Lagging -->
+            <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-lg p-6 text-white cursor-pointer hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300" onclick="openLaggingModal()">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Add Lagging</h3>
+                    <i class="fas fa-plus-circle text-2xl opacity-75"></i>
+                </div>
+                <div class="text-xl font-bold">Create Lagging</div>
+                <div class="text-yellow-100 text-sm mt-2">Click to add new lagging</div>
             </div>
         </div>
 
-<!-- Hamburger Menu Navigation (single, clean) -->
-<nav class="bg-white shadow mb-8">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-between h-16 items-center">
-            <div class="flex-shrink-0 flex items-center">
-                <span class="font-bold text-lg text-green-700">OHSS Management</span>
-            </div>
-            <div class="hidden md:flex space-x-4">
-                <a href="activities_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Activities</a>
-                <a href="kpi_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">KPI</a>
-                <a href="dashboard_stats_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Stats</a>
-                <a href="config_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">Config</a>
-                <a href="news_tab.php" class="text-gray-700 hover:text-green-700 font-semibold">News</a>
-            </div>
-            <div class="md:hidden flex items-center">
-                <button id="hamburgerBtn" class="text-gray-700 focus:outline-none">
-                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+        <!-- Add New Leading Modal -->
+        <div id="addNewLeadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Tambah KPI Leading</h3>
+                    <button type="button" onclick="closeLeadingModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="action" value="create_leading">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Indikator</label>
+                        <input type="text" name="indicator_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Actual Value</label>
+                        <input type="number" name="actual_value" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeLeadingModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">Tambah</button>
+                    </div>
+                </form>
             </div>
         </div>
-        <div id="mobileMenu" class="md:hidden hidden flex-col space-y-2 pb-4">
-            <a href="activities_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Activities</a>
-            <a href="kpi_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">KPI</a>
-            <a href="dashboard_stats_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Stats</a>
-            <a href="config_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">Config</a>
-            <a href="news_tab.php" class="block text-gray-700 hover:text-green-700 font-semibold">News</a>
+
+        <!-- Add New Lagging Modal -->
+        <div id="addNewLaggingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Tambah KPI Lagging</h3>
+                    <button type="button" onclick="closeLaggingModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="action" value="create_lagging">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Indikator</label>
+                        <input type="text" name="indicator_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Actual Value</label>
+                        <input type="number" name="actual_value" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeLaggingModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200">Tambah</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Leading KPI Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">Leading Indicators</h2>
+                <p class="text-sm text-gray-600 mt-1">View and manage all leading KPIs</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Indicator</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Actual</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <?php foreach ($leadingKPIs as $kpi): ?>
+                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                            <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
+                            <td class="px-6 py-4 text-black"><?php echo $kpi['actual_value']; ?></td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <form method="POST" class="inline-block" onsubmit="return confirm('Hapus KPI ini?');">
+                                    <input type="hidden" name="action" value="delete_leading">
+                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
+                                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200">
+                                        <i class="fas fa-trash-alt mr-1"></i> Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Lagging KPI Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">Lagging Indicators</h2>
+                <p class="text-sm text-gray-600 mt-1">View and manage all lagging KPIs</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Indicator</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Actual</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <?php foreach ($laggingKPIs as $kpi): ?>
+                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                            <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
+                            <td class="px-6 py-4 text-black"><?php echo $kpi['actual_value']; ?></td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <form method="POST" class="inline-block" onsubmit="return confirm('Hapus KPI ini?');">
+                                    <input type="hidden" name="action" value="delete_lagging">
+                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
+                                    <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                                        <i class="fas fa-trash-alt mr-1"></i> Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</nav>
 
-
-<?php if ($message): ?>
-<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 max-w-4xl mx-auto">
-    <?php echo $message; ?>
-</div>
-<?php endif; ?>
-
-
-<div class="bg-gray-100 min-h-screen pb-16">
-    <div class="max-w-7xl mx-auto px-6 py-8 font-sans">
-    <!-- KPI Leading Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center"><i class="fas fa-chart-line text-blue-600 mr-2"></i>Leading Indicators</h2>
-                    <form method="POST" class="flex flex-wrap gap-2 items-end">
-                        <input type="hidden" name="action" value="create_leading">
-                        <input type="text" name="indicator_name" placeholder="Indicator Name" required class="border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-48 px-2 py-1">
-                        <input type="number" name="actual_value" placeholder="Actual" required class="border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-24 px-2 py-1">
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"><i class="fas fa-plus mr-1"></i>Tambah</button>
-                    </form>
-        </div>
-        <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Indicator</th>
-                                <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Actual</th>
-                                <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($leadingKPIs as $kpi): ?>
-                            <tr class="border-b hover:bg-blue-50 transition">
-                                <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
-                                <td class="px-6 py-4 text-gray-500">
-                                    <input type="number" value="<?php echo $kpi['actual_value']; ?>" class="border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-24 px-2 py-1" name="actual_value_<?php echo $kpi['id']; ?>">
-                                </td>
-                                <td class="px-4 py-4 flex gap-2">
-                                    <button onclick="updateKPI('leading', <?php echo $kpi['id']; ?>)" type="button" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Update</button>
-                                    <form method="POST" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline;">
-                                        <input type="hidden" name="action" value="delete_leading">
-                                        <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                        <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-        </div>
-    </div>
-
-
-    <!-- KPI Lagging Section -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center"><i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>Lagging Indicators</h2>
-                    <form method="POST" class="flex flex-wrap gap-2 items-end">
-                        <input type="hidden" name="action" value="create_lagging">
-                        <input type="text" name="indicator_name" placeholder="Indicator Name" required class="border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 w-48 px-2 py-1">
-                        <input type="number" name="actual_value" placeholder="Actual" required class="border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 w-24 px-2 py-1">
-                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"><i class="fas fa-plus mr-1"></i>Tambah</button>
-                    </form>
-        </div>
-        <div class="overflow-x-auto">
-                    <table class="w-full table-auto">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Indicator</th>
-                                <th class="px-6 py-3 text-left text-sm font-bold text-gray-700">Actual</th>
-                                <th class="px-4 py-3 text-left text-sm font-bold text-gray-700">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($laggingKPIs as $kpi): ?>
-                            <tr class="border-b hover:bg-red-50 transition">
-                                <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
-                                <td class="px-6 py-4 text-gray-500">
-                                    <input type="number" value="<?php echo $kpi['actual_value']; ?>" class="border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 w-24 px-2 py-1" name="actual_value_lagging_<?php echo $kpi['id']; ?>">
-                                </td>
-                                <td class="px-4 py-4 flex gap-2">
-                                    <button onclick="updateKPI('lagging', <?php echo $kpi['id']; ?>)" type="button" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Update</button>
-                                    <form method="POST" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline;">
-                                        <input type="hidden" name="action" value="delete_lagging">
-                                        <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                        <button type="submit" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-        </div>
-    </div>
-</div>
-
-<!-- Footer mirip dashboard -->
-<footer class="bg-gray-100 border-t border-gray-200 text-gray-600 text-center py-4 text-sm fixed bottom-0 w-full">
-    &copy; <?php echo date('Y'); ?> Batamindo Investment Cakrawala. All rights reserved.
-</footer>
-
-<script>
-// Hamburger menu toggle
-document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.getElementById('hamburgerBtn');
-    const menu = document.getElementById('mobileMenu');
-    if (btn && menu) {
-        btn.addEventListener('click', function() {
-            menu.classList.toggle('hidden');
-        });
-    }
-});
-function updateKPI(type, id) {
-        let inputName = type === 'lagging' ? `actual_value_lagging_${id}` : `actual_value_${id}`;
-        const actualValue = document.querySelector(`input[name="${inputName}"]`).value;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.innerHTML = `
-                <input type="hidden" name="action" value="update_${type}">
-                <input type="hidden" name="id" value="${id}">
-                <input type="hidden" name="actual_value" value="${actualValue}">
-        `;
-        document.body.appendChild(form);
-        form.submit();
-}
-</script>
+    <script>
+        function openLeadingModal() {
+            document.getElementById('addNewLaggingModal').classList.add('hidden');
+            document.getElementById('addNewLeadingModal').classList.remove('hidden');
+        }
+        
+        function openLaggingModal() {
+            document.getElementById('addNewLeadingModal').classList.add('hidden');
+            document.getElementById('addNewLaggingModal').classList.remove('hidden');
+        }
+        
+        function closeLaggingModal() {
+            document.getElementById('addNewLaggingModal').classList.add('hidden');
+        }
+        
+        function closeLeadingModal() {
+            document.getElementById('addNewLeadingModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
