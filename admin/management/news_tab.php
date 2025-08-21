@@ -9,6 +9,41 @@ $message = '';
 // Process form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     // Process form data...
+    if ($_POST['action'] === 'add') {
+        $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+        $content = isset($_POST['content']) ? trim($_POST['content']) : '';
+        $publish_date = isset($_POST['publish_date']) ? $_POST['publish_date'] : date('Y-m-d');
+        $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
+        if ($title && $content) {
+            $stmt = $pdo->prepare("INSERT INTO news (title, content, publish_date, status) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$title, $content, $publish_date, $status]);
+            $_SESSION['notif'] = 'Berita berhasil ditambahkan!';
+            header('Location: news_tab.php');
+            exit;
+        }
+    } else if ($_POST['action'] === 'update') {
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+        $content = isset($_POST['content']) ? trim($_POST['content']) : '';
+        $publish_date = isset($_POST['publish_date']) ? $_POST['publish_date'] : date('Y-m-d');
+        $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
+        if ($id && $title && $content) {
+            $stmt = $pdo->prepare("UPDATE news SET title=?, content=?, publish_date=?, status=? WHERE id=?");
+            $stmt->execute([$title, $content, $publish_date, $status, $id]);
+            $_SESSION['notif'] = 'Berita berhasil diupdate!';
+            header('Location: news_tab.php');
+            exit;
+        }
+    } else if ($_POST['action'] === 'delete') {
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        if ($id) {
+            $stmt = $pdo->prepare("DELETE FROM news WHERE id = ?");
+            $stmt->execute([$id]);
+            $_SESSION['notif'] = 'Berita berhasil dihapus!';
+            header('Location: news_tab.php');
+            exit;
+        }
+    }
 }
 
 // Fetch news
@@ -97,10 +132,43 @@ try {
 
     <!-- Main Content -->
     <main class="container mx-auto px-6 py-8">
-        <?php if ($message): ?>
-        <div class="mb-4 p-4 rounded-lg <?php echo strpos($message, 'error') !== false ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'; ?>">
-            <?php echo $message; ?>
+        <?php if (!isset($_SESSION)) { session_start(); } ?>
+        <?php if (!empty($_SESSION['notif'])): ?>
+        <style>
+        @keyframes notifSlideIn {
+            0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes notifFadeOut {
+            to { opacity: 0; transform: translateY(-10px) scale(0.98); }
+        }
+        .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
+        .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
+        </style>
+        <div id="notifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
+            <div class="flex-shrink-0">
+                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                    <i class="fas fa-check text-green-600 text-xl"></i>
+                </span>
+            </div>
+            <div class="flex-1 text-green-800 font-semibold text-sm">
+                <?php echo $_SESSION['notif']; unset($_SESSION['notif']); ?>
+            </div>
+            <button onclick="closeNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        <script>
+        function closeNotif() {
+            var notif = document.getElementById('notifBox');
+            if (notif) {
+                notif.classList.remove('notif-animate-in');
+                notif.classList.add('notif-animate-out');
+                setTimeout(function(){ notif.remove(); }, 500);
+            }
+        }
+        setTimeout(closeNotif, 3000);
+        </script>
         <?php endif; ?>
 
         <!-- Quick Stats Overview -->
@@ -221,6 +289,7 @@ try {
             </div>
             <form method="POST" class="space-y-4">
                 <input type="hidden" name="action" value="add">
+                <input type="hidden" name="id" value="">
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -252,7 +321,7 @@ try {
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                         Cancel
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg">
+                    <button type="submit" id="submitNewsBtn" class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg">
                         Add Article
                     </button>
                 </div>
@@ -264,17 +333,26 @@ try {
     // Modal handling
     function closeModal() {
         document.getElementById('addNewModal').classList.add('hidden');
+        // Reset form to add mode
+        const form = document.querySelector('#addNewModal form');
+        if (form) {
+            form.reset();
+            form.querySelector('[name="action"]').value = 'add';
+            form.querySelector('[name="id"]').value = '';
+            document.getElementById('submitNewsBtn').textContent = 'Add Article';
+        }
     }
 
     function editNews(news) {
-        const form = document.querySelector('#addNewModal form');
-        form.querySelector('[name="action"]').value = 'update';
-        form.querySelector('[name="id"]').value = news.id;
-        form.querySelector('[name="title"]').value = news.title;
-        form.querySelector('[name="content"]').value = news.content;
-        form.querySelector('[name="publish_date"]').value = news.publish_date;
-        form.querySelector('[name="status"]').value = news.status;
-        document.getElementById('addNewModal').classList.remove('hidden');
+    const form = document.querySelector('#addNewModal form');
+    form.querySelector('[name="action"]').value = 'update';
+    form.querySelector('[name="id"]').value = news.id;
+    form.querySelector('[name="title"]').value = news.title;
+    form.querySelector('[name="content"]').value = news.content;
+    form.querySelector('[name="publish_date"]').value = news.publish_date;
+    form.querySelector('[name="status"]').value = news.status;
+    document.getElementById('submitNewsBtn').textContent = 'Update Article';
+    document.getElementById('addNewModal').classList.remove('hidden');
     }
 
     // Auto-hide messages after 5 seconds

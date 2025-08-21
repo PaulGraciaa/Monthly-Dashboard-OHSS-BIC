@@ -10,10 +10,8 @@ if (!function_exists('sanitize')) {
     }
 }
 
-$message = '';
-if (isset($_GET['success'])) $message = 'Activity berhasil ditambahkan!';
-if (isset($_GET['updated'])) $message = 'Activity berhasil diupdate!';
-if (isset($_GET['deleted'])) $message = 'Activity berhasil dihapus!';
+
+
 
 // Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -35,11 +33,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             $stmt = $pdo->prepare("INSERT INTO activities (title, description, activity_date, image_path, created_by) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$title, $description, $activity_date, $image_path, $_SESSION['admin_id']]);
-            header('Location: activities_tab.php?success=1');
+            $_SESSION['notif'] = 'Activity berhasil ditambahkan!';
+            header('Location: activities_tab.php');
+            exit();
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'delete') {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+            if ($id > 0) {
+                $stmt = $pdo->prepare("DELETE FROM activities WHERE id = ?");
+                $stmt->execute([$id]);
+                $_SESSION['notif'] = 'Activity berhasil dihapus!';
+            }
+            header('Location: activities_tab.php');
+            exit();
+        } elseif (isset($_POST['action']) && $_POST['action'] == 'edit') {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+            $title = sanitize($_POST['title'] ?? '');
+            $description = sanitize($_POST['description'] ?? '');
+            $activity_date = $_POST['activity_date'] ?? '';
+            $image_path = $_POST['current_image'] ?? '';
+            $upload_dir = '../../uploads/activity/';
+            if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+            if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+                $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $file_name = 'activity_' . time() . '_' . rand(1000,9999) . '.' . $file_extension;
+                $upload_path = $upload_dir . $file_name;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                    $image_path = 'uploads/activity/' . $file_name;
+                }
+            }
+            if ($id > 0) {
+                $stmt = $pdo->prepare("UPDATE activities SET title = ?, description = ?, activity_date = ?, image_path = ? WHERE id = ?");
+                $stmt->execute([$title, $description, $activity_date, $image_path, $id]);
+                $_SESSION['notif'] = 'Activity berhasil diupdate!';
+            }
+            header('Location: activities_tab.php');
             exit();
         }
     } catch (Exception $e) {
-        $message = 'Error: ' . $e->getMessage();
+        $_SESSION['notif'] = 'Error: ' . $e->getMessage();
+        header('Location: activities_tab.php');
+        exit();
     }
 }
 
@@ -47,7 +80,7 @@ try {
     $stmt = $pdo->query("SELECT * FROM activities ORDER BY activity_date DESC");
     $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    $message = 'Error loading activities: ' . $e->getMessage();
+    $_SESSION['notif'] = 'Error loading activities: ' . $e->getMessage();
     $activities = [];
 }
 ?>
@@ -72,7 +105,7 @@ try {
         }
     </script>
 </head>
-<body>
+<body class="bg-gray-100 font-sans">
     <!-- Red Header Section -->
     <div class="bg-gradient-to-r from-red-600 to-red-800">
         <header class="text-white py-4">
@@ -118,18 +151,52 @@ try {
                     <a href="config_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-cog mr-1"></i> Config
                     </a>
+                    <a href="dashboard_stats_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-pie mr-1"></i> Stats
+                    </a>
                 </nav>
             </div>
         </div>
     </div>
 
-    <!-- Gray Background Content Area -->
-    <div class="bg-gray-200 min-h-screen">
-        <main class="max-w-7xl mx-auto px-4 py-6">
-            <?php if ($message): ?>
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-lg shadow-sm">
-                <?php echo $message; ?>
+    <div class="container mx-auto px-4 py-8">
+            <?php if (!isset($_SESSION)) { session_start(); } ?>
+            <?php if (!empty($_SESSION['notif'])): ?>
+            <style>
+            @keyframes notifSlideIn {
+                0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes notifFadeOut {
+                to { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            }
+            .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
+            .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
+            </style>
+            <div id="notifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
+                <div class="flex-shrink-0">
+                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                        <i class="fas fa-check text-green-600 text-xl"></i>
+                    </span>
+                </div>
+                <div class="flex-1 text-green-800 font-semibold text-sm">
+                    <?php echo $_SESSION['notif']; unset($_SESSION['notif']); ?>
+                </div>
+                <button onclick="closeNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            <script>
+            function closeNotif() {
+                var notif = document.getElementById('notifBox');
+                if (notif) {
+                    notif.classList.remove('notif-animate-in');
+                    notif.classList.add('notif-animate-out');
+                    setTimeout(function(){ notif.remove(); }, 500);
+                }
+            }
+            setTimeout(closeNotif, 3000);
+            </script>
             <?php endif; ?>
 
             <!-- Add Activity Form -->
@@ -203,7 +270,7 @@ try {
                                      alt="<?php echo htmlspecialchars($activity['title']); ?>" 
                                      class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
                                 <div class="absolute top-4 right-4 flex space-x-2">
-                                    <button type="button" onclick="toggleEditForm(<?php echo $activity['id']; ?>)"
+                                    <button type="button" onclick="openEditModal(<?php echo $activity['id']; ?>, '<?php echo htmlspecialchars(addslashes($activity['title'])); ?>', '<?php echo htmlspecialchars(addslashes($activity['description'])); ?>', '<?php echo $activity['activity_date']; ?>', '<?php echo htmlspecialchars(addslashes($activity['image_path'])); ?>')"
                                             class="bg-white text-red-600 p-2 rounded-lg shadow-md hover:shadow-lg hover:bg-red-50 transition-all duration-300">
                                         <i class="fas fa-edit"></i>
                                     </button>
@@ -233,24 +300,69 @@ try {
                             </div>
                         </div>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+    <!-- Edit Activity Modal -->
+    <div id="editActivityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Edit Activity</h3>
+                <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-        </main>
+            <form id="editActivityForm" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="id" id="edit_id">
+                <input type="hidden" name="current_image" id="edit_current_image">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input type="text" name="title" id="edit_title" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Activity Date</label>
+                    <input type="date" name="activity_date" id="edit_activity_date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="description" id="edit_description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                    <input type="file" name="image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                    <div class="mt-2" id="edit_image_preview"></div>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">Update</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-hide success messages
-        const messageBox = document.querySelector('.bg-green-100');
-        if (messageBox) {
-            setTimeout(() => {
-                messageBox.style.opacity = '0';
-                messageBox.style.transition = 'opacity 0.5s ease-out';
-                setTimeout(() => messageBox.remove(), 500);
-            }, 5000);
-        }
+    function openEditModal(id, title, description, activity_date, image_path) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_title').value = title;
+        document.getElementById('edit_description').value = description;
+        document.getElementById('edit_activity_date').value = activity_date;
+        document.getElementById('edit_current_image').value = image_path;
+        document.getElementById('edit_image_preview').innerHTML = image_path ? `<img src="../../${image_path}" alt="Preview" class="h-24 rounded mt-2">` : '';
+        document.getElementById('editActivityModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    function closeEditModal() {
+        document.getElementById('editActivityModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+    // Optional: close modal on ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeEditModal();
     });
     </script>
+                    <?php endif; ?>
+                </div>
+            </div>
+    </div>
+
+
 </body>
 </html>

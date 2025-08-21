@@ -4,7 +4,7 @@ require_once '../../config/database.php';
 requireAdminLogin();
 
 // Initialize variables
-$message = '';
+
 
 // Process form submissions
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
@@ -20,18 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         if ($_POST['action'] === 'add') {
             $stmt = $pdo->prepare("INSERT INTO dashboard_stats (stat_name, stat_value, stat_description, stat_icon, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active]);
-            $message = 'Data berhasil ditambahkan!';
+            $_SESSION['notif'] = 'Data berhasil ditambahkan!';
         } elseif ($_POST['action'] === 'update' && $id) {
             $stmt = $pdo->prepare("UPDATE dashboard_stats SET stat_name=?, stat_value=?, stat_description=?, stat_icon=?, display_order=?, is_active=? WHERE id=?");
             $stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active, $id]);
-            $message = 'Data berhasil diupdate!';
+            $_SESSION['notif'] = 'Data berhasil diupdate!';
         } elseif ($_POST['action'] === 'delete' && $id) {
             $stmt = $pdo->prepare("DELETE FROM dashboard_stats WHERE id=?");
             $stmt->execute([$id]);
-            $message = 'Data berhasil dihapus!';
+            $_SESSION['notif'] = 'Data berhasil dihapus!';
         }
     } catch (Exception $e) {
-        $message = 'Terjadi error: ' . $e->getMessage();
+    $_SESSION['notif'] = 'Terjadi error: ' . $e->getMessage();
     }
 }
 
@@ -47,58 +47,95 @@ $stats = $pdo->query("SELECT * FROM dashboard_stats ORDER BY display_order, id")
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <!-- Header and Navigation -->
-    <header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">
-        <div class="max-w-7xl mx-auto px-4">
-            <!-- Company Header -->
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center space-x-4">
-                    <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
-                    <div>
-                        <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                        <p class="text-red-200">OHS Security System Management</p>
+    <!-- Red Header Section -->
+    <div class="bg-gradient-to-r from-red-600 to-red-800">
+        <header class="text-white py-4">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-4">
+                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                            <p class="text-red-200">OHS Security System Management</p>
+                        </div>
                     </div>
-                </div>
-                <div class="hidden md:flex items-center space-x-3">
-                    <div class="text-right">
-                        <p class="text-sm text-white">Welcome, Admin</p>
-                        <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                    <div class="hidden md:flex items-center space-x-3">
+                        <div class="text-right">
+                            <p class="text-sm text-white">Welcome, Admin</p>
+                            <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                        </div>
+                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </a>
                     </div>
-                    <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                    </a>
                 </div>
             </div>
-            <!-- Navigation Menu -->
-            <nav class="flex items-center justify-between">
-                <div class="text-xl font-bold">Dashboard Stats</div>
-                <div class="md:hidden">
-                    <button id="menuBtn" class="text-white focus:outline-none">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
-                <div id="mobileMenu" class="hidden md:flex space-x-4">
-                    <a href="index.php" class="text-white hover:text-red-200 px-3 py-2">OHS</a>
-                    <a href="news_tab.php" class="text-white hover:text-red-200 px-3 py-2">News</a>
-                    <a href="activities_tab.php" class="text-white hover:text-red-200 px-3 py-2">Activities</a>
-                    <a href="config_tab.php" class="text-white hover:text-red-200 px-3 py-2">Config</a>
-                    <a href="kpi_tab.php" class="text-white hover:text-red-200 px-3 py-2">KPI</a>
-                    <a href="dashboard_stats_tab.php" class="text-white hover:text-red-200 px-3 py-2">Dashboard Stats</a>
-                </div>
-            </nav>
+        </header>
+        <!-- Navigation -->
+        <div class="border-t border-red-500/30">
+            <div class="max-w-7xl mx-auto px-4 py-2">
+                <nav class="flex space-x-4">
+                    <a href="index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-line mr-1"></i> Dashboard
+                    </a>
+                    <a href="activities_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-tasks mr-1"></i> Activities
+                    </a>
+                    <a href="kpi_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-bar mr-1"></i> KPI
+                    </a>
+                    <a href="news_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-newspaper mr-1"></i> News
+                    </a>
+                    <a href="config_tab.php" class="text-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-cog mr-1"></i> Config
+                    </a>
+                    <a href="dashboard_stats_tab.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-pie mr-1"></i> Stats
+                    </a>
+                </nav>
+            </div>
         </div>
-    </header>
+    </div>
 
     <div class="container mx-auto px-4 py-8">
-        <?php if ($message): ?>
-        <div class="mb-6">
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md" role="alert">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                    <p><?php echo $message; ?></p>
-                </div>
+        <?php if (!isset($_SESSION)) { session_start(); } ?>
+        <?php if (!empty($_SESSION['notif'])): ?>
+        <style>
+        @keyframes notifSlideIn {
+            0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes notifFadeOut {
+            to { opacity: 0; transform: translateY(-10px) scale(0.98); }
+        }
+        .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
+        .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
+        </style>
+        <div id="notifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
+            <div class="flex-shrink-0">
+                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                    <i class="fas fa-check text-green-600 text-xl"></i>
+                </span>
             </div>
+            <div class="flex-1 text-green-800 font-semibold text-sm">
+                <?php echo $_SESSION['notif']; unset($_SESSION['notif']); ?>
+            </div>
+            <button onclick="closeNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        <script>
+        function closeNotif() {
+            var notif = document.getElementById('notifBox');
+            if (notif) {
+                notif.classList.remove('notif-animate-in');
+                notif.classList.add('notif-animate-out');
+                setTimeout(function(){ notif.remove(); }, 500);
+            }
+        }
+        setTimeout(closeNotif, 3000);
+        </script>
         <?php endif; ?>
 
         <!-- Quick Stats Overview -->
