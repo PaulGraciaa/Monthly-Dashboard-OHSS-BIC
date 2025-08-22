@@ -97,11 +97,14 @@ try {
         <div class="border-t border-red-500/30">
             <div class="max-w-7xl mx-auto px-4 py-2">
                 <nav class="flex space-x-4">
-                    <a href="index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="../dashboard.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-line mr-1"></i> Dashboard
                     </a>
                     <a href="activities_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-tasks mr-1"></i> Activities
+                    </a>
+                    <a href="life_saving_rules_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-shield-alt mr-1"></i> Life Saving Rules & BASCOM
                     </a>
                     <a href="kpi_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i> KPI
@@ -112,15 +115,13 @@ try {
                     <a href="config_tab.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-cog mr-1"></i> Config
                     </a>
-                    <a href="dashboard_stats_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="dashboard_stats_tab.php" class="text-red-100 text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-pie mr-1"></i> Stats
                     </a>
                 </nav>
             </div>
         </div>
     </div>
-
-
 
 <?php if (!isset($_SESSION)) { session_start(); } ?>
 <?php if (!empty($_SESSION['notif'])): ?>

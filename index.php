@@ -1,34 +1,3 @@
-<!-- Loader Spinner Merah -->
-<div id="loader-bg" style="position:fixed;z-index:9999;top:0;left:0;right:0;bottom:0;background:#f4f7fa;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s;">
-  <div class="loader" style="border:6px solid #e0e7ef;border-top:6px solid #e53935;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;"></div>
-</div>
-
-<?php
-session_start();
-require_once 'config/database.php';
-
-// Get dashboard statistics
-$stats = $pdo->query("SELECT * FROM dashboard_stats WHERE is_active = 1 ORDER BY display_order")->fetchAll();
-
-// Get KPI Leading data
-$kpiLeading = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->fetchAll();
-
-// Get KPI Lagging data
-$kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
-
-// Get activities
-$activities = $pdo->query("SELECT * FROM activities WHERE status = 'active' ORDER BY activity_date DESC")->fetchAll();
-
-// Get news
-$news = $pdo->query("SELECT * FROM news WHERE status = 'published' ORDER BY publish_date DESC")->fetchAll();
-
-// Get configuration
-$config = [];
-$configData = $pdo->query("SELECT * FROM config")->fetchAll();
-foreach ($configData as $item) {
-    $config[$item['config_key']] = $item['config_value'];
-}
-?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -40,14 +9,18 @@ foreach ($configData as $item) {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <!-- Font Awesome -->
-  <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css " />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js "></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
+  <!-- Swiper JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com "></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <script>
     // Register Chart.js DataLabels plugin
@@ -68,10 +41,124 @@ foreach ($configData as $item) {
       },
     };
   </script>
+  <style>
+    @keyframes blinkRedGray {
+      0%, 100% { color: #f40000; }
+      50% { color: #2c08d1; }
+    }
+    .animate-blink {
+      animation: blinkRedGray 1s infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes blinkBorderRedBlue {
+      0%, 100% { border-color: #f40000; }
+      50% { border-color: #2c08d1; }
+    }
+    .animate-blink-border {
+      animation: blinkBorderRedBlue 1s infinite;
+      border-style: solid;
+    }
+
+    .kpi-card {
+      transition: all 0.3s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .chart-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-container canvas {
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #leadingTab, #laggingTab {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      transform: translateY(0);
+    }
+
+    #leadingTab:hover, #laggingTab:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(10, 77, 158, 0.15);
+    }
+
+    #tabIndicator {
+      box-shadow: 0 2px 4px rgba(10, 77, 158, 0.3);
+    }
+    
+    .fadein {
+      opacity: 0;
+      transition: opacity 1s;
+    }
+    .fadein.show {
+      opacity: 1;
+    }
+    
+    .life-image-hover {
+      transition: transform 0.3s ease;
+    }
+    .life-image-hover:hover {
+      transform: scale(1.05);
+    }
+    
+    .activity-card {
+      transition: all 0.3s ease;
+    }
+    .activity-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+    }
+  </style>
 </head>
 <body class="bg-background-color text-gray-800 font-sans min-h-screen flex flex-col">
 
-<!-- Loader removed -->
+<?php
+session_start();
+require_once 'config/database.php';
+
+// Get dashboard statistics
+$stats = $pdo->query("SELECT * FROM dashboard_stats WHERE is_active = 1 ORDER BY display_order")->fetchAll();
+
+// Get KPI Leading data
+$kpiLeading = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->fetchAll();
+
+// Get KPI Lagging data
+$kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
+
+// Get activities
+$adminId = $_SESSION['admin_id'] ?? null;
+if ($adminId) {
+    $activities = $pdo->prepare("SELECT * FROM activities WHERE status = 'active' AND created_by = ? ORDER BY activity_date DESC");
+    $activities->execute([$adminId]);
+    $activities = $activities->fetchAll();
+} else {
+    $activities = [];
+}
+
+// Get news
+$news = $pdo->query("SELECT * FROM news WHERE status = 'published' ORDER BY publish_date DESC")->fetchAll();
+
+// Get configuration
+$config = [];
+$configData = $pdo->query("SELECT * FROM config")->fetchAll();
+foreach ($configData as $item) {
+    $config[$item['config_key']] = $item['config_value'];
+}
+
+// Get Life Saving Rules & BASCOM
+$lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->fetchAll();
+?>
 
   <!-- Sidebar -->
   <aside id="sidebar" class="fixed top-0 left-0 h-full w-60 bg-header-footer-bg text-white shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col pt-0 rounded-r-3xl border-r-4 border-header-footer-bg">
@@ -84,7 +171,7 @@ foreach ($configData as $item) {
       </div>  
       <a href="index.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md text-base">
         <i class="fas fa-home text-lg"></i> Dashboard
-    </a>
+      </a>
       <a href="OHS.php" class="flex items-center gap-3 px-4 py-2 rounded-xl font-semibold bg-white/10 hover:bg-white/20 text-white transition shadow-sm backdrop-blur-md">
         <i class="fas fa-shield-alt"></i> OHSS
       </a>
@@ -140,50 +227,24 @@ foreach ($configData as $item) {
   </header>
 
   <!-- Main Content -->
-  <main class="main-content flex-1 fadein">
-  <script>
-    // Loader and fade-in logic
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        var loader = document.getElementById('loader-bg');
-        if (loader) loader.style.opacity = 0;
-        setTimeout(function() {
-          if (loader) loader.style.display = 'none';
-          var main = document.querySelector('main.main-content');
-          if (main) main.classList.add('show');
-        }, 500);
-      }, 900);
-    });
-  </script>
-  <style>
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .fadein {
-      opacity: 0;
-      transition: opacity 1s;
-    }
-    .fadein.show {
-      opacity: 1;
-    }
-  </style>
+  <main class="main-content flex-1 fadein show">
     <div class="container mx-auto px-4 max-w-7xl">
-    <!-- KPI Cards (horizontal, lebih kecil) -->
-    <div class="flex flex-row gap-3 mb-3">
-      <?php if (!empty($stats)): ?>
-        <?php foreach ($stats as $stat): ?>
-        <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
-          <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
-            <i class="<?php echo $stat['stat_icon']; ?> text-primary-blue text-sm"></i> <?php echo $stat['stat_value']; ?>
+      <!-- KPI Cards (horizontal, lebih kecil) -->
+      <div class="flex flex-row gap-3 mb-3">
+        <?php if (!empty($stats)): ?>
+          <?php foreach ($stats as $stat): ?>
+          <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
+            <div class="text-lg font-extrabold text-primary-blue tracking-wide flex items-center gap-2">
+              <i class="<?php echo $stat['stat_icon']; ?> text-primary-blue text-sm"></i> <?php echo $stat['stat_value']; ?>
+            </div>
+            <div class="mt-1 text-black-600 text-xs font-semibold"><strong><?php echo $stat['stat_name']; ?></strong></div>
           </div>
-          <div class="mt-1 text-black-600 text-xs font-semibold"><strong><?php echo $stat['stat_name']; ?></strong></div>
-        </div>
-        <?php endforeach; ?>
-      <?php else: ?>
-        <div class="w-full text-center text-gray-400 py-6">Tidak ada data statistik dashboard.</div>
-      <?php endif; ?>
-    </div>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <div class="w-full text-center text-gray-400 py-6">Tidak ada data statistik dashboard.</div>
+        <?php endif; ?>
+      </div>
+      
       <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 my-1 items-stretch">
         <!-- Kolom 1: KPI (diperpanjang) -->
@@ -210,6 +271,7 @@ foreach ($configData as $item) {
             <canvas id="kpiLaggingChart" width="400" height="280" style="width:100%;height:280px;position:absolute;top:0;left:0;opacity:0;transition:opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);"></canvas>
           </div>
         </div>
+        
         <!-- Kolom 2: Life Saving Rules (diperkecil) -->
         <div class="lg:col-span-3 bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
           <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
@@ -217,46 +279,56 @@ foreach ($configData as $item) {
             <h3 class="font-bold text-xs mb-0.5 text-primary-blue"><strong>Life Saving Rules & BASCOM</strong></h3>
           </div>
           <div class="flex-1 flex flex-col justify-center items-center">
-            <div id="lifeCarousel" class="relative w-full flex justify-center items-center h-72">
-              <div id="lifeContent1" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-100">
-                <img id="lifeImage1" src="img/LIFE.png" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
-                <div class="text-center px-2 mt-auto">
-                  <h4 class="text-xs font-bold text-primary-blue mb-1">Life Saving Rules</h4>
-                  <p class="text-[10px] text-gray-600 leading-tight">Aturan keselamatan wajib yang harus dipatuhi untuk mencegah kecelakaan</p>
-                </div>
+            <?php if (!empty($lsr_bascom)): ?>
+              <div id="lsrCarousel" class="relative w-full flex flex-col items-center h-72">
+                <?php foreach ($lsr_bascom as $idx => $item): ?>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-700 <?php echo $idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'; ?> lsr-slide" data-index="<?= $idx ?>">
+                    <?php if (!empty($item['gambar'])): ?>
+                      <img src="uploads/life_saving_rules/<?= htmlspecialchars($item['gambar']) ?>" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
+                    <?php endif; ?>
+                    <h4 class="text-xs font-bold text-primary-blue mb-1"><?= htmlspecialchars($item['judul']) ?></h4>
+                    <p class="text-[10px] text-gray-600 leading-tight mb-2"><?= htmlspecialchars($item['deskripsi']) ?></p>
+                    <div class="flex justify-center gap-1 mt-2">
+                      <?php foreach ($lsr_bascom as $dotIdx => $dotItem): ?>
+                        <button class="lsr-dot w-2 h-2 rounded-full bg-primary-blue opacity-<?php echo $dotIdx === $idx ? '100' : '40'; ?> transition-opacity duration-300" data-index="<?= $dotIdx ?>" aria-label="Slide <?= $dotIdx + 1 ?>"></button>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
               </div>
-              <div id="lifeContent2" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
-                <img id="lifeImage2" src="img/BASCOM.jpg" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
-                <div class="text-center px-2 mt-auto">
-                  <h4 class="text-xs font-bold text-primary-blue mb-1">BASCOM Guidelines</h4>
-                  <p class="text-[10px] text-gray-600 leading-tight">Kartu komunikasi untuk memastikan standar keselamatan tertinggi di Kawasan Batamindo</p>
-                </div>
-              </div>
-              <div id="lifeContent3" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
-                <a href="https://get-qr.com/dpD5wA" target="_blank" class="cursor-pointer hover:scale-105 transition-transform duration-300">
-                  <img id="lifeImage3" src="img/QR-BASCOM.jpg" class="h-56 object-contain mx-auto mb-2 life-image-hover" alt="QR Code BASCOM - Click to open" />
-                </a>
-                <div class="text-center px-2 mt-auto">
-                  <h4 class="text-xs font-bold text-primary-blue mb-1">QR Code BASCOM</h4>
-                  <p class="text-[10px] text-gray-600 leading-tight">Scan QR atau klik gambar untuk mengakses Bascom Card</p>
-                </div>
-              </div>
-              <div id="lifeContent4" class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0">
-                <img id="lifeImage4" src="img/Sticker -Emergency.png" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
-                <div class="text-center px-2 mt-auto">
-                  <h4 class="text-xs font-bold text-primary-blue mb-1">Emergency Contact</h4>
-                  <p class="text-[10px] text-gray-600 leading-tight">Informasi kontak darurat dan prosedur evakuasi untuk situasi emergency</p>
-                </div>
-              </div>
-            </div>
-            <div class="flex justify-center gap-1 mt-2">
-              <button class="life-dot w-2 h-2 rounded-full bg-primary-blue opacity-100 transition-opacity duration-300" data-index="0"></button>
-              <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="1"></button>
-              <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="2"></button>
-              <button class="life-dot w-2 h-2 rounded-full bg-gray-300 opacity-50 transition-opacity duration-300" data-index="3"></button>
-            </div>
+              <script>
+                const lsrSlides = document.querySelectorAll('.lsr-slide');
+                const lsrDots = document.querySelectorAll('.lsr-dot');
+                let lsrCurrent = 0;
+                function showLsrSlide(idx) {
+                  lsrSlides.forEach((slide, i) => {
+                    slide.classList.toggle('opacity-100', i === idx);
+                    slide.classList.toggle('opacity-0', i !== idx);
+                    slide.classList.toggle('z-10', i === idx);
+                    slide.classList.toggle('z-0', i !== idx);
+                  });
+                  lsrDots.forEach((dot, i) => {
+                    dot.classList.toggle('opacity-100', i === idx);
+                    dot.classList.toggle('opacity-40', i !== idx);
+                  });
+                  lsrCurrent = idx;
+                }
+                lsrDots.forEach(dot => {
+                  dot.addEventListener('click', function() {
+                    showLsrSlide(parseInt(this.dataset.index));
+                  });
+                });
+                setInterval(() => {
+                  let next = (lsrCurrent + 1) % lsrSlides.length;
+                  showLsrSlide(next);
+                }, 7000);
+              </script>
+            <?php else: ?>
+              <div class="text-gray-400">Tidak ada data Life Saving Rules & BASCOM.</div>
+            <?php endif; ?>
           </div>
         </div>
+        
         <!-- Kolom 3: Performance dan News (Kanan) -->
         <div class="lg:col-span-3 flex flex-col gap-3 h-full">
           <!-- Performance -->
@@ -273,6 +345,7 @@ foreach ($configData as $item) {
               <?php endif; ?>
             </div>
           </div>
+          
           <!-- News -->
           <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card flex-1">
             <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
@@ -301,27 +374,63 @@ foreach ($configData as $item) {
         </div>
       </section>
 
-      <!-- Carousel -->
+      <!-- Activities Carousel - Improved Version -->
       <section class="mb-1">
         <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 overflow-hidden p-3">
-          <div class="flex items-center justify-center mb-1">
+          <div class="flex items-center justify-center mb-3">
             <h3 class="text-lg font-bold text-primary-blue tracking-wide"><strong>Activities of the Month</strong></h3>
           </div>
-          <div class="w-full h-36">
             <?php if (!empty($activities)): ?>
-              <div id="activitiesCarousel" class="flex gap-6 px-4 min-w-fit items-center h-36 snap-x snap-mandatory">
-                <!-- Activity Items Container -->
-                <div id="activityItemsContainer" class="flex gap-6">
-                  <!-- Activity items will be dynamically generated here -->
+              <div class="flex gap-6 overflow-x-hidden py-3 px-2 activities-auto-scroll">
+                <?php foreach ($activities as $activity): ?>
+                <div class="min-w-[300px] max-w-xs flex-shrink-0">
+                  <div class="relative h-56 w-full rounded-2xl overflow-hidden shadow-xl group border border-gray-200">
+                    <img src="<?php echo $activity['image_path']; ?>" alt="<?php echo htmlspecialchars($activity['title']); ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-10 flex flex-col justify-end">
+                      <h4 class="text-base font-bold text-white mb-1 truncate drop-shadow-lg"><?php echo htmlspecialchars($activity['title']); ?></h4>
+                      <p class="text-xs text-gray-200 mb-2 drop-shadow">Date: <?php echo date('d F Y', strtotime($activity['activity_date'])); ?></p>
+                    </div>
+                  </div>
                 </div>
+                <?php endforeach; ?>
+                <!-- Duplikat konten agar looping seamless -->
+                <?php foreach ($activities as $activity): ?>
+                <div class="min-w-[300px] max-w-xs flex-shrink-0">
+                  <div class="relative h-56 w-full rounded-2xl overflow-hidden shadow-xl group border border-gray-200">
+                    <img src="<?php echo $activity['image_path']; ?>" alt="<?php echo htmlspecialchars($activity['title']); ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 w-full px-4 pb-4 pt-10 flex flex-col justify-end">
+                      <h4 class="text-base font-bold text-white mb-1 truncate drop-shadow-lg"><?php echo htmlspecialchars($activity['title']); ?></h4>
+                      <p class="text-xs text-gray-200 mb-2 drop-shadow">Date: <?php echo date('d F Y', strtotime($activity['activity_date'])); ?></p>
+                    </div>
+                  </div>
+                </div>
+                <?php endforeach; ?>
               </div>
             <?php else: ?>
-              <div class="flex items-center justify-center h-full text-gray-400">Tidak ada aktivitas bulan ini.</div>
+              <div class="flex items-center justify-center h-32 text-gray-400">
+                Tidak ada aktivitas bulan ini.
+              </div>
             <?php endif; ?>
-          </div>
+            <style>
+              .activities-auto-scroll {
+                  display: flex;
+                  gap: 1.5rem;
+                  animation: scroll-activities 40s linear infinite;
+                  will-change: transform;
+              }
+              @keyframes scroll-activities {
+                  0% { transform: translateX(0); }
+                  100% { transform: translateX(-50%); }
+              }
+              /* Duplikat konten agar scroll seamless */
+              .activities-auto-scroll {
+                  width: max-content;
+              }
+            </style>
         </div>
       </section>
-
     </div>
   </main>
 
@@ -330,7 +439,6 @@ foreach ($configData as $item) {
     <p>&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All rights reserved</p>
   </footer>
 
-  <!-- Scripts -->
   <script>
     // KPI Data from PHP
     const kpiLeadingData = <?php echo json_encode($kpiLeading); ?>;
@@ -341,6 +449,33 @@ foreach ($configData as $item) {
       negative: <?php echo $config['performance_negative'] ?? 5; ?>,
       others: <?php echo $config['performance_others'] ?? 5; ?>
     };
+
+    // Initialize Swiper for Activities
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.querySelector('.activities-swiper')) {
+        new Swiper('.activities-swiper', {
+          slidesPerView: 'auto',
+          spaceBetween: 16,
+          centeredSlides: false,
+          loop: true,
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+          breakpoints: {
+            640: {
+              slidesPerView: 2,
+            },
+            768: {
+              slidesPerView: 3,
+            },
+            1024: {
+              slidesPerView: 4,
+            },
+          },
+        });
+      }
+    });
 
     // Positive vs Negative Chart
     new Chart(document.getElementById('positiveNegativeChart').getContext('2d'), {
@@ -503,38 +638,12 @@ foreach ($configData as $item) {
       }
     });
 
-    // Initialize activities carousel
-    function initActivitiesCarousel() {
-      const container = document.getElementById('activityItemsContainer');
-      if (!container) return;
-
-      activitiesData.forEach((activity, index) => {
-        const item = document.createElement('div');
-        item.className = 'relative h-32 w-[220px] sm:w-[320px] flex-shrink-0 group snap-start';
-        item.innerHTML = `
-          <img src="${activity.image_path}" alt="${activity.title}" class="object-cover h-32 w-full rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300" />
-          <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent text-white p-2 rounded-b-2xl transition-opacity duration-300 group-hover:opacity-0">
-            <span class="block truncate text-[10px] font-medium leading-tight">${activity.title}</span>
-            <span class="block text-[8px] text-gray-200 mt-0.5">Date: ${new Date(activity.activity_date).toLocaleDateString('en-GB')}</span>
-          </div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    // Initialize everything when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize activities carousel
-      initActivitiesCarousel();
-      // Loader logic removed
-    });
-
     // Tab Navigation for KPI Charts
     document.addEventListener('DOMContentLoaded', function() {
       const leadingTab = document.getElementById('leadingTab');
       const laggingTab = document.getElementById('laggingTab');
-      const leadingChart = document.getElementById('kpiLeadingChart');
-      const laggingChart = document.getElementById('kpiLaggingChart');
+      const leadingChartEl = document.getElementById('kpiLeadingChart');
+      const laggingChartEl = document.getElementById('kpiLaggingChart');
       
       let currentTab = 'leading';
       let autoSwitchInterval;
@@ -548,8 +657,8 @@ foreach ($configData as $item) {
         const tabIndicator = document.getElementById('tabIndicator');
         tabIndicator.style.transform = 'translateX(0%)';
         
-        leadingChart.style.opacity = '1';
-        laggingChart.style.opacity = '0';
+        leadingChartEl.style.opacity = '1';
+        laggingChartEl.style.opacity = '0';
         currentTab = 'leading';
       }
 
@@ -562,8 +671,8 @@ foreach ($configData as $item) {
         const tabIndicator = document.getElementById('tabIndicator');
         tabIndicator.style.transform = 'translateX(100%)';
         
-        laggingChart.style.opacity = '1';
-        leadingChart.style.opacity = '0';
+        laggingChartEl.style.opacity = '1';
+        leadingChartEl.style.opacity = '0';
         currentTab = 'lagging';
       }
 
@@ -600,7 +709,7 @@ foreach ($configData as $item) {
       startAutoSwitch();
     });
 
-    // Life Saving Rules Carousel
+    // Life Saving Rules Carousel - Fixed Version
     document.addEventListener('DOMContentLoaded', function() {
       const lifeContents = [
         document.getElementById('lifeContent1'),
@@ -620,12 +729,14 @@ foreach ($configData as $item) {
         });
         
         lifeDots.forEach((dot, i) => {
-          if (i === index) {
-            dot.classList.add('bg-primary-blue', 'opacity-100');
-            dot.classList.remove('bg-gray-300', 'opacity-50');
-          } else {
-            dot.classList.add('bg-gray-300', 'opacity-50');
-            dot.classList.remove('bg-primary-blue', 'opacity-100');
+          if (dot) {
+            if (i === index) {
+              dot.classList.add('bg-primary-blue', 'opacity-100');
+              dot.classList.remove('bg-gray-300', 'opacity-50');
+            } else {
+              dot.classList.remove('bg-primary-blue', 'opacity-100');
+              dot.classList.add('bg-gray-300', 'opacity-50');
+            }
           }
         });
       }
@@ -669,6 +780,8 @@ foreach ($configData as $item) {
     // News Carousel
     document.addEventListener('DOMContentLoaded', function() {
       const newsItems = document.querySelectorAll('.news-item');
+      if (newsItems.length === 0) return;
+      
       let currentNewsIndex = 0;
       let newsAutoSlideInterval;
 
@@ -707,31 +820,39 @@ foreach ($configData as $item) {
       const menuBtn = document.getElementById('menuBtn');
       const sidebarBackBtn = document.getElementById('sidebarBackBtn');
       
+      if (!sidebar || !menuBtn) return;
+      
       menuBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         sidebar.classList.toggle('-translate-x-full');
       });
       
       document.addEventListener('click', function(e) {
-        if (!sidebar.classList.contains('-translate-x-full')) {
+        if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
           sidebar.classList.add('-translate-x-full');
         }
       });
       
-      sidebar.addEventListener('click', function(e) {
-        e.stopPropagation();
-      });
+      if (sidebar) {
+        sidebar.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
       
-      sidebarBackBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        sidebar.classList.add('-translate-x-full');
-      });
+      if (sidebarBackBtn) {
+        sidebarBackBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          sidebar.classList.add('-translate-x-full');
+        });
+      }
     });
 
     // Fullscreen toggle logic
     document.addEventListener('DOMContentLoaded', function() {
       const fullscreenBtn = document.getElementById('fullscreenBtn');
       const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+      
+      if (!fullscreenBtn || !exitFullscreenBtn) return;
       
       fullscreenBtn.addEventListener('click', () => {
         const docElm = document.documentElement;
@@ -769,64 +890,5 @@ foreach ($configData as $item) {
       });
     });
   </script>
-
-  <!-- Styles -->
-  <style>
-@keyframes blinkRedGray {
-  0%, 100% { color: #f40000; }
-  50% { color: #2c08d1; }
-}
-.animate-blink {
-  animation: blinkRedGray 1s infinite;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-
-@keyframes blinkBorderRedBlue {
-  0%, 100% { border-color: #f40000; }
-  50% { border-color: #2c08d1; }
-}
-.animate-blink-border {
-  animation: blinkBorderRedBlue 1s infinite;
-  border-style: solid;
-}
-
-.kpi-card {
-  transition: all 0.3s ease;
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-.chart-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.chart-container canvas {
-  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#leadingTab, #laggingTab {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  transform: translateY(0);
-}
-
-#leadingTab:hover, #laggingTab:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(10, 77, 158, 0.15);
-}
-
-#tabIndicator {
-  box-shadow: 0 2px 4px rgba(10, 77, 158, 0.3);
-}
-  </style>
 </body>
-</html> 
+</html>

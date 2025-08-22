@@ -1,6 +1,17 @@
+
 -- Database OHSS Dashboard
 CREATE DATABASE IF NOT EXISTS ohss_dashboard CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ohss_dashboard;
+
+-- Tabel untuk Life Saving Rules & BASCOM
+CREATE TABLE life_saving_rules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    kategori VARCHAR(50) NOT NULL, -- 'Life Saving Rules' atau 'BASCOM'
+    judul VARCHAR(255) NOT NULL,
+    deskripsi TEXT NOT NULL,
+    gambar VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Tabel Admin Users
 CREATE TABLE admin_users (

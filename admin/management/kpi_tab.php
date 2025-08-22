@@ -111,11 +111,14 @@ $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")-
         <div class="border-t border-red-500/30">
             <div class="max-w-7xl mx-auto px-4 py-2">
                 <nav class="flex space-x-4">
-                    <a href="index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="../dashboard.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-line mr-1"></i> Dashboard
                     </a>
                     <a href="activities_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-tasks mr-1"></i> Activities
+                    </a>
+                    <a href="life_saving_rules_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-shield-alt mr-1"></i> Life Saving Rules & BASCOM
                     </a>
                     <a href="kpi_tab.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-bar mr-1"></i> KPI
@@ -289,14 +292,24 @@ $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")-
                         <?php foreach ($leadingKPIs as $kpi): ?>
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
-                            <td class="px-6 py-4 text-black"><?php echo $kpi['actual_value']; ?></td>
+                            <td class="px-6 py-4 text-black">
+                                <form method="POST" class="flex items-center gap-2">
+                                    <input type="hidden" name="action" value="update_leading">
+                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
+                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" required>
+                                </form>
+                            </td>
                             <td class="px-6 py-4 text-right space-x-2">
-                                <form method="POST" class="inline-block" onsubmit="return confirm('Hapus KPI ini?');">
+                                <form method="POST" class="inline-block align-middle" style="display:inline-block;">
+                                    <input type="hidden" name="action" value="update_leading">
+                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
+                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="hidden">
+                                    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs mr-1">Simpan</button>
+                                </form>
+                                <form method="POST" class="inline-block align-middle" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline-block;">
                                     <input type="hidden" name="action" value="delete_leading">
                                     <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200">
-                                        <i class="fas fa-trash-alt mr-1"></i> Hapus
-                                    </button>
+                                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
                                 </form>
                             </td>
                         </tr>
@@ -325,14 +338,24 @@ $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")-
                         <?php foreach ($laggingKPIs as $kpi): ?>
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
-                            <td class="px-6 py-4 text-black"><?php echo $kpi['actual_value']; ?></td>
+                            <td class="px-6 py-4 text-black">
+                                <form method="POST" class="flex items-center gap-2">
+                                    <input type="hidden" name="action" value="update_lagging">
+                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
+                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" required>
+                                </form>
+                            </td>
                             <td class="px-6 py-4 text-right space-x-2">
-                                <form method="POST" class="inline-block" onsubmit="return confirm('Hapus KPI ini?');">
+                                <form method="POST" class="inline-block align-middle" style="display:inline-block;">
+                                    <input type="hidden" name="action" value="update_lagging">
+                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
+                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="hidden">
+                                    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs mr-1">Simpan</button>
+                                </form>
+                                <form method="POST" class="inline-block align-middle" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline-block;">
                                     <input type="hidden" name="action" value="delete_lagging">
                                     <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                                        <i class="fas fa-trash-alt mr-1"></i> Hapus
-                                    </button>
+                                    <button type="submit" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700 text-xs"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
                                 </form>
                             </td>
                         </tr>
