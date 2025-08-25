@@ -44,35 +44,6 @@ requireAdminLogin();
         </div>
     </header>
 
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg mb-6">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <span class="font-bold text-xl text-red-600">OHSS Dashboard</span>
-                </div>
-                <div class="hidden md:flex space-x-4">
-                    <a href="activities_tab.php" class="text-gray-700 hover:text-red-600 font-semibold px-3 py-2">Activities</a>
-                    <a href="kpi_tab.php" class="text-gray-700 hover:text-red-600 font-semibold px-3 py-2">KPI</a>
-                    <a href="dashboard_stats_tab.php" class="text-gray-700 hover:text-red-600 font-semibold px-3 py-2">Stats</a>
-                    <a href="config_tab.php" class="text-gray-700 hover:text-red-600 font-semibold px-3 py-2">Config</a>
-                    <a href="news_tab.php" class="text-gray-700 hover:text-red-600 font-semibold px-3 py-2">News</a>
-                </div>
-                <div class="md:hidden">
-                    <button id="hamburgerBtn" class="text-gray-700 focus:outline-none">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-            <div id="mobileMenu" class="md:hidden hidden flex-col space-y-2 pb-4">
-                <a href="activities_tab.php" class="block text-gray-700 hover:text-red-600 font-semibold px-3 py-2">Activities</a>
-                <a href="kpi_tab.php" class="block text-gray-700 hover:text-red-600 font-semibold px-3 py-2">KPI</a>
-                <a href="dashboard_stats_tab.php" class="block text-gray-700 hover:text-red-600 font-semibold px-3 py-2">Stats</a>
-                <a href="config_tab.php" class="block text-gray-700 hover:text-red-600 font-semibold px-3 py-2">Config</a>
-                <a href="news_tab.php" class="block text-gray-700 hover:text-red-600 font-semibold px-3 py-2">News</a>
-            </div>
-        </div>
-    </nav>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Stats Overview -->
