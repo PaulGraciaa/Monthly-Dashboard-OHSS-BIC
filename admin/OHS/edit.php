@@ -98,137 +98,214 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edit Insiden - OHS Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .form-label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #374151;
-    }
-    .form-input {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-    .form-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
-    .btn-primary {
-      background-color: #16a34a;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      font-weight: 600;
-    }
-    .btn-primary:hover {
-      background-color: #15803d;
-    }
-    .btn-secondary {
-      background-color: #6b7280;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      font-weight: 600;
-    }
-    .btn-secondary:hover {
-      background-color: #4b5563;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Incident - OHSS Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
-  <header class="bg-red-600 text-white px-6 py-4">
-    <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Edit Insiden</h1>
-      <a href="index.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-        <i class="fas fa-arrow-left mr-2"></i>Kembali
-      </a>
-    </div>
-  </header>
+    <!-- Header and Navigation -->
+    <header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Company Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                        <p class="text-red-200">OHS Security System</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <p class="text-sm text-white">Welcome, Admin</p>
+                        <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="index.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition">
+                            <i class="fas fa-arrow-left mr-1"></i> Back
+                        </a>
+                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <main class="max-w-4xl mx-auto px-6 py-6">
-    <form method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="md:col-span-2">
-        <label class="form-label">Judul</label>
-        <input name="title" required class="form-input" value="<?php echo htmlspecialchars($row['title']); ?>" />
-      </div>
-      <div>
-        <label class="form-label">Tanggal</label>
-        <input type="date" name="incident_date" value="<?php echo htmlspecialchars($row['incident_date']); ?>" class="form-input" />
-      </div>
-      <div>
-        <label class="form-label">Waktu</label>
-        <input type="time" name="incident_time" value="<?php echo htmlspecialchars($row['incident_time']); ?>" class="form-input" />
-      </div>
-      <div>
-        <label class="form-label">Nama (Who)</label>
-        <input name="who_name" class="form-input" value="<?php echo htmlspecialchars($row['who_name']); ?>" />
-      </div>
-      <div>
-        <label class="form-label">NPK</label>
-        <input name="who_npk" class="form-input" value="<?php echo htmlspecialchars($row['who_npk']); ?>" />
-      </div>
-      <div class="md:col-span-2">
-        <label class="form-label">Ringkasan</label>
-        <textarea name="summary" rows="3" class="form-input"><?php echo htmlspecialchars($row['summary']); ?></textarea>
-      </div>
-      <div class="md:col-span-2">
-        <label class="form-label">Hasil</label>
-        <textarea name="result" rows="2" class="form-input"><?php echo htmlspecialchars($row['result']); ?></textarea>
-      </div>
-      <div class="md:col-span-2">
-        <label class="form-label">Root Causes</label>
-        <textarea name="root_causes" rows="4" class="form-input"><?php echo htmlspecialchars($row['root_causes']); ?></textarea>
-      </div>
-      <div class="md:col-span-2">
-        <label class="form-label">Key Takeaways</label>
-        <textarea name="key_takeaways" rows="3" class="form-input"><?php echo htmlspecialchars($row['key_takeaways']); ?></textarea>
-      </div>
-      <div class="md:col-span-2">
-        <label class="form-label">Corrective Actions</label>
-        <textarea name="corrective_actions" rows="3" class="form-input"><?php echo htmlspecialchars($row['corrective_actions']); ?></textarea>
-      </div>
-      <div>
-        <label class="form-label">Evidence (Foto)</label>
-        <input type="file" name="photo_image" accept="image/*" class="form-input" />
-        <?php if (!empty($row['photo_image_path'])): ?>
-          <div class="mt-2">
-            <p class="text-sm text-gray-600">Foto saat ini:</p>
-            <img src="<?php echo htmlspecialchars($row['photo_image_path']); ?>" alt="Evidence" class="w-full h-32 object-cover rounded shadow" />
-          </div>
-        <?php endif; ?>
-      </div>
-      <div>
-        <label class="form-label">Incident Map</label>
-        <input type="file" name="map_image" accept="image/*" class="form-input" />
-        <?php if (!empty($row['map_image_path'])): ?>
-          <div class="mt-2">
-            <p class="text-sm text-gray-600">Map saat ini:</p>
-            <img src="<?php echo htmlspecialchars($row['map_image_path']); ?>" alt="Incident Map" class="w-full h-32 object-cover rounded shadow" />
-          </div>
-        <?php endif; ?>
-      </div>
-      <div>
-        <label class="form-label">Status</label>
-        <select name="status" class="form-input">
-          <?php foreach (["draft","published","archived"] as $st): ?>
-            <option value="<?php echo $st; ?>" <?php echo ($row['status']===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="md:col-span-2 flex justify-between pt-4">
-        <a href="index.php" class="btn-secondary">Batal</a>
-        <button type="submit" class="btn-primary">Simpan Perubahan</button>
-      </div>
-    </form>
-  </main>
+    <main class="max-w-4xl mx-auto px-4 pb-12">
+        <!-- Page Title -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Edit Incident</h2>
+            <p class="mt-1 text-sm text-gray-600">Update the incident details below.</p>
+        </div>
+
+        <!-- Incident Form -->
+        <form method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow-lg">
+            <!-- Form Header -->
+            <div class="border-b border-gray-200 px-6 py-4">
+                <h3 class="text-lg font-medium text-gray-900">Incident Information</h3>
+            </div>
+
+            <!-- Form Content -->
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input name="title" required 
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                           value="<?php echo htmlspecialchars($row['title']); ?>" 
+                           placeholder="Enter incident title" />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" name="incident_date" 
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                           value="<?php echo htmlspecialchars($row['incident_date']); ?>" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                    <input type="time" name="incident_time" 
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                           value="<?php echo htmlspecialchars($row['incident_time']); ?>" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reporter Name</label>
+                    <input name="who_name" 
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                           value="<?php echo htmlspecialchars($row['who_name']); ?>" 
+                           placeholder="Enter reporter name" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NPK</label>
+                    <input name="who_npk" 
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                           value="<?php echo htmlspecialchars($row['who_npk']); ?>" 
+                           placeholder="Enter NPK number" />
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+                    <textarea name="summary" rows="3" 
+                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                              placeholder="Describe what happened..."><?php echo htmlspecialchars($row['summary']); ?></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Result</label>
+                    <textarea name="result" rows="2" 
+                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                              placeholder="What was the outcome..."><?php echo htmlspecialchars($row['result']); ?></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Root Causes</label>
+                    <textarea name="root_causes" rows="4" 
+                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                              placeholder="List the root causes..."><?php echo htmlspecialchars($row['root_causes']); ?></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Key Takeaways</label>
+                    <textarea name="key_takeaways" rows="3" 
+                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                              placeholder="List the key lessons learned..."><?php echo htmlspecialchars($row['key_takeaways']); ?></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Corrective Actions</label>
+                    <textarea name="corrective_actions" rows="3" 
+                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+                              placeholder="List the actions taken to prevent recurrence..."><?php echo htmlspecialchars($row['corrective_actions']); ?></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Evidence Photo</label>
+                    <?php if (!empty($row['photo_image_path'])): ?>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Current Photo:</p>
+                        <img src="../../<?php echo htmlspecialchars($row['photo_image_path']); ?>" 
+                             alt="Evidence" 
+                             class="w-full h-40 object-cover rounded-lg shadow-sm" />
+                    </div>
+                    <?php endif; ?>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="photo-image" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload new photo</span>
+                                    <input id="photo-image" name="photo_image" type="file" accept="image/*" class="sr-only">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Incident Map</label>
+                    <?php if (!empty($row['map_image_path'])): ?>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Current Map:</p>
+                        <img src="../../<?php echo htmlspecialchars($row['map_image_path']); ?>" 
+                             alt="Incident Map" 
+                             class="w-full h-40 object-cover rounded-lg shadow-sm" />
+                    </div>
+                    <?php endif; ?>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="map-image" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload new map</span>
+                                    <input id="map-image" name="map_image" type="file" accept="image/*" class="sr-only">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status" 
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <?php foreach (["draft","published","archived"] as $st): ?>
+                            <option value="<?php echo $st; ?>" <?php echo ($row['status']===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="md:col-span-2 border-t border-gray-200 pt-5">
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="window.location.href='index.php'" 
+                                class="rounded-lg border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
 </body>
 </html>

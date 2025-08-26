@@ -121,36 +121,55 @@ if (($_GET['view'] ?? '') === 'ptw') {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OHS Incidents - Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OHS Incidents - OHSS Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
-  <header class="bg-red-600 text-white px-6 py-4">
-    <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold">OHS Incidents</h1>
-      <div class="flex items-center gap-3">
-        <a href="../dashboard.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-          <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
-        </a>
-        <a href="create.php" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-          <i class="fas fa-plus mr-2"></i>Tambah Insiden
-        </a>
-      </div>
-    </div>
-  </header>
+    <!-- Header and Navigation -->
+    <header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Company Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                        <p class="text-red-200">OHS Security System</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <p class="text-sm text-white">Welcome, Admin</p>
+                        <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="../dashboard.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition">
+                            <i class="fas fa-arrow-left mr-1"></i> Dashboard
+                        </a>
+                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-6">
-    <div class="flex items-center gap-2 mb-4">
-      <a href="index.php" class="px-4 py-2 rounded inline-flex items-center gap-2 border transition <?php echo (!isset($_GET['view'])?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
-        <i class="fas fa-list"></i><span>Incidents</span>
-      </a>
-      <a href="index.php?view=ptw" class="px-4 py-2 rounded inline-flex items-center gap-2 border transition <?php echo (($_GET['view'] ?? '')==='ptw'?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
-        <i class="fas fa-clipboard-list"></i><span>PTW</span>
-      </a>
+  <main class="max-w-7xl mx-auto px-4">
+    <!-- Action Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+            <a href="index.php" class="px-4 py-2 rounded-lg inline-flex items-center gap-2 border transition <?php echo (!isset($_GET['view'])?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
+                <i class="fas fa-list"></i><span>Incidents</span>
+            </a>
+            <a href="index.php?view=ptw" class="px-4 py-2 rounded-lg inline-flex items-center gap-2 border transition <?php echo (($_GET['view'] ?? '')==='ptw'?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
+                <i class="fas fa-clipboard-list"></i><span>PTW</span>
+            </a>
+        </div>
     </div>
 
     <?php if (($_GET['view'] ?? '') === 'ptw'): ?>
@@ -348,53 +367,106 @@ if (($_GET['view'] ?? '') === 'ptw') {
 
     <?php else: ?>
 
-      <div class="bg-white rounded-lg shadow p-4 mb-4">
-        <form class="flex flex-wrap items-end gap-3">
-        <div>
-          <label class="block text-sm">Pencarian</label>
-          <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" class="border rounded px-3 py-2 w-64" placeholder="Judul / ringkasan..." />
+      <!-- Search and Filter Section -->
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-800">Filter Incidents</h2>
+          <div class="flex items-center gap-2">
+            <a href="create.php" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-150">
+              <i class="fas fa-plus mr-2"></i>Add New Incident
+            </a>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm">Status</label>
-          <select name="status" class="border rounded px-3 py-2">
-            <option value="">Semua</option>
-            <?php foreach (["draft","published","archived"] as $st): ?>
-              <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-          <button class="bg-gray-800 text-white px-4 py-2 rounded inline-flex items-center gap-2"><i class="fas fa-filter"></i>Filter</button>
-      </form>
+        <form class="flex flex-wrap items-end gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <div class="relative">
+              <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" 
+                     class="border rounded-lg pl-10 pr-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                     placeholder="Search by title or summary..." />
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+            </div>
+          </div>
+          <div class="w-48">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select name="status" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">All Status</option>
+              <?php foreach (["draft","published","archived"] as $st): ?>
+                <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-150">
+              <i class="fas fa-filter mr-2"></i>Apply Filter
+            </button>
+          </div>
+        </form>
       </div>
 
-      <div class="overflow-x-auto bg-white rounded-lg shadow">
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-100">
-            <tr class="sticky top-0 z-10">
-              <th class="border px-3 py-2 text-left">Judul</th>
-              <th class="border px-3 py-2">Tanggal</th>
-              <th class="border px-3 py-2">Pelapor</th>
-              <th class="border px-3 py-2">Status</th>
-              <th class="border px-3 py-2">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($rows as $row): ?>
-            <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-              <td class="border px-3 py-2"><?php echo htmlspecialchars($row['title']); ?></td>
-              <td class="border px-3 py-2 text-center"><?php echo htmlspecialchars($row['incident_date']); ?><?php echo $row['incident_time']? ' '.$row['incident_time']:''; ?></td>
-              <td class="border px-3 py-2 text-center"><?php echo htmlspecialchars(trim(($row['who_name'] ?? '').' ('.$row['who_npk'].')')); ?></td>
-              <td class="border px-3 py-2 text-center">
-                <span class="px-2 py-1 rounded text-xs <?php echo $row['status']==='published'?'bg-green-100 text-green-700':($row['status']==='draft'?'bg-yellow-100 text-yellow-700':'bg-gray-100 text-gray-600'); ?>"><?php echo ucfirst($row['status']); ?></span>
-              </td>
-              <td class="border px-3 py-2 text-center">
-                <a href="edit.php?id=<?php echo $row['id']; ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">Edit</a>
-                <a href="?delete=<?php echo $row['id']; ?>" onclick="return confirm('Hapus insiden ini?')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Hapus</a>
-              </td>
-            </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+      <!-- Incidents Table -->
+      <div class="bg-white rounded-lg shadow-lg">
+        <div class="p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Incident List</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead>
+                <tr class="bg-gray-50 border-b">
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Title</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Date</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Reporter</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Status</th>
+                  <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <?php foreach ($rows as $row): ?>
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($row['title']); ?></div>
+                  </td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-500">
+                    <?php echo htmlspecialchars($row['incident_date']); ?><?php echo $row['incident_time']? ' '.$row['incident_time']:''; ?>
+                  </td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-500">
+                    <?php echo htmlspecialchars(trim(($row['who_name'] ?? '').' ('.$row['who_npk'].')')); ?>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                      <?php echo $row['status']==='published'?'bg-green-100 text-green-800':
+                              ($row['status']==='draft'?'bg-yellow-100 text-yellow-800':
+                               'bg-gray-100 text-gray-800'); ?>">
+                      <?php echo ucfirst($row['status']); ?>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <div class="flex justify-center items-center space-x-2">
+                      <a href="edit.php?id=<?php echo $row['id']; ?>" 
+                         class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-150">
+                        <i class="fas fa-edit mr-1"></i> Edit
+                      </a>
+                      <a href="?delete=<?php echo $row['id']; ?>" 
+                         onclick="return confirm('Are you sure you want to delete this incident?')" 
+                         class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150">
+                        <i class="fas fa-trash mr-1"></i> Delete
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+                <?php if (count($rows) === 0): ?>
+                <tr>
+                  <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                    No incidents found. Create a new incident to get started.
+                  </td>
+                </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     <?php endif; ?>
   </main>
