@@ -137,12 +137,9 @@ $kpiLeading = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->
 $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
 
 // Get activities
-$adminId = $_SESSION['admin_id'] ?? null;
-if ($adminId) {
-    $activities = $pdo->prepare("SELECT * FROM activities WHERE status = 'active' AND created_by = ? ORDER BY activity_date DESC");
-    $activities->execute([$adminId]);
-    $activities = $activities->fetchAll();
-} else {
+try {
+    $activities = $pdo->query("SELECT * FROM activities WHERE status = 'active' ORDER BY activity_date DESC")->fetchAll();
+} catch (Exception $e) {
     $activities = [];
 }
 

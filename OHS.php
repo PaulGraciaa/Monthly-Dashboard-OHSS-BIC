@@ -414,47 +414,56 @@ $cutoff = sprintf('01 %s – %s %s %d', $monthName, date('t', mktime(0,0,0,$mont
     </div>
 
     <!-- Halaman 3: Laporan Insiden -->
+    <?php
+    $incidents = $pdo->query('SELECT * FROM ohs_incidents WHERE status = "published" ORDER BY incident_date DESC, id DESC LIMIT 2')->fetchAll();
+    if ($incidents && count($incidents) > 0):
+      foreach ($incidents as $idx => $incident):
+    ?>
     <div class="page-break page-break-inside-avoid">
       <div class="incident-box bg-white rounded-xl p-6 mt-8">
         <div class="font-extrabold text-lg mb-2">
-          3. INCIDENT & ACCIDENT REPORT & SHARING LESSON LEARNT (if any)
+          <?php echo ($idx === 0) ? '3.' : '4.'; ?> INCIDENT & ACCIDENT REPORT & SHARING LESSON LEARNT (if any)
         </div>
-        <div class="font-bold text-xl mb-1">Lesson Learned: Incident at Trash Storage Checkpoint B (First Aid Case)</div>
-                 <div class="italic text-base mb-3">Date: 4 July 2025 | Time: 21:05 WIB</div>
+        <div class="font-bold text-xl mb-1">Lesson Learned: <?php echo htmlspecialchars($incident['title']); ?></div>
+        <div class="italic text-base mb-3">Date: <?php echo date('d F Y', strtotime($incident['incident_date'])); ?> | Time: <?php echo htmlspecialchars($incident['incident_time']); ?> WIB</div>
         <div class="flex flex-col md:flex-row gap-4">
           <!-- Kiri: Foto -->
           <div class="flex flex-col gap-2 md:w-1/2">
-            <div class="photo-placeholder w-full h-72 rounded">INCIDENT MAP</div>
-            <div class="photo-placeholder w-full h-72 rounded">PHOTO EVIDENCE</div>
+            <?php if ($incident['map_image_path']): ?>
+              <img src="<?php echo $incident['map_image_path']; ?>" alt="Incident Map" class="w-full h-72 object-contain rounded shadow" />
+            <?php else: ?>
+              <div class="photo-placeholder w-full h-72 rounded">INCIDENT MAP</div>
+            <?php endif; ?>
+            <?php if ($incident['photo_image_path']): ?>
+              <img src="<?php echo $incident['photo_image_path']; ?>" alt="Photo Evidence" class="w-full h-72 object-contain rounded shadow" />
+            <?php else: ?>
+              <div class="photo-placeholder w-full h-72 rounded">PHOTO EVIDENCE</div>
+            <?php endif; ?>
           </div>
           <!-- Kanan: Ringkasan & Detail -->
           <div class="md:w-1/2 flex flex-col gap-2">
             <div>
               <div class="font-bold mb-1">Incident Summary:</div>
               <ul class="list-disc ml-5 text-sm">
-                <li><b>Who:</b> Security Officer Didit Cahyono (NPK: 25567)</li>
-                <li><b>What Happened:</b> Officer attempted to close a <b>damaged metal door</b> (~40–50kg) at Checkpoint B. Door collapsed, trapping his right thumb and ring finger → <b>laceration injuries</b>.</li>
-                <li><b>Result:</b> Treated at BIP Clinic. <b>No property damage or lost time reported.</b></li>
+                <li><b>Who:</b> <?php echo htmlspecialchars($incident['who_name']); ?> (NPK: <?php echo htmlspecialchars($incident['who_npk']); ?>)</li>
+                <li><b>Summary:</b> <?php echo nl2br(htmlspecialchars($incident['summary'])); ?></li>
+                <li><b>Result:</b> <?php echo nl2br(htmlspecialchars($incident['result'])); ?></li>
               </ul>
             </div>
             <div>
               <div class="font-bold mb-1">Root Causes:</div>
               <ol class="list-decimal ml-5 text-sm">
-                <li><b>Lack of pre-task hazard assessment</b> and lighting check during night shift.</li>
-                <li>Checkpoint placed near a known hazard (damaged structure).</li>
-                <li>Inadequate hazard reporting and delayed action on known damage.</li>
-                <li>No barricade/warning signs on damaged infrastructure.</li>
-                <li>Lack of training in handling damaged or unstable equipment.</li>
+                <?php foreach (explode("\n", $incident['root_causes']) as $cause): ?>
+                  <?php if (trim($cause)): ?><li><?php echo htmlspecialchars($cause); ?></li><?php endif; ?>
+                <?php endforeach; ?>
               </ol>
             </div>
             <div>
               <div class="font-bold mb-1">Key Takeaways:</div>
               <ul class="list-disc ml-5 text-sm">
-                <li>Always <b>assess risk before acting</b>, especially on damaged equipment.</li>
-                <li>Ensure <b>hazard reporting is immediate</b> and followed up.</li>
-                <li>Night shift operations must be supported by <b>adequate lighting and supervision</b>.</li>
-                <li><b>Checkpoint placement</b> must avoid hazardous zones.</li>
-                <li><b>Preventive maintenance</b> and housekeeping are critical to safety.</li>
+                <?php foreach (explode("\n", $incident['key_takeaways']) as $take): ?>
+                  <?php if (trim($take)): ?><li><?php echo htmlspecialchars($take); ?></li><?php endif; ?>
+                <?php endforeach; ?>
               </ul>
             </div>
           </div>
@@ -463,15 +472,23 @@ $cutoff = sprintf('01 %s – %s %s %d', $monthName, date('t', mktime(0,0,0,$mont
         <div class="mt-4">
           <div class="font-bold mb-1">✔️ Corrective Actions:</div>
           <ul class="text-sm ml-5">
-            <li>✅ Barricade and signage installed on damaged structures (<span class="text-green-600 font-bold">Done</span>)</li>
-            <li>🕒 Refresher training on <b>line of fire</b> awareness (<span class="text-yellow-600 font-bold">In Progress</span>)</li>
-            <li>📢 Protocol for quick hazard reporting under development (<span class="text-green-600 font-bold">Done</span>)</li>
-            <li>✅ Barcode scanner relocated to safer area (<span class="text-green-600 font-bold">Done</span>)</li>
-            <li>🕒 Routine <b>hazard inspection</b> at all checkpoints (<span class="text-yellow-600 font-bold">In Progress</span>)</li>
+            <?php foreach (explode("\n", $incident['corrective_actions']) as $action): ?>
+              <?php if (trim($action)): ?><li><?php echo htmlspecialchars($action); ?></li><?php endif; ?>
+            <?php endforeach; ?>
           </ul>
         </div>
       </div>
     </div>
+    <?php endforeach;
+    else: ?>
+    <div class="page-break page-break-inside-avoid">
+      <div class="incident-box bg-white rounded-xl p-6 mt-8">
+        <div class="w-full text-center py-12 text-gray-500 text-lg font-semibold">
+          <i class="fas fa-info-circle text-2xl mr-2"></i> No incident reported this month
+        </div>
+      </div>
+    </div>
+    <?php endif; ?>
   </main>
 
   <footer class="bg-header-footer-bg text-white text-center py-2 mt-3 text-xs">

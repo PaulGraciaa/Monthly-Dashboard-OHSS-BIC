@@ -3,7 +3,12 @@ require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../../config/database.php';
 requireAdminLogin();
 
-// Handle delete
+// Fungsi sanitize untuk keamanan input
+function sanitize($data) {
+    return htmlspecialchars(strip_tags(trim($data)));
+}
+
+// Handle delete incident
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     $stmt = $pdo->prepare('DELETE FROM ohs_incidents WHERE id = ?');
@@ -30,6 +35,88 @@ $sql .= ' ORDER BY incident_date DESC, id DESC';
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $rows = $stmt->fetchAll();
+
+// Jika view adalah ptw, proses data PTW
+if (($_GET['view'] ?? '') === 'ptw') {
+    $currentMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
+    $currentYear  = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
+
+    // Navigasi bulan
+    $prevMonth = $currentMonth === 1 ? 12 : $currentMonth - 1;
+    $prevYear  = $currentMonth === 1 ? $currentYear - 1 : $currentYear;
+    $nextMonth = $currentMonth === 12 ? 1 : $currentMonth + 1;
+    $nextYear  = $currentMonth === 12 ? $currentYear + 1 : $currentYear;
+
+    // Handle delete PTW
+    if (isset($_GET['delete_ptw'])) {
+        $id = (int)$_GET['delete_ptw'];
+        $stmt = $pdo->prepare('DELETE FROM ptw_records WHERE id = ?');
+        $stmt->execute([$id]);
+        header('Location: index.php?view=ptw&month=' . $currentMonth . '&year=' . $currentYear);
+        exit;
+    }
+
+    // Handle create/update PTW
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $contractor_name = sanitize($_POST['contractor_name'] ?? '');
+        $num_ptw = (int)($_POST['num_ptw'] ?? 0);
+        $general = (int)($_POST['general'] ?? 0);
+        $hot_work = (int)($_POST['hot_work'] ?? 0);
+        $lifting = (int)($_POST['lifting'] ?? 0);
+        $excavation = (int)($_POST['excavation'] ?? 0);
+        $electrical = (int)($_POST['electrical'] ?? 0);
+        $work_high = (int)($_POST['work_high'] ?? 0);
+        $radiography = (int)($_POST['radiography'] ?? 0);
+        $manpower = (int)($_POST['manpower'] ?? 0);
+        $month = (int)($_POST['month'] ?? $currentMonth);
+        $year = (int)($_POST['year'] ?? $currentYear);
+        $display_order = (int)($_POST['display_order'] ?? 0);
+
+        if ($id > 0) {
+            // Update existing record
+            $stmt = $pdo->prepare('UPDATE ptw_records SET contractor_name=?, num_ptw=?, general=?, hot_work=?, lifting=?, excavation=?, electrical=?, work_high=?, radiography=?, manpower=?, month=?, year=?, display_order=? WHERE id=?');
+            $stmt->execute([$contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order, $id]);
+        } else {
+            // Insert new record
+            $stmt = $pdo->prepare('INSERT INTO ptw_records (contractor_name, num_ptw, general, hot_work, lifting, excavation, electrical, work_high, radiography, manpower, month, year, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt->execute([$contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order]);
+        }
+        
+        header('Location: index.php?view=ptw&month=' . $month . '&year=' . $year);
+        exit;
+    }
+
+    // Get PTW records for current month and year
+    $stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month = ? AND year = ? ORDER BY display_order, contractor_name');
+    $stmt->execute([$currentMonth, $currentYear]);
+    $records = $stmt->fetchAll();
+
+    // Calculate totals
+    $totals = [
+        'num_ptw' => 0,
+        'general' => 0,
+        'hot_work' => 0,
+        'lifting' => 0,
+        'excavation' => 0,
+        'electrical' => 0,
+        'work_high' => 0,
+        'radiography' => 0,
+        'manpower' => 0
+    ];
+    
+    foreach ($records as $r) {
+        $totals['num_ptw'] += (int)$r['num_ptw'];
+        $totals['general'] += (int)$r['general'];
+        $totals['hot_work'] += (int)$r['hot_work'];
+        $totals['lifting'] += (int)$r['lifting'];
+        $totals['excavation'] += (int)$r['excavation'];
+        $totals['electrical'] += (int)$r['electrical'];
+        $totals['work_high'] += (int)$r['work_high'];
+        $totals['radiography'] += (int)$r['radiography'];
+        $totals['manpower'] += (int)$r['manpower'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -66,81 +153,22 @@ $rows = $stmt->fetchAll();
       </a>
     </div>
 
-    <?php if (($_GET['view'] ?? '') === 'ptw') {
-      $currentMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
-      $currentYear  = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
-
-      // Navigasi bulan
-      $prevMonth = $currentMonth === 1 ? 12 : $currentMonth - 1;
-      $prevYear  = $currentMonth === 1 ? $currentYear - 1 : $currentYear;
-      $nextMonth = $currentMonth === 12 ? 1 : $currentMonth + 1;
-      $nextYear  = $currentMonth === 12 ? $currentYear + 1 : $currentYear;
-
-      // Handle delete PTW (gunakan param khusus agar tidak bentrok dengan delete insiden)
-      if (isset($_GET['delete_ptw'])) {
-          $id = (int)$_GET['delete_ptw'];
-          $stmt = $pdo->prepare('DELETE FROM ptw_records WHERE id = ?');
-          $stmt->execute([$id]);
-          header('Location: index.php?view=ptw&month=' . $currentMonth . '&year=' . $currentYear);
-          exit;
-      }
-
-      // Handle create/update PTW
-      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-          $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-          $contractor_name = sanitize($_POST['contractor_name'] ?? '');
-          $num_ptw = (int)($_POST['num_ptw'] ?? 0);
-          $general = (int)($_POST['general'] ?? 0);
-          $hot_work = (int)($_POST['hot_work'] ?? 0);
-          $lifting = (int)($_POST['lifting'] ?? 0);
-          $excavation = (int)($_POST['excavation'] ?? 0);
-          $electrical = (int)($_POST['electrical'] ?? 0);
-          $work_high = (int)($_POST['work_high'] ?? 0);
-          $radiography = (int)($_POST['radiography'] ?? 0);
-          $manpower = (int)($_POST['manpower'] ?? 0);
-          $month = (int)($_POST['month'] ?? $currentMonth);
-          $year = (int)($_POST['year'] ?? $currentYear);
-          $display_order = (int)($_POST['display_order'] ?? 0);
-
-          if ($id > 0) {
-              $sql = 'UPDATE ptw_records SET contractor_name=?, num_ptw=?, general=?, hot_work=?, lifting=?, excavation=?, electrical=?, work_high=?, radiography=?, manpower=?, month=?, year=?, display_order=?, created_by=created_by WHERE id=?';
-              $stmt = $pdo->prepare($sql);
-              $stmt->execute([$contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order, $id]);
-          } else {
-              $sql = 'INSERT INTO ptw_records (contractor_name, num_ptw, general, hot_work, lifting, excavation, electrical, work_high, radiography, manpower, month, year, display_order, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-              $stmt = $pdo->prepare($sql);
-              $stmt->execute([$contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order, $_SESSION['admin_id']]);
-          }
-
-          header('Location: index.php?view=ptw&month=' . $month . '&year=' . $year);
-          exit;
-      }
-
-      // Ambil data PTW
-      $stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month=? AND year=? ORDER BY display_order, contractor_name');
-      $stmt->execute([$currentMonth, $currentYear]);
-      $records = $stmt->fetchAll();
-
-      // Total PTW
-      $totals = [
-        'num_ptw' => 0, 'general' => 0, 'hot_work' => 0, 'lifting' => 0, 'excavation' => 0, 'electrical' => 0, 'work_high' => 0, 'radiography' => 0, 'manpower' => 0
-      ];
-      foreach ($records as $r) {
-        foreach ($totals as $k => $v) { $totals[$k] += (int)$r[$k]; }
-      }
-    ?>
-    <div class="p-1">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div class="flex items-center gap-3">
-          <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2"><i class="fas fa-clipboard-list text-gray-700"></i>PTW Records</h3>
-          <a href="?view=ptw&month=<?php echo $prevMonth; ?>&year=<?php echo $prevYear; ?>" class="inline-flex items-center gap-2 border px-3 py-2 rounded hover:bg-gray-50 text-gray-700" title="Bulan sebelumnya">
-            <i class="fas fa-chevron-left"></i><span class="hidden md:inline">Prev</span>
-          </a>
-          <a href="?view=ptw&month=<?php echo $nextMonth; ?>&year=<?php echo $nextYear; ?>" class="inline-flex items-center gap-2 border px-3 py-2 rounded hover:bg-gray-50 text-gray-700" title="Bulan berikutnya">
-            <span class="hidden md:inline">Next</span><i class="fas fa-chevron-right"></i>
-          </a>
+    <?php if (($_GET['view'] ?? '') === 'ptw'): ?>
+      <div class="bg-white rounded-lg shadow p-4 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold">PTW Records - <?php echo date('F Y', mktime(0, 0, 0, $currentMonth, 1, $currentYear)); ?></h2>
+          <div class="flex items-center gap-2">
+            <a href="?view=ptw&month=<?php echo $prevMonth; ?>&year=<?php echo $prevYear; ?>" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+            <span class="text-gray-700"><?php echo date('F Y', mktime(0, 0, 0, $currentMonth, 1, $currentYear)); ?></span>
+            <a href="?view=ptw&month=<?php echo $nextMonth; ?>&year=<?php echo $nextYear; ?>" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </div>
         </div>
-        <form method="get" class="flex items-end gap-3">
+        
+        <form method="get" class="flex flex-wrap items-end gap-3 mb-4">
           <input type="hidden" name="view" value="ptw" />
           <div>
             <label class="block text-sm text-gray-700">Bulan</label>
@@ -275,102 +303,100 @@ $rows = $stmt->fetchAll();
           </tbody>
         </table>
       </div>
-    </div>
 
-    <script>
-    function fillForm(row) {
-      document.getElementById('form-id').value = row.id;
-      document.getElementById('form-contractor').value = row.contractor_name;
-      document.getElementById('form-num_ptw').value = row.num_ptw;
-      document.getElementById('form-general').value = row.general;
-      document.getElementById('form-hot_work').value = row.hot_work;
-      document.getElementById('form-lifting').value = row.lifting;
-      document.getElementById('form-excavation').value = row.excavation;
-      document.getElementById('form-electrical').value = row.electrical;
-      document.getElementById('form-work_high').value = row.work_high;
-      document.getElementById('form-radiography').value = row.radiography;
-      document.getElementById('form-manpower').value = row.manpower;
-      document.getElementById('form-display_order').value = row.display_order;
-      document.getElementById('form-month').value = row.month;
-      document.getElementById('form-year').value = row.year;
-      const panel = document.getElementById('ptw-form-panel');
-      if (panel) { panel.open = true; }
-      document.getElementById('form-contractor').focus();
-    }
+      <script>
+      function fillForm(row) {
+        document.getElementById('form-id').value = row.id;
+        document.getElementById('form-contractor').value = row.contractor_name;
+        document.getElementById('form-num_ptw').value = row.num_ptw;
+        document.getElementById('form-general').value = row.general;
+        document.getElementById('form-hot_work').value = row.hot_work;
+        document.getElementById('form-lifting').value = row.lifting;
+        document.getElementById('form-excavation').value = row.excavation;
+        document.getElementById('form-electrical').value = row.electrical;
+        document.getElementById('form-work_high').value = row.work_high;
+        document.getElementById('form-radiography').value = row.radiography;
+        document.getElementById('form-manpower').value = row.manpower;
+        document.getElementById('form-display_order').value = row.display_order;
+        document.getElementById('form-month').value = row.month;
+        document.getElementById('form-year').value = row.year;
+        const panel = document.getElementById('ptw-form-panel');
+        if (panel) { panel.open = true; }
+        document.getElementById('form-contractor').focus();
+      }
 
-    function openNewForm() {
-      document.getElementById('form-id').value = '';
-      document.getElementById('form-contractor').value = '';
-      document.getElementById('form-num_ptw').value = '';
-      document.getElementById('form-general').value = '';
-      document.getElementById('form-hot_work').value = '';
-      document.getElementById('form-lifting').value = '';
-      document.getElementById('form-excavation').value = '';
-      document.getElementById('form-electrical').value = '';
-      document.getElementById('form-work_high').value = '';
-      document.getElementById('form-radiography').value = '';
-      document.getElementById('form-manpower').value = '';
-      document.getElementById('form-display_order').value = '';
-      document.getElementById('form-month').value = '<?php echo $currentMonth; ?>';
-      document.getElementById('form-year').value = '<?php echo $currentYear; ?>';
-      const panel = document.getElementById('ptw-form-panel');
-      if (panel) { panel.open = true; }
-      document.getElementById('form-contractor').focus();
-    }
-    </script>
+      function openNewForm() {
+        document.getElementById('form-id').value = '';
+        document.getElementById('form-contractor').value = '';
+        document.getElementById('form-num_ptw').value = '';
+        document.getElementById('form-general').value = '';
+        document.getElementById('form-hot_work').value = '';
+        document.getElementById('form-lifting').value = '';
+        document.getElementById('form-excavation').value = '';
+        document.getElementById('form-electrical').value = '';
+        document.getElementById('form-work_high').value = '';
+        document.getElementById('form-radiography').value = '';
+        document.getElementById('form-manpower').value = '';
+        document.getElementById('form-display_order').value = '';
+        document.getElementById('form-month').value = '<?php echo $currentMonth; ?>';
+        document.getElementById('form-year').value = '<?php echo $currentYear; ?>';
+        const panel = document.getElementById('ptw-form-panel');
+        if (panel) { panel.open = true; }
+        document.getElementById('form-contractor').focus();
+      }
+      </script>
 
-    <?php exit; } ?>
+    <?php else: ?>
 
-    <div class="bg-white rounded-lg shadow p-4 mb-4">
-      <form class="flex flex-wrap items-end gap-3">
-      <div>
-        <label class="block text-sm">Pencarian</label>
-        <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" class="border rounded px-3 py-2 w-64" placeholder="Judul / ringkasan..." />
+      <div class="bg-white rounded-lg shadow p-4 mb-4">
+        <form class="flex flex-wrap items-end gap-3">
+        <div>
+          <label class="block text-sm">Pencarian</label>
+          <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" class="border rounded px-3 py-2 w-64" placeholder="Judul / ringkasan..." />
+        </div>
+        <div>
+          <label class="block text-sm">Status</label>
+          <select name="status" class="border rounded px-3 py-2">
+            <option value="">Semua</option>
+            <?php foreach (["draft","published","archived"] as $st): ?>
+              <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+          <button class="bg-gray-800 text-white px-4 py-2 rounded inline-flex items-center gap-2"><i class="fas fa-filter"></i>Filter</button>
+      </form>
       </div>
-      <div>
-        <label class="block text-sm">Status</label>
-        <select name="status" class="border rounded px-3 py-2">
-          <option value="">Semua</option>
-          <?php foreach (["draft","published","archived"] as $st): ?>
-            <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-        <button class="bg-gray-800 text-white px-4 py-2 rounded inline-flex items-center gap-2"><i class="fas fa-filter"></i>Filter</button>
-    </form>
-    </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-100">
-          <tr class="sticky top-0 z-10">
-            <th class="border px-3 py-2 text-left">Judul</th>
-            <th class="border px-3 py-2">Tanggal</th>
-            <th class="border px-3 py-2">Pelapor</th>
-            <th class="border px-3 py-2">Status</th>
-            <th class="border px-3 py-2">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($rows as $row): ?>
-          <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-            <td class="border px-3 py-2"><?php echo htmlspecialchars($row['title']); ?></td>
-            <td class="border px-3 py-2 text-center"><?php echo htmlspecialchars($row['incident_date']); ?><?php echo $row['incident_time']? ' '.$row['incident_time']:''; ?></td>
-            <td class="border px-3 py-2 text-center"><?php echo htmlspecialchars(trim(($row['who_name'] ?? '').' ('.$row['who_npk'].')')); ?></td>
-            <td class="border px-3 py-2 text-center">
-              <span class="px-2 py-1 rounded text-xs <?php echo $row['status']==='published'?'bg-green-100 text-green-700':($row['status']==='draft'?'bg-yellow-100 text-yellow-700':'bg-gray-100 text-gray-600'); ?>"><?php echo ucfirst($row['status']); ?></span>
-            </td>
-            <td class="border px-3 py-2 text-center">
-              <a href="edit.php?id=<?php echo $row['id']; ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">Edit</a>
-              <a href="?delete=<?php echo $row['id']; ?>" onclick="return confirm('Hapus insiden ini?')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Hapus</a>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
+      <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-100">
+            <tr class="sticky top-0 z-10">
+              <th class="border px-3 py-2 text-left">Judul</th>
+              <th class="border px-3 py-2">Tanggal</th>
+              <th class="border px-3 py-2">Pelapor</th>
+              <th class="border px-3 py-2">Status</th>
+              <th class="border px-3 py-2">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($rows as $row): ?>
+            <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
+              <td class="border px-3 py-2"><?php echo htmlspecialchars($row['title']); ?></td>
+              <td class="border px-3 py-2 text-center"><?php echo htmlspecialchars($row['incident_date']); ?><?php echo $row['incident_time']? ' '.$row['incident_time']:''; ?></td>
+              <td class="border px-3 py-2 text-center"><?php echo htmlspecialchars(trim(($row['who_name'] ?? '').' ('.$row['who_npk'].')')); ?></td>
+              <td class="border px-3 py-2 text-center">
+                <span class="px-2 py-1 rounded text-xs <?php echo $row['status']==='published'?'bg-green-100 text-green-700':($row['status']==='draft'?'bg-yellow-100 text-yellow-700':'bg-gray-100 text-gray-600'); ?>"><?php echo ucfirst($row['status']); ?></span>
+              </td>
+              <td class="border px-3 py-2 text-center">
+                <a href="edit.php?id=<?php echo $row['id']; ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">Edit</a>
+                <a href="?delete=<?php echo $row['id']; ?>" onclick="return confirm('Hapus insiden ini?')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Hapus</a>
+              </td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
   </main>
 </body>
 </html>
-
-
