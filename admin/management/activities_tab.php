@@ -227,14 +227,20 @@ try {
                             </div>
                         </div>
                         <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea name="description" rows="3" 
-                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"></textarea>
-                        </div>
-                        <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
-                            <input type="file" name="image" accept="image/*" 
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                            <div id="activity-drop-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer relative transition-all duration-300">
+                              <input id="activity-image" name="image" type="file" accept="image/*" class="sr-only">
+                              <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                  <span id="activity-drop-label" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">Upload or drag a photo</span>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                <img id="activity-preview" src="#" alt="Preview" class="mx-auto mt-2 rounded shadow hidden max-h-40" />
+                              </div>
+                            </div>
                         </div>
                     </div>
 
@@ -366,6 +372,49 @@ try {
             </div>
     </div>
 
-
+    <script>
+const activityDropArea = document.getElementById('activity-drop-area');
+const activityInput = document.getElementById('activity-image');
+const activityPreview = document.getElementById('activity-preview');
+const activityLabel = document.getElementById('activity-drop-label');
+if (activityDropArea && activityInput && activityPreview) {
+  activityDropArea.addEventListener('click', () => {
+    activityInput.disabled = false;
+    activityInput.click();
+  });
+  activityDropArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    activityDropArea.classList.add('bg-blue-50');
+  });
+  activityDropArea.addEventListener('dragleave', e => {
+    activityDropArea.classList.remove('bg-blue-50');
+  });
+  activityDropArea.addEventListener('drop', e => {
+    e.preventDefault();
+    activityDropArea.classList.remove('bg-blue-50');
+    if (e.dataTransfer.files.length) {
+      // Assign dropped file to input using DataTransfer
+      const dt = new DataTransfer();
+      dt.items.add(e.dataTransfer.files[0]);
+      activityInput.files = dt.files;
+      showActivityPreview(activityInput.files[0]);
+    }
+  });
+  activityInput.addEventListener('change', e => {
+    if (activityInput.files.length) {
+      showActivityPreview(activityInput.files[0]);
+    }
+  });
+  function showActivityPreview(file) {
+    if (!file) return activityPreview.classList.add('hidden');
+    const reader = new FileReader();
+    reader.onload = e => {
+      activityPreview.src = e.target.result;
+      activityPreview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+</script>
 </body>
 </html>

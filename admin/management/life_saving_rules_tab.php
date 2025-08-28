@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? '';
     $current_image = $_POST['current_image'] ?? '';
     $gambar = $current_image;
+    $kategori = $_POST['kategori'] ?? 'Life Saving Rules';
     $target_dir = '../../uploads/life_saving_rules/';
     if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] == 0) {
@@ -28,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if ($action == 'add') {
-        $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar) VALUES (?, ?, ?)");
-        $stmt->execute([$judul, $deskripsi, $gambar]);
+        $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar, kategori) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$judul, $deskripsi, $gambar, $kategori]);
         $_SESSION['notif'] = 'Data berhasil ditambah!';
         header('Location: life_saving_rules_tab.php');
         exit;
@@ -70,8 +71,8 @@ $bascom_gambar = 'bascom_card.png'; // Pastikan file ini ada di uploads/life_sav
 $cekBascom = $pdo->prepare("SELECT COUNT(*) FROM life_saving_rules WHERE judul = ?");
 $cekBascom->execute([$bascom_judul]);
 if ($cekBascom->fetchColumn() == 0) {
-    $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar) VALUES (?, ?, ?)");
-    $stmt->execute([$bascom_judul, $bascom_deskripsi, $bascom_gambar]);
+    $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar, kategori) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$bascom_judul, $bascom_deskripsi, $bascom_gambar, 'BASCOM']);
 }
 ?>
 
@@ -207,13 +208,22 @@ if ($cekBascom->fetchColumn() == 0) {
                         <label class="block text-sm font-medium text-gray-700 mb-2">Judul</label>
                         <input type="text" name="judul" id="form-judul" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" required>
                     </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                        <textarea name="deskripsi" id="form-deskripsi" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" required></textarea>
-                    </div>
+                    <!-- Deskripsi removed -->
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar</label>
-                        <input type="file" name="gambar" id="form-gambar" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                        <div id="main-drop-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer relative transition-all duration-300">
+                          <input id="main-gambar" name="gambar" type="file" accept="image/*" class="sr-only">
+                          <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600 justify-center">
+                              <span id="main-drop-label" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">Upload or drag a photo</span>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                            <img id="main-preview" src="#" alt="Preview" class="mx-auto mt-2 rounded shadow hidden max-h-40" />
+                          </div>
+                        </div>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
@@ -253,7 +263,7 @@ if ($cekBascom->fetchColumn() == 0) {
                                 <img src="../../uploads/life_saving_rules/<?= htmlspecialchars($row['gambar']) ?>" alt="img" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
                             <?php endif; ?>
                             <div class="absolute top-4 right-4 flex space-x-2">
-                                <button type="button" onclick="editData(<?= $row['id'] ?>, '<?= addslashes($row['kategori']) ?>', '<?= addslashes($row['judul']) ?>', '<?= addslashes($row['deskripsi']) ?>')"
+                                <button type="button" class="edit-btn" data-id="<?= $row['id'] ?>" data-judul="<?= addslashes($row['judul']) ?>"
                                         class="bg-white text-red-600 p-2 rounded-lg shadow-md hover:shadow-lg hover:bg-red-50 transition-all duration-300">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -269,7 +279,7 @@ if ($cekBascom->fetchColumn() == 0) {
                                 </h3>
                             </div>
                             <p class="text-gray-600 mb-4 line-clamp-3">
-                                <?= nl2br(htmlspecialchars($row['deskripsi'])) ?>
+                                <!-- Deskripsi removed -->
                             </p>
                         </div>
                     </div>
@@ -278,14 +288,149 @@ if ($cekBascom->fetchColumn() == 0) {
             </div>
         </div>
     </div>
+
+    <!-- Modal Edit Life Saving Rules -->
+    <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-8 relative">
+        <button onclick="closeEditModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-600 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+          <i class="fas fa-edit text-yellow-500 mr-3"></i>Edit Life Saving Rule
+        </h2>
+        <form id="editForm" method="post" enctype="multipart/form-data" class="space-y-6">
+          <input type="hidden" name="id" id="edit-id">
+          <input type="hidden" name="action" value="edit">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Judul</label>
+            <input type="text" name="judul" id="edit-judul" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required>
+          </div>
+          <!-- Deskripsi removed -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Gambar</label>
+            <div id="edit-drop-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer relative transition-all duration-300">
+              <input id="edit-gambar" name="gambar" type="file" accept="image/*" class="sr-only">
+              <div class="space-y-1 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <div class="flex text-sm text-gray-600 justify-center">
+                  <span id="edit-drop-label" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500">Upload or drag a photo</span>
+                </div>
+                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                <img id="edit-preview" src="#" alt="Preview" class="mx-auto mt-2 rounded shadow hidden max-h-40" />
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 mt-4">
+            <button type="button" onclick="closeEditModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium">Batal</button>
+            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-2 rounded-lg font-medium">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
         function editData(id, kategori, judul, deskripsi) {
             document.getElementById('form-id').value = id;
             document.getElementById('form-kategori').value = kategori;
             document.getElementById('form-judul').value = judul;
-            document.getElementById('form-deskripsi').value = deskripsi;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        function openEditModal(id, judul, deskripsi) {
+          document.getElementById('edit-id').value = id;
+          document.getElementById('edit-judul').value = judul;
+          document.getElementById('editModal').classList.remove('hidden');
+        }
+        function closeEditModal() {
+          document.getElementById('editModal').classList.add('hidden');
+        }
+        // Replace edit button handler
+        window.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('.edit-btn').forEach(function(btn) {
+            btn.onclick = function() {
+              openEditModal(this.dataset.id, this.dataset.judul, this.dataset.deskripsi);
+            };
+          });
+        });
+    </script>
+    <script>
+    // Drag and drop for edit modal image (same as create.php)
+    const editDropArea = document.getElementById('edit-drop-area');
+    const editInput = document.getElementById('edit-gambar');
+    const editPreview = document.getElementById('edit-preview');
+    const editLabel = document.getElementById('edit-drop-label');
+    if (editDropArea && editInput && editPreview) {
+      editDropArea.addEventListener('click', () => editInput.click());
+      editDropArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        editDropArea.classList.add('bg-blue-50');
+      });
+      editDropArea.addEventListener('dragleave', e => {
+        editDropArea.classList.remove('bg-blue-50');
+      });
+      editDropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        editDropArea.classList.remove('bg-blue-50');
+        if (e.dataTransfer.files.length) {
+          editInput.files = e.dataTransfer.files;
+          showEditPreview(editInput.files[0]);
+        }
+      });
+      editInput.addEventListener('change', e => {
+        if (editInput.files.length) {
+          showEditPreview(editInput.files[0]);
+        }
+      });
+      function showEditPreview(file) {
+        if (!file) return editPreview.classList.add('hidden');
+        const reader = new FileReader();
+        reader.onload = e => {
+          editPreview.src = e.target.result;
+          editPreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    </script>
+    <script>
+    // Drag and drop for main form image (same as modal and create.php)
+    const mainDropArea = document.getElementById('main-drop-area');
+    const mainInput = document.getElementById('main-gambar');
+    const mainPreview = document.getElementById('main-preview');
+    const mainLabel = document.getElementById('main-drop-label');
+    if (mainDropArea && mainInput && mainPreview) {
+      mainDropArea.addEventListener('click', () => mainInput.click());
+      mainDropArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        mainDropArea.classList.add('bg-blue-50');
+      });
+      mainDropArea.addEventListener('dragleave', e => {
+        mainDropArea.classList.remove('bg-blue-50');
+      });
+      mainDropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        mainDropArea.classList.remove('bg-blue-50');
+        if (e.dataTransfer.files.length) {
+          mainInput.files = e.dataTransfer.files;
+          showMainPreview(mainInput.files[0]);
+        }
+      });
+      mainInput.addEventListener('change', e => {
+        if (mainInput.files.length) {
+          showMainPreview(mainInput.files[0]);
+        }
+      });
+      function showMainPreview(file) {
+        if (!file) return mainPreview.classList.add('hidden');
+        const reader = new FileReader();
+        reader.onload = e => {
+          mainPreview.src = e.target.result;
+          mainPreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
     </script>
 </body>
 </html>
