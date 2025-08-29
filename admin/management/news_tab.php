@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
         if ($title && $content) {
             $stmt = $pdo->prepare("INSERT INTO news (title, content, publish_date, status) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$title, $content, $publish_date, $status]);
+            $stmt->execute(array($title, $content, $publish_date, $status));
             $_SESSION['notif'] = 'Berita berhasil ditambahkan!';
             header('Location: news_tab.php');
             exit;
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
         if ($id && $title && $content) {
             $stmt = $pdo->prepare("UPDATE news SET title=?, content=?, publish_date=?, status=? WHERE id=?");
-            $stmt->execute([$title, $content, $publish_date, $status, $id]);
+            $stmt->execute(array($title, $content, $publish_date, $status, $id));
             $_SESSION['notif'] = 'Berita berhasil diupdate!';
             header('Location: news_tab.php');
             exit;
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         if ($id) {
             $stmt = $pdo->prepare("DELETE FROM news WHERE id = ?");
-            $stmt->execute([$id]);
+            $stmt->execute(array($id));
             $_SESSION['notif'] = 'Berita berhasil dihapus!';
             header('Location: news_tab.php');
             exit;
@@ -49,9 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 // Fetch news
 try {
     $news = $pdo->query("SELECT * FROM news ORDER BY publish_date DESC")->fetchAll();
-    if (!$news) $news = [];
+    if (!$news) $news = array();
 } catch (Exception $e) {
-    $news = [];
+    $news = array();
     $message = 'Error loading news: ' . $e->getMessage();
 }
 ?>

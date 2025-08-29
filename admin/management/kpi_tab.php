@@ -18,14 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
             if ($indicator_name !== '' && $actual_value !== '') {
                 $stmt = $pdo->prepare("INSERT INTO kpi_leading (indicator_name, actual_value) VALUES (?, ?)");
-                $stmt->execute([$indicator_name, $actual_value]);
+                $stmt->execute(array($indicator_name, $actual_value));
                 $_SESSION['notif'] = 'KPI Leading berhasil ditambahkan!';
             }
         } elseif ($_POST['action'] == 'delete_leading') {
             $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
             if ($id > 0) {
                 $stmt = $pdo->prepare("DELETE FROM kpi_leading WHERE id = ?");
-                $stmt->execute([$id]);
+                $stmt->execute(array($id));
                 $_SESSION['notif'] = 'KPI Leading berhasil dihapus!';
             }
         } elseif ($_POST['action'] == 'create_lagging') {
@@ -33,14 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
             if ($indicator_name !== '' && $actual_value !== '') {
                 $stmt = $pdo->prepare("INSERT INTO kpi_lagging (indicator_name, actual_value) VALUES (?, ?)");
-                $stmt->execute([$indicator_name, $actual_value]);
+                $stmt->execute(array($indicator_name, $actual_value));
                 $_SESSION['notif'] = 'KPI Lagging berhasil ditambahkan!';
             }
         } elseif ($_POST['action'] == 'delete_lagging') {
             $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
             if ($id > 0) {
                 $stmt = $pdo->prepare("DELETE FROM kpi_lagging WHERE id = ?");
-                $stmt->execute([$id]);
+                $stmt->execute(array($id));
                 $_SESSION['notif'] = 'KPI Lagging berhasil dihapus!';
             }
         } elseif ($_POST['action'] == 'update_leading') {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             $notes = isset($_POST['notes']) && $_POST['notes'] !== '' ? trim($_POST['notes']) : null;
             if ($id > 0 && $actual_value !== '') {
                 $stmt = $pdo->prepare("UPDATE kpi_leading SET actual_value = ?, target_value = ?, notes = ? WHERE id = ?");
-                $stmt->execute([$actual_value, $target_value, $notes, $id]);
+                $stmt->execute(array($actual_value, $target_value, $notes, $id));
                 $_SESSION['notif'] = 'KPI Leading berhasil diperbarui!';
             }
         } elseif ($_POST['action'] == 'update_lagging') {
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
             $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
             if ($id > 0 && $actual_value !== '') {
                 $stmt = $pdo->prepare("UPDATE kpi_lagging SET actual_value = ? WHERE id = ?");
-                $stmt->execute([$actual_value, $id]);
+                $stmt->execute(array($actual_value, $id));
                 $_SESSION['notif'] = 'KPI Lagging berhasil diperbarui!';
             }
         }

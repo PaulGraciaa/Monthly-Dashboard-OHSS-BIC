@@ -14,7 +14,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id = (int)$_GET['id'];
 $stmt = $pdo->prepare("SELECT * FROM security_personnel WHERE id = ?");
-$stmt->execute([$id]);
+$stmt->execute(array($id));
 $personnel = $stmt->fetch();
 
 if (!$personnel) {
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $photo_alt = sanitize($_POST['photo_alt']);
     
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_types = array('image/jpeg', 'image/png', 'image/gif');
         $max_size = 5 * 1024 * 1024; // 5MB
         
         if (in_array($_FILES['photo']['type'], $allowed_types) && $_FILES['photo']['size'] <= $max_size) {
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($error)) {
         try {
             $stmt = $pdo->prepare("UPDATE security_personnel SET position = ?, personnel_count = ?, personnel_names = ?, photo_path = ?, photo_alt = ?, description = ?, display_order = ? WHERE id = ?");
-            $stmt->execute([$position, $personnel_count, $personnel_names, $photo_path, $photo_alt, $description, $display_order, $id]);
+            $stmt->execute(array($position, $personnel_count, $personnel_names, $photo_path, $photo_alt, $description, $display_order, $id));
             
             header("Location: security_management.php?success=updated");
             exit();
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <?php if ($error): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            <?= $error ?>
+                            <?php echo $error; ?>
                         </div>
                     <?php endif; ?>
 
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Jabatan <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="position" required 
-                                       value="<?= htmlspecialchars($personnel['position']) ?>"
+                                       value="<?php echo htmlspecialchars($personnel['position']); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: Executive, Inspector, dll">
                             </div>
@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Jumlah Personel <span class="text-red-500">*</span>
                                 </label>
                                 <input type="number" name="personnel_count" required min="0"
-                                       value="<?= $personnel['personnel_count'] ?>"
+                                       value="<?php echo $personnel['personnel_count']; ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: 5">
                             </div>
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Urutan Tampilan
                                 </label>
                                 <input type="number" name="display_order" min="0"
-                                       value="<?= $personnel['display_order'] ?>"
+                                       value="<?php echo $personnel['display_order']; ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: 1">
                             </div>
@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </label>
                                 <textarea name="personnel_names" rows="4"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                                          placeholder="Masukkan nama-nama personel (satu nama per baris)"><?= htmlspecialchars($personnel['personnel_names']) ?></textarea>
+                                          placeholder="Masukkan nama-nama personel (satu nama per baris)"><?php echo htmlspecialchars($personnel['personnel_names']); ?></textarea>
                             </div>
 
                             <!-- Description -->
@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </label>
                                 <textarea name="description" rows="3"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                                          placeholder="Deskripsi singkat tentang jabatan ini"><?= htmlspecialchars($personnel['description']) ?></textarea>
+                                          placeholder="Deskripsi singkat tentang jabatan ini"><?php echo htmlspecialchars($personnel['description']); ?></textarea>
                             </div>
 
                             <!-- Current Photo -->
@@ -183,11 +183,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Foto Saat Ini
                                 </label>
                                 <div class="flex items-center space-x-4">
-                                    <img src="../<?= htmlspecialchars($personnel['photo_path']) ?>" 
-                                         alt="<?= htmlspecialchars($personnel['photo_alt'] ?? 'Security Photo') ?>" 
+                                    <img src="../<?php echo htmlspecialchars($personnel['photo_path']); ?>" 
+                                         alt="<?php echo htmlspecialchars(isset($personnel['photo_alt']) ? $personnel['photo_alt'] : 'Security Photo'); ?>" 
                                          class="w-24 h-24 object-cover rounded border">
                                     <div>
-                                        <p class="text-sm text-gray-600"><?= htmlspecialchars($personnel['photo_alt'] ?? 'Tidak ada deskripsi') ?></p>
+                                        <p class="text-sm text-gray-600"><?php echo htmlspecialchars(isset($personnel['photo_alt']) ? $personnel['photo_alt'] : 'Tidak ada deskripsi'); ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Teks Alternatif Foto
                                 </label>
                                 <input type="text" name="photo_alt"
-                                       value="<?= htmlspecialchars($personnel['photo_alt']) ?>"
+                                       value="<?php echo htmlspecialchars($personnel['photo_alt']); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Deskripsi foto untuk aksesibilitas">
                             </div>
@@ -232,4 +232,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </body>
-</html> 
+</html>
+[file content end]
+
+[file name]: index.php
+[file content begin]
+<?php
+require_once '../auth.php';
+require_once '../../config/database.php';
+requireAdminLogin();
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Management - OHSS Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { background-color: #1f2937; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="min-h-screen">
+        <header class="bg-red-600 text-white px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Security Management</h1>
+                <a href="../dashboard.php" class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali ke Dashboard
+                </a>
+            </div>
+        </header>
+        <div class="container mx-auto px-6 py-8">
+            <div class="mb-6 flex gap-2">
+                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('personnel')">
+                    <i class="fas fa-users-cog mr-2"></i>Personnel
+                </button>
+                <button class="tab-btn bg-gray-800 text-white px-4 py-2 rounded" onclick="showTab('gallery')">
+                    <i class="fas fa-images mr-2"></i>Gallery
+                </button>
+            </div>
+            <div id="personnel" class="tab-content active">
+                <?php include 'security_management.php'; ?>
+            </div>
+            <div id="gallery" class="tab-content">
+                <?php include 'add_security_gallery.php'; ?>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showTab(tab) {
+            var tabs = document.querySelectorAll('.tab-content');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            var buttons = document.querySelectorAll('.tab-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tab).classList.add('active');
+            var indexMap = { personnel: 0, gallery: 1 };
+            var buttons = document.querySelectorAll('.tab-btn');
+            var idx = indexMap[tab];
+            if (buttons[idx]) buttons[idx].classList.add('active');
+        }
+        // default
+        showTab('personnel');
+    </script>
+</body>
+</html>

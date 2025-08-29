@@ -19,15 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
     try {
         if ($_POST['action'] === 'add') {
             $stmt = $pdo->prepare("INSERT INTO dashboard_stats (stat_name, stat_value, stat_description, stat_icon, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active]);
+            $stmt->execute(array($stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active));
             $_SESSION['notif'] = 'Data berhasil ditambahkan!';
         } elseif ($_POST['action'] === 'update' && $id) {
             $stmt = $pdo->prepare("UPDATE dashboard_stats SET stat_name=?, stat_value=?, stat_description=?, stat_icon=?, display_order=?, is_active=? WHERE id=?");
-            $stmt->execute([$stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active, $id]);
+            $stmt->execute(array($stat_name, $stat_value, $stat_description, $stat_icon, $display_order, $is_active, $id));
             $_SESSION['notif'] = 'Data berhasil diupdate!';
         } elseif ($_POST['action'] === 'delete' && $id) {
             $stmt = $pdo->prepare("DELETE FROM dashboard_stats WHERE id=?");
-            $stmt->execute([$id]);
+            $stmt->execute(array($id));
             $_SESSION['notif'] = 'Data berhasil dihapus!';
         }
     } catch (Exception $e) {

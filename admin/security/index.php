@@ -47,16 +47,20 @@ requireAdminLogin();
     </div>
     <script>
         function showTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(function(el) {
-                el.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(function(btn){
-                btn.classList.remove('active');
-            });
+            var tabs = document.querySelectorAll('.tab-content');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            var buttons = document.querySelectorAll('.tab-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            
             document.getElementById(tab).classList.add('active');
-            const indexMap = { personnel: 0, gallery: 1 };
-            const buttons = document.querySelectorAll('.tab-btn');
-            const idx = indexMap[tab];
+            var indexMap = { personnel: 0, gallery: 1 };
+            var buttons = document.querySelectorAll('.tab-btn');
+            var idx = indexMap[tab];
             if (buttons[idx]) buttons[idx].classList.add('active');
         }
         // default

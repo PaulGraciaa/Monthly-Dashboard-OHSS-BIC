@@ -8,6 +8,14 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     header('Location: login.php');
     exit();
 }
+
+// Handle session name untuk PHP 5.3
+$adminName = '';
+if (isset($_SESSION['admin_name'])) {
+    $adminName = $_SESSION['admin_name'];
+} else if (isset($_SESSION['admin_username'])) {
+    $adminName = $_SESSION['admin_username'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -24,26 +32,29 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                    },
+                    }
                 },
             },
         }
     </script>
     <style>
         .gradient-bg {
+            background: #dc2626; /* Fallback untuk browser lama */
+            background: -moz-linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            background: -webkit-linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
             background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
         }
         .module-card:hover {
-            transform: translateY(-2px);
+            position: relative;
+            top: -2px;
+        }
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -62,7 +73,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                 <div class="flex items-center space-x-8">
                     <div class="text-right">
                         <p class="text-red-100 text-sm">Selamat datang,</p>
-                        <p class="font-medium"><?php echo $_SESSION['admin_name'] ?? $_SESSION['admin_username']; ?></p>
+                        <p class="font-medium"><?php echo htmlspecialchars($adminName); ?></p>
                     </div>
                     <a href="logout.php" class="bg-white text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow">
                         <i class="fas fa-sign-out-alt mr-2"></i>Logout
@@ -142,4 +153,4 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         </div>
     </footer>
 </body>
-</html> 
+</html>

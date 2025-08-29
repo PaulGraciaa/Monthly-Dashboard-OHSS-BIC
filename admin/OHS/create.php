@@ -4,17 +4,17 @@ require_once __DIR__ . '/../../config/database.php';
 requireAdminLogin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $title = sanitize($_POST['title'] ?? '');
-  $incident_date = $_POST['incident_date'] ?? date('Y-m-d');
-  $incident_time = $_POST['incident_time'] ?? null;
-  $who_name = sanitize($_POST['who_name'] ?? '');
-  $who_npk = sanitize($_POST['who_npk'] ?? '');
-  $summary = $_POST['summary'] ?? '';
-  $result = $_POST['result'] ?? '';
-  $root_causes = $_POST['root_causes'] ?? '';
-  $key_takeaways = $_POST['key_takeaways'] ?? '';
-  $corrective_actions = $_POST['corrective_actions'] ?? '';
-  $status = $_POST['status'] ?? 'published';
+  $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+  $incident_date = isset($_POST['incident_date']) ? $_POST['incident_date'] : date('Y-m-d');
+  $incident_time = isset($_POST['incident_time']) ? $_POST['incident_time'] : null;
+  $who_name = sanitize(isset($_POST['who_name']) ? $_POST['who_name'] : '');
+  $who_npk = sanitize(isset($_POST['who_npk']) ? $_POST['who_npk'] : '');
+  $summary = isset($_POST['summary']) ? $_POST['summary'] : '';
+  $result = isset($_POST['result']) ? $_POST['result'] : '';
+  $root_causes = isset($_POST['root_causes']) ? $_POST['root_causes'] : '';
+  $key_takeaways = isset($_POST['key_takeaways']) ? $_POST['key_takeaways'] : '';
+  $corrective_actions = isset($_POST['corrective_actions']) ? $_POST['corrective_actions'] : '';
+  $status = isset($_POST['status']) ? $_POST['status'] : 'published';
 
   // Handle file upload
   $photo_image_path = '';
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   $stmt = $pdo->prepare('INSERT INTO ohs_incidents (title, incident_date, incident_time, who_name, who_npk, summary, result, root_causes, key_takeaways, corrective_actions, map_image_path, photo_image_path, status, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
-  $stmt->execute([$title, $incident_date, $incident_time, $who_name, $who_npk, $summary, $result, $root_causes, $key_takeaways, $corrective_actions, $map_image_path, $photo_image_path, $status, $_SESSION['admin_id']]);
+  $stmt->execute(array($title, $incident_date, $incident_time, $who_name, $who_npk, $summary, $result, $root_causes, $key_takeaways, $corrective_actions, $map_image_path, $photo_image_path, $status, $_SESSION['admin_id']));
 
   header('Location: index.php');
   exit;

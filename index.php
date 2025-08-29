@@ -140,14 +140,14 @@ $kpiLagging = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->
 try {
     $activities = $pdo->query("SELECT * FROM activities WHERE status = 'active' ORDER BY activity_date DESC")->fetchAll();
 } catch (Exception $e) {
-    $activities = [];
+    $activities = array();
 }
 
 // Get news
 $news = $pdo->query("SELECT * FROM news WHERE status = 'published' ORDER BY publish_date DESC")->fetchAll();
 
 // Get configuration
-$config = [];
+$config = array();
 $configData = $pdo->query("SELECT * FROM config")->fetchAll();
 foreach ($configData as $item) {
     $config[$item['config_key']] = $item['config_value'];
@@ -182,7 +182,7 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
         <i class="fas fa-video"></i> Surveillance
       </a>
       <div class="mt-8 text-xs text-white/80 px-2">
-        <span class="block">&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All Rights Reserved.</span>
+        <span class="block">&copy; 2025 <?php echo isset($config['company_name']) ? $config['company_name'] : 'Batamindo Investment Cakrawala'; ?>. All Rights Reserved.</span>
       </div>
     </div>
   </aside>
@@ -208,9 +208,9 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
 
     <!-- Title & Date -->
     <div class="text-right hidden sm:block">
-      <div class="text-sm font-semibold leading-tight"><strong><?php echo $config['dashboard_title'] ?? 'Dashboard OHSS Monthly'; ?></strong></div>
+      <div class="text-sm font-semibold leading-tight"><strong><?php echo isset($config['dashboard_title']) ? $config['dashboard_title'] : 'Dashboard OHSS Monthly'; ?></strong></div>
       <div class="text-[10px] opacity-80 mt-0.5 leading-tight">
-        <?php echo $config['report_code'] ?? 'BIC / OHSS-25-034-006-179'; ?> | Cut of date: <?php echo $config['cut_off_date'] ?? '01 July –31 July 2025'; ?>
+        <?php echo isset($config['report_code']) ? $config['report_code'] : 'BIC / OHSS-25-034-006-179'; ?> | Cut of date: <?php echo isset($config['cut_off_date']) ? $config['cut_off_date'] : '01 July –31 July 2025'; ?>
       </div>
     </div>
 
@@ -433,7 +433,7 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
 
   <!-- Footer -->
   <footer class="bg-header-footer-bg text-white text-center py-2 mt-3 text-xs">
-    <p>&copy; 2025 <?php echo $config['company_name'] ?? 'Batamindo Investment Cakrawala'; ?>. All rights reserved</p>
+    <p>&copy; 2025 <?php echo isset($config['company_name']) ? $config['company_name'] : 'Batamindo Investment Cakrawala'; ?>. All rights reserved</p>
   </footer>
 
   <script>
@@ -442,9 +442,9 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
     const kpiLaggingData = <?php echo json_encode($kpiLagging); ?>;
     const activitiesData = <?php echo json_encode($activities); ?>;
     const performanceData = {
-      positive: <?php echo $config['performance_positive'] ?? 90; ?>,
-      negative: <?php echo $config['performance_negative'] ?? 5; ?>,
-      others: <?php echo $config['performance_others'] ?? 5; ?>
+      positive: <?php echo isset($config['performance_positive']) ? $config['performance_positive'] : 90; ?>,
+      negative: <?php echo isset($config['performance_negative']) ? $config['performance_negative'] : 5; ?>,
+      others: <?php echo isset($config['performance_others']) ? $config['performance_others'] : 5; ?>
     };
 
     // Initialize Swiper for Activities

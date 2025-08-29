@@ -12,14 +12,14 @@ function sanitize($data) {
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     $stmt = $pdo->prepare('DELETE FROM ohs_incidents WHERE id = ?');
-    $stmt->execute([$id]);
+    $stmt->execute(array($id));
     header('Location: index.php');
     exit;
 }
 
 // List incidents
-$where = [];
-$params = [];
+$where = array();
+$params = array();
 if (!empty($_GET['q'])) {
     $where[] = '(title LIKE ? OR summary LIKE ?)';
     $params[] = '%' . $_GET['q'] . '%';
@@ -37,7 +37,8 @@ $stmt->execute($params);
 $rows = $stmt->fetchAll();
 
 // Jika view adalah ptw, proses data PTW
-if (($_GET['view'] ?? '') === 'ptw') {
+$view = isset($_GET['view']) ? $_GET['view'] : '';
+if ($view === 'ptw') {
     $currentMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
     $currentYear  = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 
@@ -51,7 +52,7 @@ if (($_GET['view'] ?? '') === 'ptw') {
     if (isset($_GET['delete_ptw'])) {
         $id = (int)$_GET['delete_ptw'];
         $stmt = $pdo->prepare('DELETE FROM ptw_records WHERE id = ?');
-        $stmt->execute([$id]);
+        $stmt->execute(array($id));
         header('Location: index.php?view=ptw&month=' . $currentMonth . '&year=' . $currentYear);
         exit;
     }
@@ -59,28 +60,28 @@ if (($_GET['view'] ?? '') === 'ptw') {
     // Handle create/update PTW
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-        $contractor_name = sanitize($_POST['contractor_name'] ?? '');
-        $num_ptw = (int)($_POST['num_ptw'] ?? 0);
-        $general = (int)($_POST['general'] ?? 0);
-        $hot_work = (int)($_POST['hot_work'] ?? 0);
-        $lifting = (int)($_POST['lifting'] ?? 0);
-        $excavation = (int)($_POST['excavation'] ?? 0);
-        $electrical = (int)($_POST['electrical'] ?? 0);
-        $work_high = (int)($_POST['work_high'] ?? 0);
-        $radiography = (int)($_POST['radiography'] ?? 0);
-        $manpower = (int)($_POST['manpower'] ?? 0);
-        $month = (int)($_POST['month'] ?? $currentMonth);
-        $year = (int)($_POST['year'] ?? $currentYear);
-        $display_order = (int)($_POST['display_order'] ?? 0);
+        $contractor_name = sanitize(isset($_POST['contractor_name']) ? $_POST['contractor_name'] : '');
+        $num_ptw = (int)(isset($_POST['num_ptw']) ? $_POST['num_ptw'] : 0);
+        $general = (int)(isset($_POST['general']) ? $_POST['general'] : 0);
+        $hot_work = (int)(isset($_POST['hot_work']) ? $_POST['hot_work'] : 0);
+        $lifting = (int)(isset($_POST['lifting']) ? $_POST['lifting'] : 0);
+        $excavation = (int)(isset($_POST['excavation']) ? $_POST['excavation'] : 0);
+        $electrical = (int)(isset($_POST['electrical']) ? $_POST['electrical'] : 0);
+        $work_high = (int)(isset($_POST['work_high']) ? $_POST['work_high'] : 0);
+        $radiography = (int)(isset($_POST['radiography']) ? $_POST['radiography'] : 0);
+        $manpower = (int)(isset($_POST['manpower']) ? $_POST['manpower'] : 0);
+        $month = (int)(isset($_POST['month']) ? $_POST['month'] : $currentMonth);
+        $year = (int)(isset($_POST['year']) ? $_POST['year'] : $currentYear);
+        $display_order = (int)(isset($_POST['display_order']) ? $_POST['display_order'] : 0);
 
         if ($id > 0) {
             // Update existing record
             $stmt = $pdo->prepare('UPDATE ptw_records SET contractor_name=?, num_ptw=?, general=?, hot_work=?, lifting=?, excavation=?, electrical=?, work_high=?, radiography=?, manpower=?, month=?, year=?, display_order=? WHERE id=?');
-            $stmt->execute([$contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order, $id]);
+            $stmt->execute(array($contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order, $id));
         } else {
             // Insert new record
             $stmt = $pdo->prepare('INSERT INTO ptw_records (contractor_name, num_ptw, general, hot_work, lifting, excavation, electrical, work_high, radiography, manpower, month, year, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-            $stmt->execute([$contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order]);
+            $stmt->execute(array($contractor_name, $num_ptw, $general, $hot_work, $lifting, $excavation, $electrical, $work_high, $radiography, $manpower, $month, $year, $display_order));
         }
         
         header('Location: index.php?view=ptw&month=' . $month . '&year=' . $year);
@@ -89,11 +90,11 @@ if (($_GET['view'] ?? '') === 'ptw') {
 
     // Get PTW records for current month and year
     $stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month = ? AND year = ? ORDER BY display_order, contractor_name');
-    $stmt->execute([$currentMonth, $currentYear]);
+    $stmt->execute(array($currentMonth, $currentYear));
     $records = $stmt->fetchAll();
 
     // Calculate totals
-    $totals = [
+    $totals = array(
         'num_ptw' => 0,
         'general' => 0,
         'hot_work' => 0,
@@ -103,7 +104,7 @@ if (($_GET['view'] ?? '') === 'ptw') {
         'work_high' => 0,
         'radiography' => 0,
         'manpower' => 0
-    ];
+    );
     
     foreach ($records as $r) {
         $totals['num_ptw'] += (int)$r['num_ptw'];
@@ -166,13 +167,13 @@ if (($_GET['view'] ?? '') === 'ptw') {
             <a href="index.php" class="px-4 py-2 rounded-lg inline-flex items-center gap-2 border transition <?php echo (!isset($_GET['view'])?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
                 <i class="fas fa-list"></i><span>Incidents</span>
             </a>
-            <a href="index.php?view=ptw" class="px-4 py-2 rounded-lg inline-flex items-center gap-2 border transition <?php echo (($_GET['view'] ?? '')==='ptw'?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
+            <a href="index.php?view=ptw" class="px-4 py-2 rounded-lg inline-flex items-center gap-2 border transition <?php echo ($view==='ptw'?'bg-gray-800 text-white border-gray-800 hover:bg-gray-900':'bg-white text-gray-700 hover:bg-gray-50'); ?>">
                 <i class="fas fa-clipboard-list"></i><span>PTW</span>
             </a>
         </div>
     </div>
 
-    <?php if (($_GET['view'] ?? '') === 'ptw'): ?>
+    <?php if ($view === 'ptw'): ?>
       <div class="bg-white rounded-lg shadow p-4 mb-4">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-xl font-bold">PTW Records - <?php echo date('F Y', mktime(0, 0, 0, $currentMonth, 1, $currentYear)); ?></h2>
@@ -300,7 +301,7 @@ if (($_GET['view'] ?? '') === 'ptw') {
                 <td class="border px-3 py-2 text-center"><?php echo (int)$r['radiography']; ?></td>
                 <td class="border px-3 py-2 text-center"><?php echo (int)$r['manpower']; ?></td>
                 <td class="border px-3 py-2 text-center">
-                  <button onclick='fillForm(<?php echo json_encode($r, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'
+                  <button onclick='fillForm(<?php echo json_encode($r); ?>)'
                     class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs inline-flex items-center gap-2" title="Edit"><i class="fas fa-edit"></i><span>Edit</span></button>
                   <a href="?view=ptw&delete_ptw=<?php echo $r['id']; ?>&month=<?php echo $currentMonth; ?>&year=<?php echo $currentYear; ?>" onclick="return confirm('Hapus data ini?')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs inline-flex items-center gap-2" title="Hapus"><i class="fas fa-trash"></i><span>Hapus</span></a>
                 </td>
@@ -381,7 +382,7 @@ if (($_GET['view'] ?? '') === 'ptw') {
           <div class="flex-1">
             <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <div class="relative">
-              <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" 
+              <input type="text" name="q" value="<?php echo htmlspecialchars(isset($_GET['q']) ? $_GET['q'] : ''); ?>" 
                      class="border rounded-lg pl-10 pr-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                      placeholder="Search by title or summary..." />
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -393,8 +394,8 @@ if (($_GET['view'] ?? '') === 'ptw') {
             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select name="status" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="">All Status</option>
-              <?php foreach (["draft","published","archived"] as $st): ?>
-                <option value="<?php echo $st; ?>" <?php echo (($_GET['status'] ?? '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
+              <?php foreach (array("draft","published","archived") as $st): ?>
+                <option value="<?php echo $st; ?>" <?php echo ((isset($_GET['status']) ? $_GET['status'] : '')===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -431,7 +432,7 @@ if (($_GET['view'] ?? '') === 'ptw') {
                     <?php echo htmlspecialchars($row['incident_date']); ?><?php echo $row['incident_time']? ' '.$row['incident_time']:''; ?>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-500">
-                    <?php echo htmlspecialchars(trim(($row['who_name'] ?? '').' ('.$row['who_npk'].')')); ?>
+                    <?php echo htmlspecialchars(trim((isset($row['who_name']) ? $row['who_name'] : '').' ('.$row['who_npk'].')')); ?>
                   </td>
                   <td class="px-6 py-4 text-center">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 

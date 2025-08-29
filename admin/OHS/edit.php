@@ -15,26 +15,26 @@ if ($id <= 0) { header('Location: index.php'); exit; }
 
 // Ambil data yang akan diedit sebelum memproses form
 $stmt = $pdo->prepare('SELECT * FROM ohs_incidents WHERE id = ?');
-$stmt->execute([$id]);
+$stmt->execute(array($id));
 $row = $stmt->fetch();
 if (!$row) { header('Location: index.php'); exit; }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $title = sanitize($_POST['title'] ?? '');
-  $incident_date = $_POST['incident_date'] ?? date('Y-m-d');
-  $incident_time = $_POST['incident_time'] ?? null;
-  $who_name = sanitize($_POST['who_name'] ?? '');
-  $who_npk = sanitize($_POST['who_npk'] ?? '');
-  $summary = $_POST['summary'] ?? '';
-  $result = $_POST['result'] ?? '';
-  $root_causes = $_POST['root_causes'] ?? '';
-  $key_takeaways = $_POST['key_takeaways'] ?? '';
-  $corrective_actions = $_POST['corrective_actions'] ?? '';
-  $status = $_POST['status'] ?? 'published';
+  $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+  $incident_date = isset($_POST['incident_date']) ? $_POST['incident_date'] : date('Y-m-d');
+  $incident_time = isset($_POST['incident_time']) ? $_POST['incident_time'] : null;
+  $who_name = sanitize(isset($_POST['who_name']) ? $_POST['who_name'] : '');
+  $who_npk = sanitize(isset($_POST['who_npk']) ? $_POST['who_npk'] : '');
+  $summary = isset($_POST['summary']) ? $_POST['summary'] : '';
+  $result = isset($_POST['result']) ? $_POST['result'] : '';
+  $root_causes = isset($_POST['root_causes']) ? $_POST['root_causes'] : '';
+  $key_takeaways = isset($_POST['key_takeaways']) ? $_POST['key_takeaways'] : '';
+  $corrective_actions = isset($_POST['corrective_actions']) ? $_POST['corrective_actions'] : '';
+  $status = isset($_POST['status']) ? $_POST['status'] : 'published';
 
   // Gunakan path gambar yang sudah ada sebagai default
-  $photo_image_path = $row['photo_image_path'] ?? '';
-  $map_image_path = $row['map_image_path'] ?? '';
+  $photo_image_path = isset($row['photo_image_path']) ? $row['photo_image_path'] : '';
+  $map_image_path = isset($row['map_image_path']) ? $row['map_image_path'] : '';
   
   $upload_dir = __DIR__ . '/../../uploads/ohs/';
   if (!is_dir($upload_dir)) { 
@@ -45,16 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   function processFileUpload($fileKey, $uploadDir, $currentPath) {
     if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] == 0) {
       // Validasi tipe file
-      $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      $allowedTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
       $fileType = mime_content_type($_FILES[$fileKey]['tmp_name']);
       
       if (!in_array($fileType, $allowedTypes)) {
-        return ['success' => false, 'path' => $currentPath, 'error' => 'Jenis file tidak diizinkan'];
+        return array('success' => false, 'path' => $currentPath, 'error' => 'Jenis file tidak diizinkan');
       }
       
       // Validasi ukuran file (maksimal 5MB)
       if ($_FILES[$fileKey]['size'] > 5 * 1024 * 1024) {
-        return ['success' => false, 'path' => $currentPath, 'error' => 'Ukuran file terlalu besar (maksimal 5MB)'];
+        return array('success' => false, 'path' => $currentPath, 'error' => 'Ukuran file terlalu besar (maksimal 5MB)');
       }
       
       $ext = pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION);
@@ -66,10 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($currentPath) && file_exists(__DIR__ . '/../../' . $currentPath)) {
           @unlink(__DIR__ . '/../../' . $currentPath);
         }
-        return ['success' => true, 'path' => 'uploads/ohs/' . $filename];
+        return array('success' => true, 'path' => 'uploads/ohs/' . $filename);
       }
     }
-    return ['success' => true, 'path' => $currentPath]; // Tidak ada file yang diupload, gunakan yang lama
+    return array('success' => true, 'path' => $currentPath); // Tidak ada file yang diupload, gunakan yang lama
   }
 
   // Proses upload untuk photo_image
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $map_image_path = $mapResult['path'];
 
   $stmt = $pdo->prepare('UPDATE ohs_incidents SET title=?, incident_date=?, incident_time=?, who_name=?, who_npk=?, summary=?, result=?, root_causes=?, key_takeaways=?, corrective_actions=?, map_image_path=?, photo_image_path=?, status=?, updated_at=NOW() WHERE id=?');
-  $stmt->execute([$title, $incident_date, $incident_time, $who_name, $who_npk, $summary, $result, $root_causes, $key_takeaways, $corrective_actions, $map_image_path, $photo_image_path, $status, $id]);
+  $stmt->execute(array($title, $incident_date, $incident_time, $who_name, $who_npk, $summary, $result, $root_causes, $key_takeaways, $corrective_actions, $map_image_path, $photo_image_path, $status, $id));
 
   header('Location: index.php');
   exit;
@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select name="status" 
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <?php foreach (["draft","published","archived"] as $st): ?>
+                        <?php foreach (array("draft","published","archived") as $st): ?>
                             <option value="<?php echo $st; ?>" <?php echo ($row['status']===$st)?'selected':''; ?>><?php echo ucfirst($st); ?></option>
                         <?php endforeach; ?>
                     </select>

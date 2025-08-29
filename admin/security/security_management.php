@@ -7,7 +7,7 @@ requireAdminLogin();
 if (isset($_GET['delete_personnel']) && is_numeric($_GET['delete_personnel'])) {
     $id = (int)$_GET['delete_personnel'];
     $stmt = $pdo->prepare("DELETE FROM security_personnel WHERE id = ?");
-    $stmt->execute([$id]);
+    $stmt->execute(array($id));
     header("Location: security_management.php?success=deleted");
     exit();
 }
@@ -15,7 +15,7 @@ if (isset($_GET['delete_personnel']) && is_numeric($_GET['delete_personnel'])) {
 if (isset($_GET['delete_gallery']) && is_numeric($_GET['delete_gallery'])) {
     $id = (int)$_GET['delete_gallery'];
     $stmt = $pdo->prepare("SELECT photo_path FROM security_gallery WHERE id = ?");
-    $stmt->execute([$id]);
+    $stmt->execute(array($id));
     $photo = $stmt->fetch();
     
     if ($photo && file_exists($photo['photo_path'])) {
@@ -23,7 +23,7 @@ if (isset($_GET['delete_gallery']) && is_numeric($_GET['delete_gallery'])) {
     }
     
     $stmt = $pdo->prepare("DELETE FROM security_gallery WHERE id = ?");
-    $stmt->execute([$id]);
+    $stmt->execute(array($id));
     header("Location: security_management.php?success=gallery_deleted");
     exit();
 }
@@ -113,18 +113,18 @@ $gallery = $stmt->fetchAll();
                         <tbody>
                             <?php foreach ($personnel as $index => $item): ?>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3"><?= $index + 1 ?></td>
-                                <td class="px-4 py-3 font-semibold"><?= htmlspecialchars($item['position']) ?></td>
-                                <td class="px-4 py-3"><?= $item['personnel_count'] ?> personel</td>
+                                <td class="px-4 py-3"><?php echo $index + 1; ?></td>
+                                <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($item['position']); ?></td>
+                                <td class="px-4 py-3"><?php echo $item['personnel_count']; ?> personel</td>
                                 <td class="px-4 py-3">
                                     <div class="max-w-xs">
-                                        <?= nl2br(htmlspecialchars($item['personnel_names'])) ?>
+                                        <?php echo nl2br(htmlspecialchars($item['personnel_names'])); ?>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <?php if ($item['photo_path']): ?>
-                                        <img src="../<?= htmlspecialchars($item['photo_path']) ?>" 
-                                             alt="<?= htmlspecialchars($item['photo_alt'] ?? 'Security Photo') ?>" 
+                                        <img src="../<?php echo htmlspecialchars($item['photo_path']); ?>" 
+                                             alt="<?php echo htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : 'Security Photo'); ?>" 
                                              class="w-16 h-16 object-cover rounded">
                                     <?php else: ?>
                                         <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
@@ -134,11 +134,11 @@ $gallery = $stmt->fetchAll();
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex space-x-2">
-                                        <a href="edit_security_personnel.php?id=<?= $item['id'] ?>" 
+                                        <a href="edit_security_personnel.php?id=<?php echo $item['id']; ?>" 
                                            class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
                                             <i class="fas fa-edit mr-1"></i>Edit
                                         </a>
-                                        <a href="?delete_personnel=<?= $item['id'] ?>" 
+                                        <a href="?delete_personnel=<?php echo $item['id']; ?>" 
                                            class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
                                            onclick="return confirm('Yakin ingin menghapus data ini?')">
                                             <i class="fas fa-trash mr-1"></i>Hapus
@@ -165,24 +165,24 @@ $gallery = $stmt->fetchAll();
                     <?php foreach ($gallery as $item): ?>
                     <div class="bg-gray-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="../<?= htmlspecialchars($item['photo_path']) ?>" 
-                                 alt="<?= htmlspecialchars($item['photo_alt'] ?? $item['title']) ?>" 
+                            <img src="../<?php echo htmlspecialchars($item['photo_path']); ?>" 
+                                 alt="<?php echo htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : $item['title']); ?>" 
                                  class="w-full h-48 object-cover">
                             <div class="absolute top-2 right-2">
                                 <span class="bg-primary-blue text-white px-2 py-1 rounded text-xs">
-                                    <?= ucfirst($item['category']) ?>
+                                    <?php echo ucfirst($item['category']); ?>
                                 </span>
                             </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-semibold text-gray-800 mb-2"><?= htmlspecialchars($item['title']) ?></h3>
-                            <p class="text-gray-600 text-sm mb-3"><?= htmlspecialchars($item['description']) ?></p>
+                            <h3 class="font-semibold text-gray-800 mb-2"><?php echo htmlspecialchars($item['title']); ?></h3>
+                            <p class="text-gray-600 text-sm mb-3"><?php echo htmlspecialchars($item['description']); ?></p>
                             <div class="flex space-x-2">
-                                <a href="edit_security_gallery.php?id=<?= $item['id'] ?>" 
+                                <a href="edit_security_gallery.php?id=<?php echo $item['id']; ?>" 
                                    class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
                                     <i class="fas fa-edit mr-1"></i>Edit
                                 </a>
-                                <a href="?delete_gallery=<?= $item['id'] ?>" 
+                                <a href="?delete_gallery=<?php echo $item['id']; ?>" 
                                    class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
                                    onclick="return confirm('Yakin ingin menghapus foto ini?')">
                                     <i class="fas fa-trash mr-1"></i>Hapus
@@ -196,4 +196,4 @@ $gallery = $stmt->fetchAll();
         </div>
     </div>
 </body>
-</html> 
+</html>

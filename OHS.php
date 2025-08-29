@@ -5,7 +5,7 @@ $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 
 // Ambil data PTW untuk bulan/tahun yang diminta
 $stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month=? AND year=? ORDER BY display_order, contractor_name');
-$stmt->execute([$month, $year]);
+$stmt->execute(array($month, $year));
 $ptwRecords = $stmt->fetchAll();
 
 // Jika kosong, fallback ke bulan-tahun terbaru yang tersedia di tabel
@@ -16,13 +16,13 @@ if (!$ptwRecords) {
     $year = (int)$latest['year'];
     $month = (int)$latest['month'];
     $stmt = $pdo->prepare('SELECT * FROM ptw_records WHERE month=? AND year=? ORDER BY display_order, contractor_name');
-    $stmt->execute([$month, $year]);
+    $stmt->execute(array($month, $year));
     $ptwRecords = $stmt->fetchAll();
   }
 }
 
 // Hitung total dan data untuk chart
-$totals = ['num_ptw'=>0,'general'=>0,'hot_work'=>0,'lifting'=>0,'excavation'=>0,'electrical'=>0,'work_high'=>0,'radiography'=>0,'manpower'=>0];
+$totals = array('num_ptw'=>0,'general'=>0,'hot_work'=>0,'lifting'=>0,'excavation'=>0,'electrical'=>0,'work_high'=>0,'radiography'=>0,'manpower'=>0);
 foreach ($ptwRecords as $r) {
   foreach ($totals as $k=>$_) { $totals[$k] += (int)$r[$k]; }
 }
@@ -30,8 +30,8 @@ $labels = array_map(function($r){ return $r['contractor_name']; }, $ptwRecords);
 $ptwCounts = array_map(function($r){ return (int)$r['num_ptw']; }, $ptwRecords);
 
 // Info bulan untuk header
-$monthNames = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-$monthName = $monthNames[$month] ?? date('F', mktime(0,0,0,$month,1,$year));
+$monthNames = array(1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December');
+$monthName = isset($monthNames[$month]) ? $monthNames[$month] : date('F', mktime(0,0,0,$month,1,$year));
 $cutoff = sprintf('01 %s – %s %s %d', $monthName, date('t', mktime(0,0,0,$month,1,$year)), $monthName, $year);
 ?>
 <!DOCTYPE html>

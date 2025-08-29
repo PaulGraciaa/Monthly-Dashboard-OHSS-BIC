@@ -11,13 +11,13 @@ if (!isset($pdo) || !$pdo) {
 // --- Handle CRUD ---
 $notif = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $judul = $_POST['judul'] ?? '';
-    $deskripsi = $_POST['deskripsi'] ?? '';
-    $id = $_POST['id'] ?? '';
-    $current_image = $_POST['current_image'] ?? '';
+    $action = isset($_POST['action']) ? $_POST['action'] : 'add';
+    $judul = isset($_POST['judul']) ? $_POST['judul'] : '';
+    $deskripsi = isset($_POST['deskripsi']) ? $_POST['deskripsi'] : '';
+    $id = isset($_POST['id']) ? $_POST['id'] : '';
+    $current_image = isset($_POST['current_image']) ? $_POST['current_image'] : '';
     $gambar = $current_image;
-    $kategori = $_POST['kategori'] ?? 'Life Saving Rules';
+    $kategori = isset($_POST['kategori']) ? $_POST['kategori'] : 'Life Saving Rules';
     $target_dir = '../../uploads/life_saving_rules/';
     if (!is_dir($target_dir)) { mkdir($target_dir, 0777, true); }
     if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] == 0) {
@@ -30,14 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($action == 'add') {
         $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar, kategori) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$judul, $deskripsi, $gambar, $kategori]);
+        $stmt->execute(array($judul, $deskripsi, $gambar, $kategori));
         $_SESSION['notif'] = 'Data berhasil ditambah!';
         header('Location: life_saving_rules_tab.php');
         exit;
     } elseif ($action == 'edit') {
         if ($id) {
             $stmt = $pdo->prepare("UPDATE life_saving_rules SET judul=?, deskripsi=?, gambar=? WHERE id=?");
-            $stmt->execute([$judul, $deskripsi, $gambar, $id]);
+            $stmt->execute(array($judul, $deskripsi, $gambar, $id));
             $_SESSION['notif'] = 'Data berhasil diubah!';
         }
         header('Location: life_saving_rules_tab.php');
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action == 'delete') {
         if ($id) {
             $stmt = $pdo->prepare("DELETE FROM life_saving_rules WHERE id=?");
-            $stmt->execute([$id]);
+            $stmt->execute(array($id));
             $_SESSION['notif'] = 'Data berhasil dihapus!';
         }
         header('Location: life_saving_rules_tab.php');
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
     $stmt = $pdo->prepare("DELETE FROM life_saving_rules WHERE id=?");
-    $stmt->execute([$id]);
+    $stmt->execute(array($id));
     $_SESSION['notif'] = 'Data berhasil dihapus!';
     header('Location: life_saving_rules_tab.php');
     exit;
@@ -69,10 +69,10 @@ $bascom_judul = 'BASCOM Guidelines';
 $bascom_deskripsi = 'Kartu komunikasi untuk memastikan standar keselamatan tertinggi di Kawasan Batamindo';
 $bascom_gambar = 'bascom_card.png'; // Pastikan file ini ada di uploads/life_saving_rules/
 $cekBascom = $pdo->prepare("SELECT COUNT(*) FROM life_saving_rules WHERE judul = ?");
-$cekBascom->execute([$bascom_judul]);
+$cekBascom->execute(array($bascom_judul));
 if ($cekBascom->fetchColumn() == 0) {
     $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar, kategori) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$bascom_judul, $bascom_deskripsi, $bascom_gambar, 'BASCOM']);
+    $stmt->execute(array($bascom_judul, $bascom_deskripsi, $bascom_gambar, 'BASCOM'));
 }
 ?>
 

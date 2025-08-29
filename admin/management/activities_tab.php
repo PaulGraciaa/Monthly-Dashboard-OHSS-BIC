@@ -17,9 +17,9 @@ if (!function_exists('sanitize')) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         if (isset($_POST['action']) && $_POST['action'] == 'add') {
-            $title = sanitize($_POST['title'] ?? '');
-            $description = sanitize($_POST['description'] ?? '');
-            $activity_date = $_POST['activity_date'] ?? '';
+            $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+            $description = sanitize(isset($_POST['description']) ? $_POST['description'] : '');
+            $activity_date = isset($_POST['activity_date']) ? $_POST['activity_date'] : '';
             $image_path = 'uploads/activity/default.jpg';
             $upload_dir = '../../uploads/activity/';
             if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
             $stmt = $pdo->prepare("INSERT INTO activities (title, description, activity_date, image_path, created_by) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $description, $activity_date, $image_path, $_SESSION['admin_id']]);
+            $stmt->execute(array($title, $description, $activity_date, $image_path, $_SESSION['admin_id']));
             $_SESSION['notif'] = 'Activity berhasil ditambahkan!';
             header('Location: activities_tab.php');
             exit();
@@ -40,17 +40,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
             if ($id > 0) {
                 $stmt = $pdo->prepare("DELETE FROM activities WHERE id = ?");
-                $stmt->execute([$id]);
+                $stmt->execute(array($id));
                 $_SESSION['notif'] = 'Activity berhasil dihapus!';
             }
             header('Location: activities_tab.php');
             exit();
         } elseif (isset($_POST['action']) && $_POST['action'] == 'edit') {
             $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            $title = sanitize($_POST['title'] ?? '');
-            $description = sanitize($_POST['description'] ?? '');
-            $activity_date = $_POST['activity_date'] ?? '';
-            $image_path = $_POST['current_image'] ?? '';
+            $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+            $description = sanitize(isset($_POST['description']) ? $_POST['description'] : '');
+            $activity_date = isset($_POST['activity_date']) ? $_POST['activity_date'] : '';
+            $image_path = isset($_POST['current_image']) ? $_POST['current_image'] : '';
             $upload_dir = '../../uploads/activity/';
             if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
             if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             if ($id > 0) {
                 $stmt = $pdo->prepare("UPDATE activities SET title = ?, description = ?, activity_date = ?, image_path = ? WHERE id = ?");
-                $stmt->execute([$title, $description, $activity_date, $image_path, $id]);
+                $stmt->execute(array($title, $description, $activity_date, $image_path, $id));
                 $_SESSION['notif'] = 'Activity berhasil diupdate!';
             }
             header('Location: activities_tab.php');
@@ -81,7 +81,7 @@ try {
     $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $_SESSION['notif'] = 'Error loading activities: ' . $e->getMessage();
-    $activities = [];
+    $activities = array();
 }
 ?>
 <!DOCTYPE html>

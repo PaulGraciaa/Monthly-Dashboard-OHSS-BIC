@@ -1,8 +1,27 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
+// Perbaikan: Mengganti session_status() dengan cara lama
+if (!isset($_SESSION)) {
     session_start();
 }
 require_once '../config/database.php';
+
+// Definisikan fungsi sanitize jika belum ada
+if (!function_exists('sanitize')) {
+    function sanitize($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+}
+
+// Definisikan fungsi checkAdminLogin jika belum ada
+if (!function_exists('checkAdminLogin')) {
+    function checkAdminLogin() {
+        if (!isset($_SESSION['admin_id']) || empty($_SESSION['admin_id'])) {
+            header("Location: ../login.php");
+            exit();
+        }
+    }
+}
+
 checkAdminLogin();
 
 $error = '';
@@ -16,7 +35,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id = (int)$_GET['id'];
 $stmt = $pdo->prepare("SELECT * FROM security_gallery WHERE id = ?");
-$stmt->execute([$id]);
+$stmt->execute(array($id));
 $gallery = $stmt->fetch();
 
 if (!$gallery) {
@@ -35,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $photo_alt = sanitize($_POST['photo_alt']);
     
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_types = array('image/jpeg', 'image/png', 'image/gif');
         $max_size = 5 * 1024 * 1024; // 5MB
         
         if (in_array($_FILES['photo']['type'], $allowed_types) && $_FILES['photo']['size'] <= $max_size) {
@@ -65,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($error)) {
         try {
             $stmt = $pdo->prepare("UPDATE security_gallery SET title = ?, description = ?, photo_path = ?, photo_alt = ?, category = ?, display_order = ? WHERE id = ?");
-            $stmt->execute([$title, $description, $photo_path, $photo_alt, $category, $display_order, $id]);
+            $stmt->execute(array($title, $description, $photo_path, $photo_alt, $category, $display_order, $id));
             
             header("Location: security_management.php?success=updated");
             exit();
@@ -118,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <?php if ($error): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            <?= $error ?>
+                            <?php echo $error; ?>
                         </div>
                     <?php endif; ?>
 
@@ -130,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Judul Foto <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="title" required 
-                                       value="<?= htmlspecialchars($gallery['title']) ?>"
+                                       value="<?php echo htmlspecialchars($gallery['title']); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: Patroli Siang Hari">
                             </div>
@@ -143,13 +162,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <select name="category" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue">
                                     <option value="">Pilih Kategori</option>
-                                    <option value="patrol" <?= $gallery['category'] == 'patrol' ? 'selected' : '' ?>>Patroli</option>
-                                    <option value="inspection" <?= $gallery['category'] == 'inspection' ? 'selected' : '' ?>>Inspeksi</option>
-                                    <option value="monitoring" <?= $gallery['category'] == 'monitoring' ? 'selected' : '' ?>>Monitoring</option>
-                                    <option value="coordination" <?= $gallery['category'] == 'coordination' ? 'selected' : '' ?>>Koordinasi</option>
-                                    <option value="training" <?= $gallery['category'] == 'training' ? 'selected' : '' ?>>Pelatihan</option>
-                                    <option value="emergency" <?= $gallery['category'] == 'emergency' ? 'selected' : '' ?>>Darurat</option>
-                                    <option value="other" <?= $gallery['category'] == 'other' ? 'selected' : '' ?>>Lainnya</option>
+                                    <option value="patrol" <?php echo $gallery['category'] == 'patrol' ? 'selected' : ''; ?>>Patroli</option>
+                                    <option value="inspection" <?php echo $gallery['category'] == 'inspection' ? 'selected' : ''; ?>>Inspeksi</option>
+                                    <option value="monitoring" <?php echo $gallery['category'] == 'monitoring' ? 'selected' : ''; ?>>Monitoring</option>
+                                    <option value="coordination" <?php echo $gallery['category'] == 'coordination' ? 'selected' : ''; ?>>Koordinasi</option>
+                                    <option value="training" <?php echo $gallery['category'] == 'training' ? 'selected' : ''; ?>>Pelatihan</option>
+                                    <option value="emergency" <?php echo $gallery['category'] == 'emergency' ? 'selected' : ''; ?>>Darurat</option>
+                                    <option value="other" <?php echo $gallery['category'] == 'other' ? 'selected' : ''; ?>>Lainnya</option>
                                 </select>
                             </div>
 
@@ -159,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Urutan Tampilan
                                 </label>
                                 <input type="number" name="display_order" min="0"
-                                       value="<?= $gallery['display_order'] ?>"
+                                       value="<?php echo $gallery['display_order']; ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: 1">
                             </div>
@@ -171,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </label>
                                 <textarea name="description" rows="3"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                                          placeholder="Deskripsi singkat tentang foto ini"><?= htmlspecialchars($gallery['description']) ?></textarea>
+                                          placeholder="Deskripsi singkat tentang foto ini"><?php echo htmlspecialchars($gallery['description']); ?></textarea>
                             </div>
 
                             <!-- Current Photo -->
@@ -180,12 +199,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Foto Saat Ini
                                 </label>
                                 <div class="flex items-center space-x-4">
-                                    <img src="../<?= htmlspecialchars($gallery['photo_path']) ?>" 
-                                         alt="<?= htmlspecialchars($gallery['photo_alt'] ?? $gallery['title']) ?>" 
+                                    <img src="../<?php echo htmlspecialchars($gallery['photo_path']); ?>" 
+                                         alt="<?php echo htmlspecialchars(isset($gallery['photo_alt']) ? $gallery['photo_alt'] : $gallery['title']); ?>" 
                                          class="w-32 h-32 object-cover rounded border">
                                     <div>
-                                        <p class="text-sm text-gray-600"><?= htmlspecialchars($gallery['photo_alt'] ?? 'Tidak ada deskripsi') ?></p>
-                                        <p class="text-xs text-gray-500 mt-1">Kategori: <?= ucfirst($gallery['category']) ?></p>
+                                        <p class="text-sm text-gray-600"><?php echo htmlspecialchars(isset($gallery['photo_alt']) ? $gallery['photo_alt'] : 'Tidak ada deskripsi'); ?></p>
+                                        <p class="text-xs text-gray-500 mt-1">Kategori: <?php echo ucfirst($gallery['category']); ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -206,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Teks Alternatif Foto
                                 </label>
                                 <input type="text" name="photo_alt"
-                                       value="<?= htmlspecialchars($gallery['photo_alt']) ?>"
+                                       value="<?php echo htmlspecialchars($gallery['photo_alt']); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Deskripsi foto untuk aksesibilitas">
                             </div>
@@ -229,4 +248,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </body>
-</html> 
+</html>

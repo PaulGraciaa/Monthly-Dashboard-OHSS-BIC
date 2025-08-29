@@ -330,7 +330,7 @@ $gallery = $stmt->fetchAll();
               <?php if ($item['personnel_names']): ?>
                 <?= nl2br(htmlspecialchars($item['personnel_names'])) ?>
               <?php else: ?>
-                <?= htmlspecialchars($item['description'] ?? '') ?>
+                <?= htmlspecialchars(isset($item['description']) ? $item['description'] : '') ?>
               <?php endif; ?>
             </td>
           </tr>
@@ -348,7 +348,7 @@ $gallery = $stmt->fetchAll();
     <?php foreach ($gallery as $item): ?>
     <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
       <img src="<?= htmlspecialchars($item['photo_path']) ?>" 
-           alt="<?= htmlspecialchars($item['photo_alt'] ?? $item['title']) ?>" 
+           alt="<?= htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : $item['title']) ?>" 
            class="object-cover w-full h-48 gallery-photo">
       <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">
         <?= htmlspecialchars($item['description']) ?>

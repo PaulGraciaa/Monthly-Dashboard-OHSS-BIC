@@ -5,7 +5,7 @@ requireAdminLogin();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update') {
     try {
-        $configs = [
+        $configs = array(
             'company_name' => isset($_POST['company_name']) ? sanitize($_POST['company_name']) : '',
             'dashboard_title' => isset($_POST['dashboard_title']) ? sanitize($_POST['dashboard_title']) : '',
             'report_code' => isset($_POST['report_code']) ? sanitize($_POST['report_code']) : '',
@@ -13,10 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             'performance_positive' => isset($_POST['performance_positive']) ? sanitize($_POST['performance_positive']) : 90,
             'performance_negative' => isset($_POST['performance_negative']) ? sanitize($_POST['performance_negative']) : 5,
             'performance_others' => isset($_POST['performance_others']) ? sanitize($_POST['performance_others']) : 5
-        ];
+        );
         foreach ($configs as $key => $value) {
             $stmt = $pdo->prepare("UPDATE config SET config_value = ? WHERE config_key = ?");
-            if (!$stmt->execute([$value, $key])) {
+            if (!$stmt->execute(array($value, $key))) {
                 throw new Exception("Error updating $key configuration");
             }
         }
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 }
 
 try {
-    $config = [];
+    $config = array();
     $configData = $pdo->query("SELECT * FROM config")->fetchAll();
     foreach ($configData as $item) {
         $config[$item['config_key']] = $item['config_value'];
@@ -189,7 +189,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Company Name</label>
                         <div class="relative">
                             <i class="fas fa-building absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" name="company_name" value="<?php echo $config['company_name'] ?? ''; ?>" required 
+                            <input type="text" name="company_name" value="<?php echo isset($config['company_name']) ? $config['company_name'] : ''; ?>" required
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                         </div>
                     </div>
@@ -198,7 +198,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Dashboard Title</label>
                         <div class="relative">
                             <i class="fas fa-desktop absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" name="dashboard_title" value="<?php echo $config['dashboard_title'] ?? ''; ?>" required 
+                            <input type="text" name="dashboard_title" value="<?php echo isset($config['dashboard_title']) ? $config['dashboard_title'] : ''; ?>" required
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                         </div>
                     </div>
@@ -207,7 +207,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Report Code</label>
                         <div class="relative">
                             <i class="fas fa-hashtag absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" name="report_code" value="<?php echo $config['report_code'] ?? ''; ?>" required 
+                            <input type="text" name="report_code" value="<?php echo isset($config['report_code']) ? $config['report_code'] : ''; ?>" required
                                 class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                         </div>
                     </div>
@@ -216,7 +216,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Cut Off Date</label>
                         <div class="relative">
                             <i class="fas fa-calendar absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" name="cut_off_date" value="<?php echo $config['cut_off_date'] ?? ''; ?>" required 
+                            <input type="text" name="cut_off_date" value="<?php echo isset($config['cut_off_date']) ? $config['cut_off_date'] : ''; ?>" required
                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                                    placeholder="e.g., 01 July –31 July 2025">
                         </div>
@@ -234,7 +234,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Positive (%)</label>
                         <div class="relative">
                             <i class="fas fa-plus-circle absolute left-3 top-3 text-green-500"></i>
-                            <input type="number" name="performance_positive" value="<?php echo $config['performance_positive'] ?? 90; ?>" required 
+                            <input type="number" name="performance_positive" value="<?php echo isset($config['performance_positive']) ? $config['performance_positive'] : 90; ?>" required
                                    class="w-full pl-10 pr-4 py-2.5 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-green-50"
                                    min="0" max="100">
                         </div>
@@ -244,7 +244,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Negative (%)</label>
                         <div class="relative">
                             <i class="fas fa-minus-circle absolute left-3 top-3 text-red-500"></i>
-                            <input type="number" name="performance_negative" value="<?php echo $config['performance_negative'] ?? 5; ?>" required 
+                            <input type="number" name="performance_negative" value="<?php echo isset($config['performance_negative']) ? $config['performance_negative'] : 5; ?>" required
                                    class="w-full pl-10 pr-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-red-50"
                                    min="0" max="100">
                         </div>
@@ -254,7 +254,7 @@ setTimeout(closeNotif, 3000);
                         <label class="block text-sm font-medium text-gray-700">Others (%)</label>
                         <div class="relative">
                             <i class="fas fa-dot-circle absolute left-3 top-3 text-gray-500"></i>
-                            <input type="number" name="performance_others" value="<?php echo $config['performance_others'] ?? 5; ?>" required 
+                            <input type="number" name="performance_others" value="<?php echo isset($config['performance_others']) ? $config['performance_others'] : 5; ?>" required
                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50"
                                    min="0" max="100">
                         </div>

@@ -1,8 +1,29 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
+// Perbaikan: Mengganti session_status() dengan cara lama
+if (!isset($_SESSION)) {
     session_start();
 }
 require_once '../../config/database.php';
+// Pastikan fungsi checkAdminLogin() dan sanitize() ada di database.php
+// Jika tidak, tambahkan di sini
+
+// Definisikan fungsi sanitize jika belum ada
+if (!function_exists('sanitize')) {
+    function sanitize($data) {
+        return htmlspecialchars(strip_tags(trim($data)));
+    }
+}
+
+// Definisikan fungsi checkAdminLogin jika belum ada
+if (!function_exists('checkAdminLogin')) {
+    function checkAdminLogin() {
+        if (!isset($_SESSION['admin_id']) || empty($_SESSION['admin_id'])) {
+            header("Location: ../login.php");
+            exit();
+        }
+    }
+}
+
 checkAdminLogin();
 
 $error = '';
@@ -16,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Handle file upload
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowed_types = array('image/jpeg', 'image/png', 'image/gif');
         $max_size = 5 * 1024 * 1024; // 5MB
         
         if (in_array($_FILES['photo']['type'], $allowed_types) && $_FILES['photo']['size'] <= $max_size) {
@@ -35,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 try {
                     $stmt = $pdo->prepare("INSERT INTO security_gallery (title, description, photo_path, photo_alt, category, display_order, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->execute([$title, $description, $photo_path, $photo_alt, $category, $display_order, $_SESSION['admin_id']]);
+                    $stmt->execute(array($title, $description, $photo_path, $photo_alt, $category, $display_order, $_SESSION['admin_id']));
                     
                     header("Location: security_management.php?success=added");
                     exit();
@@ -100,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <?php if ($error): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            <?= $error ?>
+                            <?php echo $error; ?>
                         </div>
                     <?php endif; ?>
 
@@ -129,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <option value="monitoring">Monitoring</option>
                                     <option value="coordination">Koordinasi</option>
                                     <option value="training">Pelatihan</option>
-                                    <option value="emergency">Darurat</option>
+                                    <option value="emergery">Darurat</option>
                                     <option value="other">Lainnya</option>
                                 </select>
                             </div>
@@ -192,4 +213,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </body>
-</html> 
+</html>
