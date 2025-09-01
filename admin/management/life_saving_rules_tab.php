@@ -54,26 +54,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 // Hapus
 if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $stmt = $pdo->prepare("DELETE FROM life_saving_rules WHERE id=?");
-    $stmt->execute(array($id));
-    $_SESSION['notif'] = 'Data berhasil dihapus!';
-    header('Location: life_saving_rules_tab.php');
-    exit;
+  $id = $_GET['delete'];
+  // Ambil gambar sebelum hapus
+  $stmt = $pdo->prepare("SELECT gambar FROM life_saving_rules WHERE id=?");
+  $stmt->execute(array($id));
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($row && !empty($row['gambar'])) {
+    $img_path = '../../' . $row['gambar'];
+    if (file_exists($img_path)) {
+      unlink($img_path);
+    }
+  }
+  // Hapus data
+  $stmt = $pdo->prepare("DELETE FROM life_saving_rules WHERE id=?");
+  $stmt->execute(array($id));
+  $_SESSION['notif'] = 'Data berhasil dihapus!';
+  header('Location: life_saving_rules_tab.php');
+  exit;
 }
 // --- Ambil Data ---
 $data = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC");
 
 // Insert BASCOM data jika belum ada
-$bascom_judul = 'BASCOM Guidelines';
-$bascom_deskripsi = 'Kartu komunikasi untuk memastikan standar keselamatan tertinggi di Kawasan Batamindo';
-$bascom_gambar = 'bascom_card.png'; // Pastikan file ini ada di uploads/life_saving_rules/
-$cekBascom = $pdo->prepare("SELECT COUNT(*) FROM life_saving_rules WHERE judul = ?");
-$cekBascom->execute(array($bascom_judul));
-if ($cekBascom->fetchColumn() == 0) {
-    $stmt = $pdo->prepare("INSERT INTO life_saving_rules (judul, deskripsi, gambar, kategori) VALUES (?, ?, ?, ?)");
-    $stmt->execute(array($bascom_judul, $bascom_deskripsi, $bascom_gambar, 'BASCOM'));
-}
+
 ?>
 
 
@@ -208,7 +211,6 @@ if ($cekBascom->fetchColumn() == 0) {
                         <label class="block text-sm font-medium text-gray-700 mb-2">Judul</label>
                         <input type="text" name="judul" id="form-judul" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" required>
                     </div>
-                    <!-- Deskripsi removed -->
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar</label>
                         <div id="main-drop-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer relative transition-all duration-300">
@@ -226,6 +228,10 @@ if ($cekBascom->fetchColumn() == 0) {
                         </div>
                     </div>
                 </div>
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                <textarea name="deskripsi" id="form-deskripsi" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" required></textarea>
+              </div>
                 <div class="flex justify-end gap-2 mt-4">
                     <button type="submit" name="tambah" class="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
                         <i class="fas fa-plus"></i>
@@ -259,9 +265,9 @@ if ($cekBascom->fetchColumn() == 0) {
                     <?php while ($row = $data->fetch(PDO::FETCH_ASSOC)): ?>
                     <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                         <div class="relative">
-                            <?php if ($row['gambar']): ?>
-                                <img src="../../uploads/life_saving_rules/<?= htmlspecialchars($row['gambar']) ?>" alt="img" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
-                            <?php endif; ?>
+              <?php if ($row['gambar']): ?>
+                <img src="../../<?= htmlspecialchars($row['gambar']) ?>" alt="img" class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+              <?php endif; ?>
                             <div class="absolute top-4 right-4 flex space-x-2">
                                 <button type="button" class="edit-btn" data-id="<?= $row['id'] ?>" data-judul="<?= addslashes($row['judul']) ?>"
                                         class="bg-white text-red-600 p-2 rounded-lg shadow-md hover:shadow-lg hover:bg-red-50 transition-all duration-300">
@@ -273,14 +279,14 @@ if ($cekBascom->fetchColumn() == 0) {
                             </div>
                         </div>
                         <div class="p-6">
-                            <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-xl font-bold text-gray-800 truncate" title="<?= htmlspecialchars($row['judul']) ?>">
-                                    <?= htmlspecialchars($row['judul']) ?>
-                                </h3>
-                            </div>
-                            <p class="text-gray-600 mb-4 line-clamp-3">
-                                <!-- Deskripsi removed -->
-                            </p>
+            <div class="mb-3">
+              <h3 class="text-xl font-bold text-gray-800 truncate mb-2" title="<?= htmlspecialchars($row['judul']) ?>">
+                <?= htmlspecialchars($row['judul']) ?>
+              </h3>
+              <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                <?= htmlspecialchars($row['deskripsi']) ?>
+              </p>
+            </div>
                         </div>
                     </div>
                     <?php endwhile; ?>
@@ -335,12 +341,14 @@ if ($cekBascom->fetchColumn() == 0) {
             document.getElementById('form-id').value = id;
             document.getElementById('form-kategori').value = kategori;
             document.getElementById('form-judul').value = judul;
+            document.getElementById('form-deskripsi').value = deskripsi;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function openEditModal(id, judul, deskripsi) {
           document.getElementById('edit-id').value = id;
           document.getElementById('edit-judul').value = judul;
-          document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('edit-deskripsi').value = deskripsi;
+            document.getElementById('editModal').classList.remove('hidden');
         }
         function closeEditModal() {
           document.getElementById('editModal').classList.add('hidden');

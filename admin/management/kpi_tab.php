@@ -10,65 +10,84 @@ if (!function_exists('sanitize')) {
     }
 }
 
-// ...existing code...
+// Koneksi MySQLi
+$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+if ($mysqli->connect_error) {
+    die('Koneksi gagal: ' . $mysqli->connect_error);
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
-    try {
-        if ($_POST['action'] == 'create_leading') {
-            $indicator_name = isset($_POST['indicator_name']) ? sanitize($_POST['indicator_name']) : '';
-            $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
-            if ($indicator_name !== '' && $actual_value !== '') {
-                $stmt = $pdo->prepare("INSERT INTO kpi_leading (indicator_name, actual_value) VALUES (?, ?)");
-                $stmt->execute(array($indicator_name, $actual_value));
-                $_SESSION['notif'] = 'KPI Leading berhasil ditambahkan!';
-            }
-        } elseif ($_POST['action'] == 'delete_leading') {
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            if ($id > 0) {
-                $stmt = $pdo->prepare("DELETE FROM kpi_leading WHERE id = ?");
-                $stmt->execute(array($id));
-                $_SESSION['notif'] = 'KPI Leading berhasil dihapus!';
-            }
-        } elseif ($_POST['action'] == 'create_lagging') {
-            $indicator_name = isset($_POST['indicator_name']) ? sanitize($_POST['indicator_name']) : '';
-            $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
-            if ($indicator_name !== '' && $actual_value !== '') {
-                $stmt = $pdo->prepare("INSERT INTO kpi_lagging (indicator_name, actual_value) VALUES (?, ?)");
-                $stmt->execute(array($indicator_name, $actual_value));
-                $_SESSION['notif'] = 'KPI Lagging berhasil ditambahkan!';
-            }
-        } elseif ($_POST['action'] == 'delete_lagging') {
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            if ($id > 0) {
-                $stmt = $pdo->prepare("DELETE FROM kpi_lagging WHERE id = ?");
-                $stmt->execute(array($id));
-                $_SESSION['notif'] = 'KPI Lagging berhasil dihapus!';
-            }
-        } elseif ($_POST['action'] == 'update_leading') {
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
-            $target_value = isset($_POST['target_value']) && $_POST['target_value'] !== '' ? trim($_POST['target_value']) : null;
-            $notes = isset($_POST['notes']) && $_POST['notes'] !== '' ? trim($_POST['notes']) : null;
-            if ($id > 0 && $actual_value !== '') {
-                $stmt = $pdo->prepare("UPDATE kpi_leading SET actual_value = ?, target_value = ?, notes = ? WHERE id = ?");
-                $stmt->execute(array($actual_value, $target_value, $notes, $id));
-                $_SESSION['notif'] = 'KPI Leading berhasil diperbarui!';
-            }
-        } elseif ($_POST['action'] == 'update_lagging') {
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            $actual_value = isset($_POST['actual_value']) ? sanitize($_POST['actual_value']) : '';
-            if ($id > 0 && $actual_value !== '') {
-                $stmt = $pdo->prepare("UPDATE kpi_lagging SET actual_value = ? WHERE id = ?");
-                $stmt->execute(array($actual_value, $id));
-                $_SESSION['notif'] = 'KPI Lagging berhasil diperbarui!';
-            }
+    if ($_POST['action'] == 'create_leading') {
+        $indicator_name = isset($_POST['indicator_name']) ? sanitize($_POST['indicator_name']) : '';
+        $actual_value = isset($_POST['actual_value']) ? intval($_POST['actual_value']) : 0;
+        if ($indicator_name !== '' && is_numeric($actual_value)) {
+            $stmt = $mysqli->prepare("INSERT INTO kpi_leading (indicator_name, actual_value) VALUES (?, ?)");
+            $stmt->bind_param('si', $indicator_name, $actual_value);
+            $stmt->execute();
+            $_SESSION['notif'] = 'KPI Leading berhasil ditambahkan!';
         }
-    } catch (Exception $e) {
-    $_SESSION['notif'] = 'Terjadi error: ' . $e->getMessage();
+    } elseif ($_POST['action'] == 'delete_leading') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if ($id > 0) {
+            $stmt = $mysqli->prepare("DELETE FROM kpi_leading WHERE id = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $_SESSION['notif'] = 'KPI Leading berhasil dihapus!';
+        }
+    } elseif ($_POST['action'] == 'create_lagging') {
+        $indicator_name = isset($_POST['indicator_name']) ? sanitize($_POST['indicator_name']) : '';
+        $actual_value = isset($_POST['actual_value']) ? intval($_POST['actual_value']) : 0;
+        if ($indicator_name !== '' && is_numeric($actual_value)) {
+            $stmt = $mysqli->prepare("INSERT INTO kpi_lagging (indicator_name, actual_value) VALUES (?, ?)");
+            $stmt->bind_param('si', $indicator_name, $actual_value);
+            $stmt->execute();
+            $_SESSION['notif'] = 'KPI Lagging berhasil ditambahkan!';
+        }
+    } elseif ($_POST['action'] == 'delete_lagging') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if ($id > 0) {
+            $stmt = $mysqli->prepare("DELETE FROM kpi_lagging WHERE id = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $_SESSION['notif'] = 'KPI Lagging berhasil dihapus!';
+        }
+    } elseif ($_POST['action'] == 'update_leading') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $actual_value = isset($_POST['actual_value']) ? intval($_POST['actual_value']) : 0;
+        $target_value = isset($_POST['target_value']) && $_POST['target_value'] !== '' ? trim($_POST['target_value']) : null;
+        $notes = isset($_POST['notes']) && $_POST['notes'] !== '' ? trim($_POST['notes']) : null;
+        if ($id > 0 && is_numeric($actual_value)) {
+            $stmt = $mysqli->prepare("UPDATE kpi_leading SET actual_value = ?, target_value = ?, notes = ? WHERE id = ?");
+            $stmt->bind_param('issi', $actual_value, $target_value, $notes, $id);
+            $stmt->execute();
+            $_SESSION['notif'] = 'KPI Leading berhasil diperbarui!';
+        }
+    } elseif ($_POST['action'] == 'update_lagging') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $actual_value = isset($_POST['actual_value']) ? intval($_POST['actual_value']) : 0;
+        if ($id > 0 && is_numeric($actual_value)) {
+            $stmt = $mysqli->prepare("UPDATE kpi_lagging SET actual_value = ? WHERE id = ?");
+            $stmt->bind_param('ii', $actual_value, $id);
+            $stmt->execute();
+            $_SESSION['notif'] = 'KPI Lagging berhasil diperbarui!';
+        }
     }
 }
 
-$leadingKPIs = $pdo->query("SELECT * FROM kpi_leading ORDER BY indicator_name")->fetchAll();
-$laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")->fetchAll();
+$leadingKPIs = array();
+$result = $mysqli->query("SELECT * FROM kpi_leading ORDER BY indicator_name");
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $leadingKPIs[] = $row;
+    }
+}
+$laggingKPIs = array();
+$result2 = $mysqli->query("SELECT * FROM kpi_lagging ORDER BY indicator_name");
+if ($result2) {
+    while ($row = $result2->fetch_assoc()) {
+        $laggingKPIs[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -293,20 +312,15 @@ $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")-
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
                             <td class="px-6 py-4 text-black">
-                                <form method="POST" class="flex items-center gap-2">
-                                    <input type="hidden" name="action" value="update_leading">
-                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" required>
-                                </form>
+                                <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" form="form-leading-<?php echo $kpi['id']; ?>" required>
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
-                                <form method="POST" class="inline-block align-middle" style="display:inline-block;">
+                                <form method="POST" id="form-leading-<?php echo $kpi['id']; ?>" class="inline-block align-middle" style="display:inline-block;">
                                     <input type="hidden" name="action" value="update_leading">
                                     <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="hidden">
-                                    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs mr-1">Simpan</button>
+                                    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs">Simpan</button>
                                 </form>
-                                <form method="POST" class="inline-block align-middle" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline-block;">
+                                <form method="POST" class="inline-block align-middle ml-2" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline-block;">
                                     <input type="hidden" name="action" value="delete_leading">
                                     <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
                                     <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
@@ -339,23 +353,18 @@ $laggingKPIs = $pdo->query("SELECT * FROM kpi_lagging ORDER BY indicator_name")-
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 font-medium text-gray-900"><?php echo $kpi['indicator_name']; ?></td>
                             <td class="px-6 py-4 text-black">
-                                <form method="POST" class="flex items-center gap-2">
-                                    <input type="hidden" name="action" value="update_lagging">
-                                    <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" required>
-                                </form>
+                                <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="w-20 px-2 py-1 border border-gray-300 rounded text-xs" form="form-lagging-<?php echo $kpi['id']; ?>" required>
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
-                                <form method="POST" class="inline-block align-middle" style="display:inline-block;">
+                                <form method="POST" id="form-lagging-<?php echo $kpi['id']; ?>" class="inline-block align-middle" style="display:inline-block;">
                                     <input type="hidden" name="action" value="update_lagging">
                                     <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <input type="number" name="actual_value" value="<?php echo $kpi['actual_value']; ?>" class="hidden">
-                                    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs mr-1">Simpan</button>
+                                    <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs">Simpan</button>
                                 </form>
-                                <form method="POST" class="inline-block align-middle" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline-block;">
+                                <form method="POST" class="inline-block align-middle ml-2" onsubmit="return confirm('Hapus KPI ini?');" style="display:inline-block;">
                                     <input type="hidden" name="action" value="delete_lagging">
                                     <input type="hidden" name="id" value="<?php echo $kpi['id']; ?>">
-                                    <button type="submit" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700 text-xs"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
+                                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
                                 </form>
                             </td>
                         </tr>

@@ -14,6 +14,12 @@ try {
     die("Koneksi database gagal: " . $e->getMessage());
 }
 
+// Koneksi MySQLi untuk PHP 5.3.8
+$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+if ($mysqli->connect_error) {
+    die('Koneksi gagal: ' . $mysqli->connect_error);
+}
+
 // Fungsi untuk mencegah SQL injection
 if (!function_exists('sanitize')) {
     function sanitize($data) {
@@ -33,4 +39,4 @@ function checkAdminLogin() {
         redirect('admin/login.php');
     }
 }
-?> 
+?>

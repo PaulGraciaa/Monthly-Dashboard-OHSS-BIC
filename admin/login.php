@@ -21,23 +21,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!empty($username) && !empty($password)) {
         try {
             $stmt = $pdo->prepare("SELECT * FROM admin_users WHERE username = ? AND is_active = 1");
-            $stmt->execute([$username]);
+            $stmt->execute(array($username));
             $user = $stmt->fetch();
             
-            if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['admin_logged_in'] = true;
-                $_SESSION['admin_id'] = $user['id'];
-                $_SESSION['admin_username'] = $user['username'];
-                $_SESSION['admin_role'] = $user['role'];
-                $_SESSION['admin_name'] = $user['full_name'];
-                
-                // Update last login
-                $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
-                $updateStmt->execute([$user['id']]);
-                
-                // Redirect dengan header langsung
-                header('Location: dashboard.php');
-                exit();
+            if ($user) {
+                $isValid = false;
+                $needUpdate = false; // flag untuk update ke MD5
+
+                // Cek jika password disimpan plain text
+                if ($password === $user['password']) {
+                    $isValid = true;
+                    $needUpdate = true; // convert ke MD5
+                } 
+                // Cek jika password disimpan dalam bentuk MD5
+                elseif (md5($password) === $user['password']) {
+                    $isValid = true;
+                }
+
+                if ($isValid) {
+                    $_SESSION['admin_logged_in'] = true;
+                    $_SESSION['admin_id'] = $user['id'];
+                    $_SESSION['admin_username'] = $user['username'];
+                    $_SESSION['admin_role'] = $user['role'];
+                    $_SESSION['admin_name'] = $user['full_name'];
+
+                    // Update last login
+                    $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
+                    $updateStmt->execute(array($user['id']));
+
+                    // Jika login berhasil dengan plain text → update password jadi MD5
+                    if ($needUpdate) {
+                        $updatePwd = $pdo->prepare("UPDATE admin_users SET password = ? WHERE id = ?");
+                        $updatePwd->execute(array(md5($password), $user['id']));
+                    }
+
+                    header('Location: dashboard.php');
+                    exit();
+                } else {
+                    $error = 'Username atau password salah!';
+                }
             } else {
                 $error = 'Username atau password salah!';
             }
@@ -181,8 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <h4 class="text-sm font-medium">Default Credentials</h4>
                     </div>
                     <div class="text-sm text-gray-500 space-y-1">
-                        <p><span class="font-medium">Username:</span> admin</p>
-                        <p><span class="font-medium">Password:</span> admin123</p>
+                        <p><span class="font-medium">Username:</span> adminohss</p>
+                        <p><span class="font-medium">Password:</span> ohss1234#</p>
                     </div>
                 </div>
             </div>

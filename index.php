@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <link rel="icon" type="image/png" href="img/logo_safety.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OHSS Performance Dashboard</title>
@@ -280,11 +281,16 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
               <div id="lsrCarousel" class="relative w-full flex flex-col items-center h-72">
                 <?php foreach ($lsr_bascom as $idx => $item): ?>
                   <div class="absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-700 <?php echo $idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'; ?> lsr-slide" data-index="<?= $idx ?>">
-                    <?php if (!empty($item['gambar'])): ?>
-                      <img src="uploads/life_saving_rules/<?= htmlspecialchars($item['gambar']) ?>" class="h-56 object-contain mx-auto mb-2 life-image-hover" />
-                    <?php endif; ?>
-                    <h4 class="text-xs font-bold text-primary-blue mb-1"><?= htmlspecialchars($item['judul']) ?></h4>
-                    <p class="text-[10px] text-gray-600 leading-tight mb-2"><?= htmlspecialchars($item['deskripsi']) ?></p>
+                    <?php
+                      $imgPath = !empty($item['gambar']) ? $item['gambar'] : 'img/no-image.png';
+                    ?>
+                    <img src="<?= htmlspecialchars($imgPath) ?>" style="max-height:160px; max-width:90%; width:auto; object-fit:contain; margin-bottom:10px; background:#f3f4f6; border-radius:8px;" class="mx-auto life-image-hover" onerror="this.onerror=null;this.src='img/no-image.png';" />
+                    <h4 class="text-base font-semibold text-primary-blue mb-2 text-center" style="word-break:break-word;max-width:90%">
+                      <?= htmlspecialchars($item['judul']) ?>
+                    </h4>
+                    <p class="text-sm text-gray-700 mb-2 text-center" style="word-break:break-word;max-width:90%">
+                      <?= htmlspecialchars($item['deskripsi']) ?>
+                    </p>
                     <div class="flex justify-center gap-1 mt-2">
                       <?php foreach ($lsr_bascom as $dotIdx => $dotItem): ?>
                         <button class="lsr-dot w-2 h-2 rounded-full bg-primary-blue opacity-<?php echo $dotIdx === $idx ? '100' : '40'; ?> transition-opacity duration-300" data-index="<?= $dotIdx ?>" aria-label="Slide <?= $dotIdx + 1 ?>"></button>

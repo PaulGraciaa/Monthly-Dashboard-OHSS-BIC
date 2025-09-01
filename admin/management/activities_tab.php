@@ -15,73 +15,76 @@ if (!function_exists('sanitize')) {
 
 // Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    try {
-        if (isset($_POST['action']) && $_POST['action'] == 'add') {
-            $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
-            $description = sanitize(isset($_POST['description']) ? $_POST['description'] : '');
-            $activity_date = isset($_POST['activity_date']) ? $_POST['activity_date'] : '';
-            $image_path = 'uploads/activity/default.jpg';
-            $upload_dir = '../../uploads/activity/';
-            if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
-            if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-                $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+    if (isset($_POST['action']) && $_POST['action'] == 'add') {
+        $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+        $description = sanitize(isset($_POST['description']) ? $_POST['description'] : '');
+        $activity_date = isset($_POST['activity_date']) ? $_POST['activity_date'] : '';
+        $image_path = 'uploads/activity/default.jpg';
+        $upload_dir = '../../uploads/activity/';
+        if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+            $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $allowed_ext = array('jpg','jpeg','png','gif','webp');
+            if (in_array($file_extension, $allowed_ext)) {
                 $file_name = 'activity_' . time() . '_' . rand(1000,9999) . '.' . $file_extension;
                 $upload_path = $upload_dir . $file_name;
                 if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
                     $image_path = 'uploads/activity/' . $file_name;
                 }
             }
-            $stmt = $pdo->prepare("INSERT INTO activities (title, description, activity_date, image_path, created_by) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute(array($title, $description, $activity_date, $image_path, $_SESSION['admin_id']));
-            $_SESSION['notif'] = 'Activity berhasil ditambahkan!';
-            header('Location: activities_tab.php');
-            exit();
-        } elseif (isset($_POST['action']) && $_POST['action'] == 'delete') {
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            if ($id > 0) {
-                $stmt = $pdo->prepare("DELETE FROM activities WHERE id = ?");
-                $stmt->execute(array($id));
-                $_SESSION['notif'] = 'Activity berhasil dihapus!';
-            }
-            header('Location: activities_tab.php');
-            exit();
-        } elseif (isset($_POST['action']) && $_POST['action'] == 'edit') {
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-            $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
-            $description = sanitize(isset($_POST['description']) ? $_POST['description'] : '');
-            $activity_date = isset($_POST['activity_date']) ? $_POST['activity_date'] : '';
-            $image_path = isset($_POST['current_image']) ? $_POST['current_image'] : '';
-            $upload_dir = '../../uploads/activity/';
-            if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
-            if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-                $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $file_name = 'activity_' . time() . '_' . rand(1000,9999) . '.' . $file_extension;
-                $upload_path = $upload_dir . $file_name;
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-                    $image_path = 'uploads/activity/' . $file_name;
-                }
-            }
-            if ($id > 0) {
-                $stmt = $pdo->prepare("UPDATE activities SET title = ?, description = ?, activity_date = ?, image_path = ? WHERE id = ?");
-                $stmt->execute(array($title, $description, $activity_date, $image_path, $id));
-                $_SESSION['notif'] = 'Activity berhasil diupdate!';
-            }
-            header('Location: activities_tab.php');
-            exit();
         }
-    } catch (Exception $e) {
-        $_SESSION['notif'] = 'Error: ' . $e->getMessage();
+        $stmt = $mysqli->prepare("INSERT INTO activities (title, description, activity_date, image_path, created_by) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param('ssssi', $title, $description, $activity_date, $image_path, $_SESSION['admin_id']);
+        $stmt->execute();
+        $_SESSION['notif'] = 'Activity berhasil ditambahkan!';
+        header('Location: activities_tab.php');
+        exit();
+    } elseif (isset($_POST['action']) && $_POST['action'] == 'delete') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if ($id > 0) {
+            $stmt = $mysqli->prepare("DELETE FROM activities WHERE id = ?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $_SESSION['notif'] = 'Activity berhasil dihapus!';
+        }
+        header('Location: activities_tab.php');
+        exit();
+    } elseif (isset($_POST['action']) && $_POST['action'] == 'edit') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+        $description = sanitize(isset($_POST['description']) ? $_POST['description'] : '');
+        $activity_date = isset($_POST['activity_date']) ? $_POST['activity_date'] : '';
+        $image_path = isset($_POST['current_image']) ? $_POST['current_image'] : '';
+        $upload_dir = '../../uploads/activity/';
+        if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+            $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $allowed_ext = array('jpg','jpeg','png','gif','webp');
+            if (in_array($file_extension, $allowed_ext)) {
+                $file_name = 'activity_' . time() . '_' . rand(1000,9999) . '.' . $file_extension;
+                $upload_path = $upload_dir . $file_name;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                    $image_path = 'uploads/activity/' . $file_name;
+                }
+            }
+        }
+        if ($id > 0) {
+            $stmt = $mysqli->prepare("UPDATE activities SET title = ?, description = ?, activity_date = ?, image_path = ? WHERE id = ?");
+            $stmt->bind_param('ssssi', $title, $description, $activity_date, $image_path, $id);
+            $stmt->execute();
+            $_SESSION['notif'] = 'Activity berhasil diupdate!';
+        }
         header('Location: activities_tab.php');
         exit();
     }
 }
 
-try {
-    $stmt = $pdo->query("SELECT * FROM activities ORDER BY activity_date DESC");
-    $activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {
-    $_SESSION['notif'] = 'Error loading activities: ' . $e->getMessage();
-    $activities = array();
+$activities = array();
+$result = $mysqli->query("SELECT * FROM activities ORDER BY activity_date DESC");
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $activities[] = $row;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -275,9 +278,16 @@ try {
                         <?php foreach ($activities as $activity): ?>
                         <div class="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                             <div class="relative">
-                                <img src="../../<?php echo htmlspecialchars($activity['image_path']); ?>" 
-                                     alt="<?php echo htmlspecialchars($activity['title']); ?>" 
-                                     class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
+                          <?php
+                          $img_path = isset($activity['image_path']) && !empty($activity['image_path']) ? $activity['image_path'] : 'uploads/activity/default.jpg';
+                          $full_img_path = '../../' . $img_path;
+                          if (!file_exists($full_img_path) || !is_file($full_img_path)) {
+                              $full_img_path = '../../uploads/activity/default.jpg';
+                          }
+                          ?>
+                          <img src="<?php echo $full_img_path; ?>" 
+                              alt="<?php echo htmlspecialchars($activity['title']); ?>" 
+                              class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
                                 <div class="absolute top-4 right-4 flex space-x-2">
                                     <button type="button" onclick="openEditModal(<?php echo $activity['id']; ?>, '<?php echo htmlspecialchars(addslashes($activity['title'])); ?>', '<?php echo htmlspecialchars(addslashes($activity['description'])); ?>', '<?php echo $activity['activity_date']; ?>', '<?php echo htmlspecialchars(addslashes($activity['image_path'])); ?>')"
                                             class="bg-white text-red-600 p-2 rounded-lg shadow-md hover:shadow-lg hover:bg-red-50 transition-all duration-300">
