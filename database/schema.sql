@@ -1,4 +1,3 @@
-
 -- Database OHSS Dashboard
 CREATE DATABASE IF NOT EXISTS ohss_dashboard CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ohss_dashboard;
@@ -168,36 +167,6 @@ CREATE TABLE security_gallery (
     FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
 );
 
--- Tabel Fire Safety Content
-CREATE TABLE firesafety_content (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    section_name VARCHAR(100) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    image_path VARCHAR(255),
-    display_order INT DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_by INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
-);
-
--- Tabel Surveillance Content
-CREATE TABLE surveillance_content (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    section_name VARCHAR(100) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    image_path VARCHAR(255),
-    display_order INT DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_by INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
-);
-
 -- Insert default admin user (password: admin123)
 INSERT INTO admin_users (username, password, email, full_name, role) VALUES 
 ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@batamindo.com', 'Administrator', 'super_admin');
@@ -300,19 +269,6 @@ INSERT INTO security_gallery (title, description, photo_path, photo_alt, categor
 ('Pemeriksaan Area Belakang', 'Pemeriksaan area belakang tower pada sore hari.', 'img/p.jpg', 'Patroli 8', 'inspection', 8),
 ('Sweeping Area Terbuka', 'Sweeping area terbuka untuk deteksi potensi gangguan.', 'img/a.jpg', 'Patroli 9', 'patrol', 9);
 
--- Insert default Fire Safety content
-INSERT INTO firesafety_content (section_name, title, content, display_order) VALUES 
-('equipment', 'Fire Safety Equipment', 'Regular inspection and maintenance of fire safety equipment', 1),
-('drills', 'Fire Drills', 'Monthly fire drills conducted to ensure emergency preparedness', 2),
-('training', 'Fire Safety Training', 'Fire safety training for all employees', 3),
-('inspection', 'Fire Safety Inspection', 'Regular fire safety inspections and compliance checks', 4);
-
--- Insert default Surveillance content
-INSERT INTO surveillance_content (section_name, title, content, display_order) VALUES 
-('cctv', 'CCTV Monitoring', '24/7 CCTV monitoring system coverage and maintenance', 1),
-('incidents', 'Surveillance Incidents', 'Incidents captured through surveillance systems', 2),
-('maintenance', 'System Maintenance', 'Regular maintenance and updates of surveillance systems', 3),
-('coverage', 'Coverage Areas', 'Surveillance coverage areas and blind spot analysis', 4); 
 
 -- =============================================
 -- PTW Records (untuk menghubungkan Bagian 1 & 2)

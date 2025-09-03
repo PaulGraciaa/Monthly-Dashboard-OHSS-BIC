@@ -1,3 +1,35 @@
+<?php
+require_once 'config/database.php';
+
+// Ambil data dari database
+$stmt = $pdo->query("SELECT * FROM surveillance_overall_performance ORDER BY id ASC");
+$surveillanceData = $stmt->fetchAll();
+
+// Ambil data improvements progress
+$stmt = $pdo->query("SELECT * FROM surveillance_improvements_progress ORDER BY id ASC");
+$improvementsData = $stmt->fetchAll();
+
+// Ambil data CCTV System
+$stmt = $pdo->query("SELECT * FROM surveillance_cctv_system ORDER BY category, id ASC");
+$cctvData = $stmt->fetchAll();
+
+// Ambil data ISSS Software Utilization
+$stmt = $pdo->query("SELECT * FROM surveillance_isss_software ORDER BY id ASC");
+$isssData = $stmt->fetchAll();
+
+// Ambil data Security Team Patrol Performance
+$stmt = $pdo->query("SELECT * FROM surveillance_security_patrol ORDER BY id ASC");
+$securityPatrolData = $stmt->fetchAll();
+
+// Ambil data Security Team Performance on QR Scanned
+$stmt = $pdo->query("SELECT * FROM surveillance_qr_scanned ORDER BY id ASC");
+$qrScannedData = $stmt->fetchAll();
+
+// Ambil data Road Map CCTV & Surveillance Mapping
+$stmt = $pdo->query("SELECT * FROM surveillance_roadmap_mapping ORDER BY location_number ASC");
+$roadmapMappingData = $stmt->fetchAll();
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -7,11 +39,8 @@
   <title>OHSS Performance Dashboard - Surveillance</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script>
@@ -20,7 +49,7 @@
         extend: {
           colors: {
             'primary-blue': '#0A4D9E',
-            'header-footer-bg': '#e53935', // merah terang
+            'header-footer-bg': '#e53935',
             'background-color': '#f4f7fa',
           },
           fontFamily: {
@@ -32,12 +61,10 @@
   </script>
 
   <style>
-    /* Menyembunyikan header khusus cetak pada tampilan web */
     .print-only-header {  
       display: none;
     }
 
-    /* CSS UNTUK PRINT/PDF */
     @media print {
       @page {
         size: landscape;
@@ -49,12 +76,10 @@
         print-color-adjust: exact !important;
       }
       
-      /* Sembunyikan elemen web yang tidak perlu */
       aside, header.bg-header-footer-bg, footer, #fullscreenBtn, #exitFullscreenBtn, .sticky, .print-hidden {
         display: none !important;
       }
 
-      /* Tampilkan dan atur tata letak header khusus untuk cetak */
       .print-only-header {
         display: block !important;
         margin-bottom: 1.5rem;
@@ -95,7 +120,6 @@
         font-size: 8pt;
       }
 
-      /* Pengaturan konten utama dan halaman baru */
       main.main-content {
         margin: 0 !important;
         padding: 0 !important;
@@ -106,7 +130,6 @@
         page-break-before: always;
       }
       
-      /* Pengaturan tabel */
       table {
         width: 100% !important;
         border-collapse: collapse !important;
@@ -126,7 +149,6 @@
         background-color: #f2f2f2 !important;
       }
 
-      /* Override warna dan style lainnya */
       .bg-primary-blue, .bg-primary-blue\/90 { background-color: #0A4D9E !important; }
       .bg-blue-200 { background-color: #BFDBFE !important; }
       .bg-blue-100 { background-color: #DBEAFE !important; }
@@ -156,7 +178,6 @@
       opacity: 1;
     }
 
-    /* Tambahan style print agar grid mapping tidak pecah saat export */
     @media print {
       .print\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
       .print\:gap-4 { gap: 1rem !important; }
@@ -264,83 +285,64 @@
           </tr>
         </thead>
         <tbody class="text-sm">
-          <tr class="bg-blue-100 text-center font-bold">
-            <td class="py-2 px-3 align-top border-t border-b border-gray-400 border-r border-l">01</td>
-            <td class="py-2 px-3 text-left font-semibold align-top border-t border-b border-gray-400 border-r">Expand Cameras at Commercial Area (Pujasera Area)
-              <div class="font-normal">Was deployed 6 from 6 camera.</div>
+          <?php foreach ($improvementsData as $index => $row): ?>
+          <tr class="<?php echo $index % 2 == 0 ? 'bg-blue-100' : 'bg-blue-50'; ?> text-center font-bold">
+            <td class="py-2 px-3 align-top border-t border-b border-gray-400 border-r border-l"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></td>
+            <td class="py-2 px-3 text-left font-semibold align-top border-t border-b border-gray-400 border-r">
+              <?php echo htmlspecialchars($row['project_title']); ?>
+              <?php if (!empty($row['description'])): ?>
+              <div class="font-normal"><?php echo htmlspecialchars($row['description']); ?></div>
+              <?php endif; ?>
             </td>
             <td class="py-2 px-3 align-top border-t border-b border-gray-400 border-r">
-              <span class="bg-green-400 text-white px-2 py-1 rounded font-bold text-center block">Done</span>
+              <?php
+              $statusClass = '';
+              switch($row['status']) {
+                  case 'Done':
+                      $statusClass = 'bg-green-400 text-white';
+                      break;
+                  case 'In Progress':
+                      $statusClass = 'bg-yellow-300 text-black';
+                      break;
+                  case 'Pending':
+                      $statusClass = 'bg-blue-300 text-black';
+                      break;
+                  case 'Cancelled':
+                      $statusClass = 'bg-red-400 text-white';
+                      break;
+                  default:
+                      $statusClass = 'bg-gray-300 text-black';
+              }
+              ?>
+              <span class="<?php echo $statusClass; ?> px-2 py-1 rounded font-bold text-center block"><?php echo htmlspecialchars($row['status']); ?></span>
             </td>
-            <td class="py-2 px-3 align-top border-t border-b border-gray-400">Cumulative: 100%</td>
+            <td class="py-2 px-3 align-top border-t border-b border-gray-400"><?php echo htmlspecialchars($row['percentage']); ?></td>
           </tr>
-          <tr class="bg-blue-50 text-center font-bold">
-            <td class="py-2 px-3 align-top border-b border-gray-400 border-r border-l">02</td>
-            <td class="py-2 px-3 text-left font-semibold align-top border-b border-gray-400 border-r">Expand Cameras at Resident Area (Shophouse)
-              <div class="font-normal">Was deployed 6 from 6 camera, one camera will be installing in April</div>
-            </td>
-            <td class="py-2 px-3 align-top border-b border-gray-400 border-r">
-              <span class="bg-green-400 text-white px-2 py-1 rounded font-bold text-center block">Done</span>
-            </td>
-            <td class="py-2 px-3 align-top border-b border-gray-400">Cumulative: 100%<br>Increase this month: 25%</td>
-          </tr>
-          <tr class="bg-blue-100 text-center font-bold">
-            <td class="py-2 px-3 align-top border-b border-gray-400 border-r border-l">03</td>
-            <td class="py-2 px-3 text-left font-semibold align-top border-b border-gray-400 border-r">Expand Cameras at Commercial Area (Panasera Area)</td>
-            <td class="py-2 px-3 align-top border-b border-gray-400 border-r">
-              <span class="bg-yellow-300 text-black px-2 py-1 rounded font-bold text-center block">In progress</span>
-            </td>
-            <td class="py-2 px-3 align-top border-b border-gray-400">Cumulative: 40%<br>Increase this month: 0%</td>
-          </tr>
-          <tr class="bg-blue-50 text-center font-bold">
-            <td class="py-2 px-3 align-top border-b border-gray-400 border-r border-l">04</td>
-            <td class="py-2 px-3 text-left font-semibold align-top border-b border-gray-400 border-r">Upgrading Surveillance System at CCTV Room OPS
-              <div class="font-normal">Was installed server rack, waiting other part and equipment</div>
-            </td>
-            <td class="py-2 px-3 align-top border-b border-gray-400 border-r">
-              <span class="bg-yellow-300 text-black px-2 py-1 rounded font-bold text-center block">In Progress</span>
-            </td>
-            <td class="py-2 px-3 align-top border-b border-gray-400">Cumulative: 70%<br>Increase this month: 20%</td>
-        </div>
-    </div>
-
-      <h2 class="text-lg font-bold mb-2">1. Surveillance System Overall Performance</h2>
-      <table class="min-w-full border border-gray-400 rounded-lg bg-white shadow">
-        <thead>
-          <tr class="bg-primary-blue text-white text-center">
-            <th class="py-2 px-3 border-b border-gray-400 border-r border-l text-left" style="width:40%">Performance Indicators</th>
-            <th class="py-2 px-3 border-b border-gray-400 border-r text-center">Current Month</th>
-            <th class="py-2 px-3 border-b border-gray-400 text-center">Cumulative</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm">
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l text-left">Overall CCTV Operational Readiness Performance</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center align-middle">100%</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center align-middle"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l text-left">Overall CCTV Preventive Maintenance (PM) Performance</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center align-middle">100%</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center align-middle">100%</td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l text-left">Overall CCTV Corrective Maintenance (CM) Performance</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center align-middle">100%</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center align-middle">100%</td>
-          </tr>
-          <tr class="bg-blue-200 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l text-left align-top" rowspan="2">Utilisation of ISSS – Guard Tour Patrol</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">QR Checkpoint Scanned</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center">5741</td>
-          </tr>
-          <tr class="bg-blue-200 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Patrol Hours</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center">833</td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
+
+    <h2 class="text-lg font-bold mb-2">1. Surveillance System Overall Performance</h2>
+    <table class="min-w-full border border-gray-400 rounded-lg bg-white shadow">
+      <thead>
+        <tr class="bg-primary-blue text-white text-center">
+          <th class="py-2 px-3 border-b border-gray-400 border-r border-l text-left" style="width:40%">Performance Indicators</th>
+          <th class="py-2 px-3 border-b border-gray-400 border-r text-center">Current Month</th>
+          <th class="py-2 px-3 border-b border-gray-400 text-center">Cumulative</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        <?php foreach ($surveillanceData as $index => $row): ?>
+        <tr class="<?php echo $index % 2 == 0 ? 'bg-blue-100' : 'bg-blue-50'; ?> font-bold">
+          <td class="py-2 px-3 border-b border-gray-400 border-r border-l text-left"><?php echo htmlspecialchars($row['indicator']); ?></td>
+          <td class="py-2 px-3 border-b border-gray-400 border-r text-center align-middle"><?php echo htmlspecialchars($row['current_month']); ?></td>
+          <td class="py-2 px-3 border-b border-gray-400 text-center align-middle"><?php echo htmlspecialchars($row['cumulative']); ?></td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+
     <div class="overflow-x-auto page-break-before mt-8">
       <h2 class="text-lg font-bold mb-2">2. CCTV System</h2>
       <table class="min-w-full border border-gray-400 rounded-lg bg-white shadow">
@@ -352,70 +354,43 @@
           </tr>
         </thead>
         <tbody class="text-sm">
+          <?php 
+          $currentCategory = '';
+          foreach ($cctvData as $index => $row): 
+            if ($row['category'] != $currentCategory):
+              $currentCategory = $row['category'];
+              $categoryLabel = '';
+              switch($currentCategory) {
+                case 'Deployed CCTV Cameras Readiness': $categoryLabel = 'a. Deployed CCTV Cameras Readiness'; break;
+                case 'Total Portable CCTV Cameras': $categoryLabel = 'b. Total Portable CCTV Cameras'; break;
+                case 'Preventive Maintenance': $categoryLabel = 'c. Preventive Maintenance'; break;
+                case 'Corrective Maintenance': $categoryLabel = 'd. Corrective Maintenance'; break;
+                case 'CCTV Footage Request': $categoryLabel = 'e. CCTV Footage Request'; break;
+                default: $categoryLabel = $currentCategory;
+              }
+          ?>
           <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l" colspan="4">a. Deployed CCTV Cameras Readiness</td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r border-l" colspan="4"><?php echo $categoryLabel; ?></td>
           </tr>
+          <?php endif; ?>
           <tr class="bg-blue-50">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l pl-8 font-semibold" rowspan="2">i. CCTV Camera (IP Type)</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">Operational<br><span class='text-green-600 font-bold'>&#9650;152</span></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">Non-Operational<br>00</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center font-semibold" rowspan="2">100%</td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r border-l pl-8 font-semibold"><?php echo htmlspecialchars($row['description']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">Operational<br><span class='text-green-600 font-bold'><?php echo htmlspecialchars($row['operational']); ?></span></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">Non-Operational<br><?php echo htmlspecialchars($row['non_operational']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 text-center font-semibold"><?php echo htmlspecialchars($row['readiness_percentage']); ?></td>
           </tr>
-          <tr class="bg-blue-50">
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">&#9650;152</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">00</td>
-          </tr>
-          <tr class="bg-blue-50">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l pl-8 font-semibold" rowspan="2">ii. CCTV Fixed Camera (Analog Type)</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">Operational<br>11</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">Non-Operational<br>00</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center font-semibold" rowspan="2">100%</td>
-          </tr>
-          <tr class="bg-blue-50">
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">11</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center font-semibold">00</td>
-          </tr>
-          <tr class="bg-blue-100">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l font-bold italic" colspan="4">Highlight</td>
-          </tr>
+          <?php if (!empty($row['notes'])): ?>
           <tr class="bg-blue-50">
             <td class="py-2 px-3 border-b border-gray-400 border-r border-l text-left italic" colspan="4">
-              <ul class="list-disc pl-5">
-                <li>Surveillance system deployed based existing and future improvements</li>
-                <li>Currently migration all of camera system from analog to IP Camera system, this improvement put in phase</li>
-              </ul>
+              <?php echo htmlspecialchars($row['notes']); ?>
             </td>
           </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l" colspan="4">b. Total Portable CCTV Cameras</td>
-          </tr>
-          <tr class="bg-blue-50">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l pl-8 font-semibold">i. Portable CCTV Cameras</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Deployed<br>00</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Standby<br>00</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center"><span class="text-blue-600 font-bold">0%</span></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">c. Preventive Maintenance</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Scheduled<br>01</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Completed<br>01</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center"><span class="text-blue-600 font-bold">0%</span> / 100%</td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">d. Corrective Maintenance</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">No. of Faults<br>15</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Completed<br>15</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center"><span class="text-blue-600 font-bold">0%</span> / 100%</td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">e. CCTV Footage Request</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">No. of Request<br>11</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">Completed<br>11</td>
-            <td class="py-2 px-3 border-b border-gray-400 text-center"><span class="text-blue-600 font-bold">0%</span> / 100%</td>
-          </tr>
+          <?php endif; ?>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
+
     <div class="overflow-x-auto page-break-before mt-8">
       <h2 class="text-lg font-bold mb-2">3. ISSS Software Utilization</h2>
       <table class="min-w-full border border-gray-400 rounded-lg bg-white shadow">
@@ -437,51 +412,23 @@
           </tr>
         </thead>
         <tbody class="text-sm">
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Total Number Of Patrol Session Conducted</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">335</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">299</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">283</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">306</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">327</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">311</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
+          <?php foreach ($isssData as $index => $row): ?>
+          <tr class="<?php echo $index % 2 == 0 ? 'bg-blue-100' : 'bg-blue-50'; ?> font-bold">
+            <td class="py-2 px-3 border-b border-gray-400 border-r border-l"><?php echo htmlspecialchars($row['metric_name']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['jan']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['feb']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['mar']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['apr']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['may']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold"><?php echo htmlspecialchars($row['jun']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['jul']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['aug']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['sep']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['oct']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['nov']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50 text-center"><?php echo htmlspecialchars($row['dec']); ?></td>
           </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Total Patrol Duration Conducted (Hours)</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">732</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">687</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">673</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">749</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">769</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">833</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Total QR Checkpoints Scanned</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">5693</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">5392</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">4704</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">6102</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">5616</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">5741</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -506,156 +453,23 @@
           </tr>
         </thead>
         <tbody class="text-sm">
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team A – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">69</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">21</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">44</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">62</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">52</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">72</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
+          <?php foreach ($securityPatrolData as $index => $row): ?>
+          <tr class="<?php echo $index % 2 == 0 ? 'bg-blue-100' : 'bg-blue-50'; ?> font-bold">
+            <td class="py-2 px-3 border-b border-gray-400 border-r border-l"><?php echo htmlspecialchars($row['team_name']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['jan']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['feb']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['mar']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['apr']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['may']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold"><?php echo htmlspecialchars($row['jun']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['jul']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['aug']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['sep']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['oct']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['nov']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50 text-center"><?php echo htmlspecialchars($row['dec']); ?></td>
           </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team A – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">40</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">41</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">42</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">47</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">53</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">41</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team B – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">83</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">43</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">58</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">56</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">42</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">57</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team B – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">0</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">0</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">16</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">36</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">35</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">50</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team C – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">86</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">40</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">69</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">114</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">90</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">112</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team C – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">6</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">11</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">9</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">5</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team D – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">62</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">21</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">74</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">79</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">94</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">96</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team D – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">28</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">39</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">28</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">20</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">14</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">53</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Powerhouse</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">343</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">332</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">337</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">320</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">377</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">342</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-primary-blue text-white font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Total</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">717</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">538</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">669</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">745</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">766</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">828</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -680,156 +494,23 @@
           </tr>
         </thead>
         <tbody class="text-sm">
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team A – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">622</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">833</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">604</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1036</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">429</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">1076</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
+          <?php foreach ($qrScannedData as $index => $row): ?>
+          <tr class="<?php echo $index % 2 == 0 ? 'bg-blue-100' : 'bg-blue-50'; ?> font-bold">
+            <td class="py-2 px-3 border-b border-gray-400 border-r border-l"><?php echo htmlspecialchars($row['team_name']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['jan']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['feb']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['mar']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['apr']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r text-center"><?php echo htmlspecialchars($row['may']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold"><?php echo htmlspecialchars($row['jun']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['jul']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['aug']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['sep']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['oct']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50 text-center"><?php echo htmlspecialchars($row['nov']); ?></td>
+            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50 text-center"><?php echo htmlspecialchars($row['dec']); ?></td>
           </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team A – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1093</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">634</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1265</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">725</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">440</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">312</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team B – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1166</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1348</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">156</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">672</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">399</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">825</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team B – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">0</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">0</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">486</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">905</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">634</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">302</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team C – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">644</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">959</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">519</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">696</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">1063</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">1391</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team C – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">308</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">28</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">29</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">364</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">196</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">53</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team D – Patrol Truck</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">605</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">126</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">696</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">920</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">702</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-50 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Team D – Patrol Bike</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">319</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">726</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">145</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">348</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">665</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">336</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-blue-100 font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Powerhouse</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">936</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">738</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">804</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">660</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">870</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">744</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
-          <tr class="bg-primary-blue text-white font-bold">
-            <td class="py-2 px-3 border-b border-gray-400 border-r border-l">Total</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">5693</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">5392</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">4704</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">6102</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r text-center">5616</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-green-100 text-black text-center font-bold">5741</td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 border-r bg-blue-50"></td>
-            <td class="py-2 px-3 border-b border-gray-400 bg-blue-50"></td>
-          </tr>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -842,56 +523,18 @@
     </div>
     <div class="overflow-x-auto mt-8 print-keep-together">
       <div class="print-keep-together grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6 rounded-2xl shadow-2xl border border-gray-200 print:grid-cols-2 print:gap-4">
-        <!-- Gambar 1-10 dibungkus agar tidak terpotong saat print -->
+        <?php foreach ($roadmapMappingData as $location): ?>
         <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="BIP Parking Areas" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">1. BIP Parking Areas</div>
+          <img src="<?php echo htmlspecialchars($location['image_path']); ?>" alt="<?php echo htmlspecialchars($location['location_name']); ?>" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
+          <div class="font-extrabold text-blue-900 text-base text-center mb-1"><?php echo htmlspecialchars($location['location_number']); ?>. <?php echo htmlspecialchars($location['location_name']); ?></div>
+          <?php if (!empty($location['description'])): ?>
+          <div class="text-xs text-gray-600 text-center"><?php echo htmlspecialchars($location['description']); ?></div>
+          <?php endif; ?>
+          <?php if (!empty($location['cctv_coverage'])): ?>
+          <div class="text-xs text-green-600 font-semibold text-center mt-1">CCTV: <?php echo htmlspecialchars($location['cctv_coverage']); ?></div>
+          <?php endif; ?>
         </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Multi Purpose Hall (MPH)" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">2. Multi Purpose Hall (MPH)</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Community Centre" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">3. Community Centre</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Panasera Areas" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">4. Panasera Areas</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Power House #01" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">5. Power House #01</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Power House #4" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">6. Power House #4</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Power House #03" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">7. Power House #03</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="STP WWTP areas" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">8. STP WWTP areas</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="WTP area" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">9. WTP area</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Dormitory block" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">10. Dormitory block</div>
-        </div>
-        <!-- Gambar 11-12 tetap di luar pembungkus agar bisa lanjut ke halaman berikutnya jika perlu -->
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="OPS Area" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1">11. OPS Area</div>
-        </div>
-        <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="img/map.png" alt="Wisma Batamindo" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-            <div class="font-extrabold text-blue-900 text-base text-center mb-1">12. Wisma Batamindo</div>
-        </div>
+        <?php endforeach; ?>
       </div>
     </div>
   </main>
