@@ -1,12 +1,4 @@
 <?php
-session_start();
-require_once '../../config/database.php';
-
-// Cek login admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: ../login.php");
-    exit();
-}
 
 // Proses CRUD
 $message = '';
@@ -68,40 +60,7 @@ if (isset($_GET['edit'])) {
 $stmt = $pdo->query("SELECT * FROM surveillance_overall_performance ORDER BY id ASC");
 $data = $stmt->fetchAll();
 ?>
-
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Surveillance Overall Performance</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .bg-header-footer-bg { background-color: #e53935; }
-        .text-header-footer-bg { color: #e53935; }
-        .border-header-footer-bg { border-color: #e53935; }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-header-footer-bg text-white px-6 py-4 shadow-lg">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <a href="../dashboard.php" class="text-white hover:text-gray-200">
-                    <i class="fas fa-arrow-left text-xl"></i>
-                </a>
-                <h1 class="text-2xl font-bold">Surveillance Overall Performance</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span class="text-sm">Admin: <?php echo $_SESSION['admin_username'] ?? 'Admin'; ?></span>
-                <a href="../logout.php" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                </a>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">
         <!-- Message -->
@@ -218,5 +177,5 @@ $data = $stmt->fetchAll();
             }
         }, 5000);
     </script>
-</body>
-</html>
+
+<?php require_once 'template_footer.php'; ?>

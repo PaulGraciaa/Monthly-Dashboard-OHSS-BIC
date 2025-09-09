@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Fungsi untuk mengecek apakah admin sudah login
 function isAdminLoggedIn() {
@@ -28,12 +30,12 @@ function redirectIfLoggedIn() {
 // Fungsi untuk mendapatkan data admin yang sedang login
 function getCurrentAdmin() {
     if (isAdminLoggedIn()) {
-        return [
+        return array(
             'id' => $_SESSION['admin_id'],
             'username' => $_SESSION['admin_username'],
-            'role' => $_SESSION['admin_role'] ?? 'admin',
-            'name' => $_SESSION['admin_name'] ?? $_SESSION['admin_username']
-        ];
+            'role' => isset($_SESSION['admin_role']) ? $_SESSION['admin_role'] : 'admin',
+            'name' => isset($_SESSION['admin_name']) ? $_SESSION['admin_name'] : $_SESSION['admin_username']
+        );
     }
     return null;
 }

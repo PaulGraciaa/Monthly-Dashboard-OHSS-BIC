@@ -20,6 +20,11 @@ if ($mysqli->connect_error) {
     die('Koneksi gagal: ' . $mysqli->connect_error);
 }
 
+// Alias kompatibilitas untuk kode yang memakai $conn
+if (!isset($conn)) {
+    $conn = $mysqli;
+}
+
 // Fungsi untuk mencegah SQL injection
 if (!function_exists('sanitize')) {
     function sanitize($data) {

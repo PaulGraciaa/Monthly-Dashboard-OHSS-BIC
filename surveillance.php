@@ -10,8 +10,25 @@ $stmt = $pdo->query("SELECT * FROM surveillance_improvements_progress ORDER BY i
 $improvementsData = $stmt->fetchAll();
 
 // Ambil data CCTV System
-$stmt = $pdo->query("SELECT * FROM surveillance_cctv_system ORDER BY category, id ASC");
-$cctvData = $stmt->fetchAll();
+
+// Urutkan kategori CCTV System secara manual agar selalu a-e
+$stmt = $pdo->query("SELECT * FROM surveillance_cctv_system");
+$rawCctvData = $stmt->fetchAll();
+$categoryOrder = array(
+  'Deployed CCTV Cameras Readiness',
+  'Total Portable CCTV Cameras',
+  'Preventive Maintenance',
+  'Corrective Maintenance',
+  'CCTV Footage Request'
+);
+$cctvData = array();
+foreach ($categoryOrder as $cat) {
+  foreach ($rawCctvData as $row) {
+    if ($row['category'] === $cat) {
+      $cctvData[] = $row;
+    }
+  }
+}
 
 // Ambil data ISSS Software Utilization
 $stmt = $pdo->query("SELECT * FROM surveillance_isss_software ORDER BY id ASC");
@@ -26,7 +43,7 @@ $stmt = $pdo->query("SELECT * FROM surveillance_qr_scanned ORDER BY id ASC");
 $qrScannedData = $stmt->fetchAll();
 
 // Ambil data Road Map CCTV & Surveillance Mapping
-$stmt = $pdo->query("SELECT * FROM surveillance_roadmap_mapping ORDER BY location_number ASC");
+$stmt = $pdo->query("SELECT * FROM surveillance_roadmap_mapping ORDER BY id ASC");
 $roadmapMappingData = $stmt->fetchAll();
 ?>
 
@@ -523,16 +540,14 @@ $roadmapMappingData = $stmt->fetchAll();
     </div>
     <div class="overflow-x-auto mt-8 print-keep-together">
       <div class="print-keep-together grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6 rounded-2xl shadow-2xl border border-gray-200 print:grid-cols-2 print:gap-4">
-        <?php foreach ($roadmapMappingData as $location): ?>
+        <?php foreach ($roadmapMappingData as $row): ?>
         <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
-          <img src="<?php echo htmlspecialchars($location['image_path']); ?>" alt="<?php echo htmlspecialchars($location['location_name']); ?>" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
-          <div class="font-extrabold text-blue-900 text-base text-center mb-1"><?php echo htmlspecialchars($location['location_number']); ?>. <?php echo htmlspecialchars($location['location_name']); ?></div>
-          <?php if (!empty($location['description'])): ?>
-          <div class="text-xs text-gray-600 text-center"><?php echo htmlspecialchars($location['description']); ?></div>
+          <?php if (!empty($row['image'])): ?>
+            <img src="<?php echo htmlspecialchars($row['image']); ?>" alt="Roadmap Image" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
+          <?php else: ?>
+            <span class="text-gray-400 italic">Tidak ada gambar</span>
           <?php endif; ?>
-          <?php if (!empty($location['cctv_coverage'])): ?>
-          <div class="text-xs text-green-600 font-semibold text-center mt-1">CCTV: <?php echo htmlspecialchars($location['cctv_coverage']); ?></div>
-          <?php endif; ?>
+          <div class="font-extrabold text-blue-900 text-base text-center mb-1"><?php echo htmlspecialchars($row['title']); ?></div>
         </div>
         <?php endforeach; ?>
       </div>

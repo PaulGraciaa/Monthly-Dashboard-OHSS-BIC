@@ -11,8 +11,6 @@ if (!function_exists('sanitize')) {
 }
 
 
-
-
 // Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add') {
@@ -109,11 +107,9 @@ if ($result) {
     </script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <!-- Red Header Section -->
     <div class="bg-gradient-to-r from-red-600 to-red-800">
         <header class="text-white py-4">
             <div class="max-w-7xl mx-auto px-4">
-                <!-- Company Header -->
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center space-x-4">
                         <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
@@ -135,7 +131,6 @@ if ($result) {
             </div>
         </header>
 
-        <!-- Navigation -->
         <div class="border-t border-red-500/30">
             <div class="max-w-7xl mx-auto px-4 py-2">
                 <nav class="flex space-x-4">
@@ -205,7 +200,6 @@ if ($result) {
             </script>
             <?php endif; ?>
 
-            <!-- Add Activity Form -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-3xl font-bold text-gray-800 flex items-center">
@@ -228,6 +222,12 @@ if ($result) {
                                 <input type="date" name="activity_date" required 
                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                             </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea name="description" rows="4" 
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                                      placeholder="Enter a description for the activity..."></textarea>
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
@@ -257,7 +257,6 @@ if ($result) {
                 </form>
             </div>
 
-            <!-- Activities List -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-3xl font-bold text-gray-800 flex items-center">
@@ -319,7 +318,6 @@ if ($result) {
                             </div>
                         </div>
                         <?php endforeach; ?>
-    <!-- Edit Activity Modal -->
     <div id="editActivityModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative">
             <div class="flex justify-between items-center mb-4">

@@ -1,12 +1,6 @@
 <?php
-session_start();
-require_once '../../config/database.php';
-
-// Cek login admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: ../login.php");
-    exit();
-}
+$page_title = 'Improvements Project Progress';
+require_once 'template_header.php';
 
 // Proses CRUD
 $message = '';
@@ -72,36 +66,18 @@ $data = $stmt->fetchAll();
 
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Improvements Project Progress</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .bg-header-footer-bg { background-color: #e53935; }
-        .text-header-footer-bg { color: #e53935; }
-        .border-header-footer-bg { border-color: #e53935; }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-header-footer-bg text-white px-6 py-4 shadow-lg">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <a href="index.php" class="text-white hover:text-gray-200">
-                    <i class="fas fa-arrow-left text-xl"></i>
-                </a>
-                <h1 class="text-2xl font-bold">Improvements Project Progress</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span class="text-sm">Admin: <?php echo $_SESSION['admin_username'] ?? 'Admin'; ?></span>
-                <a href="../logout.php" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                </a>
-            </div>
-        </div>
-    </header>
+    </main>
+
+    <script>
+        function openEditModal(id) {
+            document.getElementById('editModal' + id).style.display = 'block';
+        }
+
+        function closeEditModal(id) {
+            document.getElementById('editModal' + id).style.display = 'none';
+        }
+    </script>
+
 
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">

@@ -139,3 +139,4 @@ Untuk bantuan teknis atau pertanyaan, silakan hubungi:
 ## License
 
 © 2024 Batamindo Investment Cakrawala. All rights reserved.
+

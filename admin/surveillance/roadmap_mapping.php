@@ -1,61 +1,72 @@
 <?php
+require_once '../../config/database.php';
 $page_title = 'Roadmap Mapping';
-require_once 'template_header.php';
-
-// Proses CRUD
 $message = '';
-$message_type = '';
-
-// Create/Update
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['action'])) {
-        $project_name = sanitize($_POST['project_name']);
-        $description = sanitize($_POST['description']);
-        $phase = sanitize($_POST['phase']);
-        $status = sanitize($_POST['status']);
-        $completion_percentage = sanitize($_POST['completion_percentage']);
-        
-        if ($_POST['action'] == 'add') {
-            $stmt = $mysqli->prepare("INSERT INTO surveillance_roadmap_mapping (project_name, description, phase, status, completion_percentage) VALUES (?, ?, ?, ?, ?)");
-            if ($stmt->bind_param('sssss', $project_name, $description, $phase, $status, $completion_percentage) && $stmt->execute()) {
+$edit_data = null;
+// CRUD logic moved before any output
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
+    $title = sanitize($_POST['title']);
+    $image = isset($_FILES['image']) ? $_FILES['image'] : null;
+    $imagePath = '';
+    $uploadError = '';
+    if ($image && $image['error'] == UPLOAD_ERR_OK) {
+        $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
+        $filename = 'roadmap_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+        $target = '../../uploads/roadmap_mapping/' . $filename;
+        if (move_uploaded_file($image['tmp_name'], $target)) {
+            $imagePath = 'uploads/roadmap_mapping/' . $filename;
+        } else {
+            $uploadError = 'Gagal upload gambar. Pastikan folder uploads/roadmap_mapping sudah ada dan permission benar.';
+        }
+    } elseif ($image && $image['error'] != UPLOAD_ERR_NO_FILE) {
+        $uploadError = 'Gagal upload gambar. Error code: ' . $image['error'];
+    }
+    if ($_POST['action'] == 'add') {
+        if ($uploadError) {
+            $message = $uploadError;
+        } else {
+            $stmt = $mysqli->prepare("INSERT INTO surveillance_roadmap_mapping (title, image) VALUES (?, ?)");
+            if ($stmt && $stmt->bind_param('ss', $title, $imagePath) && $stmt->execute()) {
                 $_SESSION['notif'] = "Data berhasil ditambahkan!";
                 header('Location: roadmap_mapping.php');
                 exit();
             } else {
                 $message = "Gagal menambahkan data!";
-                $message_type = "error";
             }
-        } elseif ($_POST['action'] == 'edit') {
-            $id = sanitize($_POST['id']);
-            $stmt = $mysqli->prepare("UPDATE surveillance_roadmap_mapping SET project_name = ?, description = ?, phase = ?, status = ?, completion_percentage = ? WHERE id = ?");
-            if ($stmt->bind_param('sssssi', $project_name, $description, $phase, $status, $completion_percentage, $id) && $stmt->execute()) {
+        }
+    } elseif ($_POST['action'] == 'edit') {
+        $id = sanitize($_POST['id']);
+        if ($uploadError) {
+            $message = $uploadError;
+        } else {
+            if ($imagePath) {
+                $stmt = $mysqli->prepare("UPDATE surveillance_roadmap_mapping SET title = ?, image = ? WHERE id = ?");
+                $success = $stmt && $stmt->bind_param('ssi', $title, $imagePath, $id) && $stmt->execute();
+            } else {
+                $stmt = $mysqli->prepare("UPDATE surveillance_roadmap_mapping SET title = ? WHERE id = ?");
+                $success = $stmt && $stmt->bind_param('si', $title, $id) && $stmt->execute();
+            }
+            if ($success) {
                 $_SESSION['notif'] = "Data berhasil diperbarui!";
                 header('Location: roadmap_mapping.php');
                 exit();
             } else {
                 $message = "Gagal memperbarui data!";
-                $message_type = "error";
             }
         }
     }
 }
-
-// Delete
 if (isset($_GET['delete'])) {
     $id = sanitize($_GET['delete']);
     $stmt = $mysqli->prepare("DELETE FROM surveillance_roadmap_mapping WHERE id = ?");
-    if ($stmt->bind_param('i', $id) && $stmt->execute()) {
+    if ($stmt && $stmt->bind_param('i', $id) && $stmt->execute()) {
         $_SESSION['notif'] = "Data berhasil dihapus!";
         header('Location: roadmap_mapping.php');
         exit();
     } else {
         $message = "Gagal menghapus data!";
-        $message_type = "error";
     }
 }
-
-// Ambil data untuk edit
-$edit_data = null;
 if (isset($_GET['edit'])) {
     $id = sanitize($_GET['edit']);
     $stmt = $mysqli->prepare("SELECT * FROM surveillance_roadmap_mapping WHERE id = ?");
@@ -64,8 +75,6 @@ if (isset($_GET['edit'])) {
     $result = $stmt->get_result();
     $edit_data = $result->fetch_assoc();
 }
-
-// Ambil semua data
 $data = array();
 $result = $mysqli->query("SELECT * FROM surveillance_roadmap_mapping ORDER BY id ASC");
 if ($result) {
@@ -73,182 +82,146 @@ if ($result) {
         $data[] = $row;
     }
 }
+require_once 'template_header.php';
 ?>
-
-<!-- Page Header -->
-<div class="mb-8">
-    <div class="flex items-center justify-between">
-        <div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Roadmap Mapping</h2>
-            <p class="text-gray-600">Kelola data Roadmap Mapping</p>
-        </div>
-        <a href="index.php" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
-            <i class="fas fa-arrow-left mr-2"></i> Kembali
-        </a>
-    </div>
-</div>
-
-<!-- Form Section -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-        <?php echo $edit_data ? 'Edit Data' : 'Tambah Data Baru'; ?>
-    </h3>
-    
-    <form method="POST" class="space-y-4">
-        <input type="hidden" name="action" value="<?php echo $edit_data ? 'edit' : 'add'; ?>">
-        <?php if ($edit_data): ?>
-            <input type="hidden" name="id" value="<?php echo $edit_data['id']; ?>">
-        <?php endif; ?>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
-                <input type="text" name="project_name" value="<?php echo $edit_data ? htmlspecialchars($edit_data['project_name']) : ''; ?>" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" 
-                       placeholder="Contoh: CCTV Expansion Project" required>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Phase</label>
-                <select name="phase" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" required>
-                    <option value="">Pilih Phase</option>
-                    <option value="Planning" <?php echo ($edit_data && $edit_data['phase'] == 'Planning') ? 'selected' : ''; ?>>Planning</option>
-                    <option value="Development" <?php echo ($edit_data && $edit_data['phase'] == 'Development') ? 'selected' : ''; ?>>Development</option>
-                    <option value="Implementation" <?php echo ($edit_data && $edit_data['phase'] == 'Implementation') ? 'selected' : ''; ?>>Implementation</option>
-                    <option value="Testing" <?php echo ($edit_data && $edit_data['phase'] == 'Testing') ? 'selected' : ''; ?>>Testing</option>
-                    <option value="Deployment" <?php echo ($edit_data && $edit_data['phase'] == 'Deployment') ? 'selected' : ''; ?>>Deployment</option>
-                    <option value="Maintenance" <?php echo ($edit_data && $edit_data['phase'] == 'Maintenance') ? 'selected' : ''; ?>>Maintenance</option>
-                </select>
-            </div>
-        </div>
-        
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea name="description" rows="3" 
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" 
-                      placeholder="Contoh: Proyek perluasan sistem CCTV untuk area baru"><?php echo $edit_data ? htmlspecialchars($edit_data['description']) : ''; ?></textarea>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" required>
-                    <option value="">Pilih Status</option>
-                    <option value="Active" <?php echo ($edit_data && $edit_data['status'] == 'Active') ? 'selected' : ''; ?>>Active</option>
-                    <option value="On Hold" <?php echo ($edit_data && $edit_data['status'] == 'On Hold') ? 'selected' : ''; ?>>On Hold</option>
-                    <option value="Completed" <?php echo ($edit_data && $edit_data['status'] == 'Completed') ? 'selected' : ''; ?>>Completed</option>
-                    <option value="Cancelled" <?php echo ($edit_data && $edit_data['status'] == 'Cancelled') ? 'selected' : ''; ?>>Cancelled</option>
-                    <option value="Delayed" <?php echo ($edit_data && $edit_data['status'] == 'Delayed') ? 'selected' : ''; ?>>Delayed</option>
-                </select>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Completion Percentage (%)</label>
-                <input type="number" name="completion_percentage" min="0" max="100" step="0.01" 
-                       value="<?php echo $edit_data ? htmlspecialchars($edit_data['completion_percentage']) : ''; ?>" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" required>
-            </div>
-        </div>
-        
-        <div class="flex space-x-3">
-            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-150">
-                <i class="fas <?php echo $edit_data ? 'fa-save' : 'fa-plus'; ?> mr-2"></i>
-                <?php echo $edit_data ? 'Update' : 'Simpan'; ?>
-            </button>
-            
-            <?php if ($edit_data): ?>
-                <a href="roadmap_mapping.php" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-150">
-                    <i class="fas fa-times mr-2"></i> Batal
-                </a>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Roadmap Mapping Management</h2>
+            <?php if ($message): ?>
+                <div class="rounded-lg bg-red-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800"><?php echo $message; ?></h3>
+                        </div>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
-    </form>
-</div>
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 hover:shadow-lg transition-shadow duration-300">
+        <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">
+                <?php echo $edit_data ? 'Edit Roadmap' : 'Tambah Roadmap Baru'; ?>
+            </h3>
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="action" value="<?php echo $edit_data ? 'edit' : 'add'; ?>">
+                <?php if ($edit_data): ?>
+                    <input type="hidden" name="id" value="<?php echo $edit_data['id']; ?>">
+                <?php endif; ?>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Judul Roadmap</label>
+                    <input type="text" name="title" 
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors duration-200"
+                           value="<?php echo $edit_data ? htmlspecialchars($edit_data['title']) : ''; ?>" 
+                           placeholder="Masukkan judul roadmap"
+                           required>
+                </div>
 
-<!-- Data Table -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-800">Data Roadmap Mapping</h3>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Gambar Roadmap</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-indigo-500 transition-colors duration-200">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                    <span>Upload file</span>
+                                    <input type="file" name="image" class="sr-only" <?php echo $edit_data ? '' : 'required'; ?>>
+                                </label>
+                                <p class="pl-1">atau drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                        </div>
+                    </div>
+                    <?php if ($edit_data && $edit_data['image']): ?>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500 mb-2">Gambar Saat Ini:</p>
+                            <img src="../../<?php echo $edit_data['image']; ?>" alt="Gambar" class="h-32 w-auto object-cover rounded-lg">
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-4">
+                    <?php if ($edit_data): ?>
+                        <a href="roadmap_mapping.php" 
+                           class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                            Batal
+                        </a>
+                    <?php endif; ?>
+                    <button type="submit" 
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                        <?php echo $edit_data ? 'Update Roadmap' : 'Simpan Roadmap'; ?>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-    
-    <div class="overflow-x-auto">
-        <table class="w-full">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phase</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completion (%)</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-                <?php if (empty($data)): ?>
+    <!-- Table Card -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-900">Daftar Roadmap</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">Tidak ada data</td>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
-                <?php else: ?>
-                    <?php foreach ($data as $index => $row): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo $index + 1; ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?php echo htmlspecialchars($row['project_name']); ?></td>
-                            <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($row['description']); ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full 
-                                    <?php 
-                                    switch($row['phase']) {
-                                        case 'Planning': echo 'bg-blue-100 text-blue-800'; break;
-                                        case 'Development': echo 'bg-yellow-100 text-yellow-800'; break;
-                                        case 'Implementation': echo 'bg-purple-100 text-purple-800'; break;
-                                        case 'Testing': echo 'bg-indigo-100 text-indigo-800'; break;
-                                        case 'Deployment': echo 'bg-green-100 text-green-800'; break;
-                                        case 'Maintenance': echo 'bg-gray-100 text-gray-800'; break;
-                                        default: echo 'bg-gray-100 text-gray-800';
-                                    }
-                                    ?>">
-                                    <?php echo htmlspecialchars($row['phase']); ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <span class="px-2 py-1 text-xs font-medium rounded-full 
-                                    <?php 
-                                    switch($row['status']) {
-                                        case 'Active': echo 'bg-green-100 text-green-800'; break;
-                                        case 'On Hold': echo 'bg-yellow-100 text-yellow-800'; break;
-                                        case 'Completed': echo 'bg-blue-100 text-blue-800'; break;
-                                        case 'Cancelled': echo 'bg-red-100 text-red-800'; break;
-                                        case 'Delayed': echo 'bg-orange-100 text-orange-800'; break;
-                                        default: echo 'bg-gray-100 text-gray-800';
-                                    }
-                                    ?>">
-                                    <?php echo htmlspecialchars($row['status']); ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                <div class="flex items-center">
-                                    <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-red-600 h-2 rounded-full" style="width: <?php echo htmlspecialchars($row['completion_percentage']); ?>%"></div>
-                                    </div>
-                                    <span class="text-xs text-gray-600"><?php echo htmlspecialchars($row['completion_percentage']); ?>%</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="?edit=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-900 mr-3">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="?delete=<?php echo $row['id']; ?>" class="text-red-600 hover:text-red-900" 
-                                   onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <?php if (empty($data)): ?>
+                        <tr>
+                            <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                                Belum ada data roadmap
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    <?php else: ?>
+                        <?php foreach ($data as $row): ?>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <?php echo htmlspecialchars($row['title']); ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <?php if ($row['image']): ?>
+                                        <img src="../../<?php echo $row['image']; ?>" alt="Gambar" class="h-20 w-auto object-cover rounded-lg">
+                                    <?php else: ?>
+                                        <span class="text-sm text-gray-500">Tidak ada gambar</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <a href="roadmap_mapping.php?edit=<?php echo $row['id']; ?>" 
+                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 mr-2">
+                                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        Edit
+                                    </a>
+                                    <a href="roadmap_mapping.php?delete=<?php echo $row['id']; ?>" 
+                                       onclick="return confirm('Apakah Anda yakin ingin menghapus roadmap ini?')"
+                                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Hapus
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-
-<?php require_once 'template_footer.php'; ?>
+<?php require_once 'template_footer.php';

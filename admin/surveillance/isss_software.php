@@ -1,27 +1,16 @@
 <?php
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+$page_title = 'ISSS Software';
+require_once 'template_header.php';
 
-// Debug: Cek path
-$config_path = __DIR__ . '/../../config/database.php';
-if (!file_exists($config_path)) {
-    die("Error: Database config file tidak ditemukan di: " . $config_path);
-}
-require_once $config_path;
-
-// Cek login admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ../login.php');
-    exit();
-}
-
+// Inisialisasi variabel
+$message = '';
 $message_type = '';
 $edit_data = null;
+$data = array();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $action = $_POST['action'] ?? '';
+    $action = isset($_POST['action']) ? $_POST['action'] : '';
     
     if ($action == 'add') {
         $metric_name = sanitize($_POST['metric_name']);
@@ -42,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Cek apakah tabel exists sebelum insert
             $stmt = $pdo->query("SHOW TABLES LIKE 'surveillance_isss_software'");
             if ($stmt->rowCount() == 0) {
-                // Buat tabel jika tidak ada
+                // Buat tabel jika tidak ada - menggunakan backticks untuk reserved keyword
                 $sql = "CREATE TABLE IF NOT EXISTS `surveillance_isss_software` (
                     `id` int(11) NOT NULL AUTO_INCREMENT,
                     `metric_name` varchar(255) NOT NULL,
@@ -55,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     `jul` varchar(50) DEFAULT NULL,
                     `aug` varchar(50) DEFAULT NULL,
                     `sep` varchar(50) DEFAULT NULL,
-<?php
                     `oct` varchar(50) DEFAULT NULL,
                     `nov` varchar(50) DEFAULT NULL,
                     `dec` varchar(50) DEFAULT NULL,
@@ -139,7 +127,7 @@ try {
     // Cek apakah tabel exists
     $stmt = $pdo->query("SHOW TABLES LIKE 'surveillance_isss_software'");
     if ($stmt->rowCount() == 0) {
-        // Tabel tidak ada, buat tabel
+        // Tabel tidak ada, buat tabel - menggunakan backticks untuk reserved keyword
         $sql = "CREATE TABLE IF NOT EXISTS `surveillance_isss_software` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `metric_name` varchar(255) NOT NULL,
@@ -162,15 +150,15 @@ try {
         $pdo->exec($sql);
         
         // Insert data awal
-        $insertData = [
-            ['Total Number Of Patrol Session Conducted', '335', '299', '283', '306', '327', '311', '', '', '', '', '', ''],
-            ['Total Patrol Duration Conducted (Hours)', '732', '687', '673', '749', '769', '833', '', '', '', '', '', ''],
-            ['Total QR Checkpoints Scanned', '5693', '5392', '4704', '6102', '5616', '5741', '', '', '', '', '', '']
-        ];
-        
+        $insertData = array(
+            array('Total Number Of Patrol Session Conducted', '335', '299', '283', '306', '327', '311', '', '', '', '', '', ''),
+            array('Total Patrol Duration Conducted (Hours)', '732', '687', '673', '749', '769', '833', '', '', '', '', '', ''),
+            array('Total QR Checkpoints Scanned', '5693', '5392', '4704', '6102', '5616', '5741', '', '', '', '', '', '')
+        );
+
         $stmt = $pdo->prepare("INSERT INTO surveillance_isss_software (metric_name, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, `dec`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        foreach ($insertData as $data) {
-            $stmt->execute($data);
+        foreach ($insertData as $dataRow) {
+            $stmt->execute($dataRow);
         }
     }
     
@@ -202,28 +190,6 @@ try {
             }
         }
     </script>
-</head>
-<body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-header-footer-bg text-white px-6 py-4 shadow-lg">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <a href="../dashboard.php" class="text-white hover:text-gray-200">
-                    <i class="fas fa-arrow-left text-xl"></i>
-                </a>
-                <h1 class="text-2xl font-bold">ISSS Software Utilization Management</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="index.php" class="text-white hover:text-gray-200">
-                    <i class="fas fa-home mr-2"></i>Surveillance Index
-                </a>
-                <a href="../../surveillance.php" target="_blank" class="text-white hover:text-gray-200">
-                    <i class="fas fa-eye mr-2"></i>View Page
-                </a>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">
         <!-- Message Display -->
@@ -389,5 +355,5 @@ try {
             }
         }, 5000);
     </script>
-</body>
-</html>
+
+<?php require_once 'template_footer.php'; ?>

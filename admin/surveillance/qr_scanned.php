@@ -1,27 +1,14 @@
 <?php
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+$page_title = 'QR Scanned';
+require_once 'template_header.php';
 
-// Debug: Cek path
-$config_path = __DIR__ . '/../../config/database.php';
-if (!file_exists($config_path)) {
-    die("Error: Database config file tidak ditemukan di: " . $config_path);
-}
-require_once $config_path;
-
-// Cek login admin
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: ../login.php');
-    exit();
-}
-
-$message_type = '';
-$edit_data = null;
+ $message = '';
+ $message_type = '';
+ $edit_data = null;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $action = $_POST['action'] ?? '';
+    $action = isset($_POST['action']) ? $_POST['action'] : '';
 
     if ($action == 'add') {
         $team_name = sanitize($_POST['team_name']);
@@ -55,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     `jul` varchar(50) DEFAULT NULL,
                     `aug` varchar(50) DEFAULT NULL,
                     `sep` varchar(50) DEFAULT NULL,
-<?php
                     `oct` varchar(50) DEFAULT NULL,
                     `nov` varchar(50) DEFAULT NULL,
                     `dec` varchar(50) DEFAULT NULL,
@@ -161,23 +147,23 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
         $pdo->exec($sql);
 
-        // Insert data awal
-        $insertData = [
-            ['Team A – Patrol Truck', '69', '21', '44', '62', '52', '72', '', '', '', '', '', ''],
-            ['Team A – Patrol Bike', '40', '41', '42', '47', '53', '41', '', '', '', '', '', ''],
-            ['Team B – Patrol Truck', '83', '43', '58', '56', '42', '57', '', '', '', '', '', ''],
-            ['Team B – Patrol Bike', '0', '0', '16', '36', '35', '50', '', '', '', '', '', ''],
-            ['Team C – Patrol Truck', '86', '40', '69', '114', '90', '112', '', '', '', '', '', ''],
-            ['Team C – Patrol Bike', '6', '1', '1', '11', '9', '5', '', '', '', '', '', ''],
-            ['Team D – Patrol Truck', '62', '21', '74', '79', '94', '96', '', '', '', '', '', ''],
-            ['Team D – Patrol Bike', '28', '39', '28', '20', '14', '53', '', '', '', '', '', ''],
-            ['Powerhouse', '343', '332', '337', '320', '377', '342', '', '', '', '', '', ''],
-            ['Total', '717', '538', '669', '745', '766', '828', '', '', '', '', '', '']
-        ];
+        // Insert data awal (QR Scanned) — sesuai surveillance_tables.sql
+        $insertData = array(
+            array('Team A – Patrol Truck', '622', '833', '604', '1036', '429', '1076', '', '', '', '', '', ''),
+            array('Team A – Patrol Bike', '1093', '634', '1265', '725', '440', '312', '', '', '', '', '', ''),
+            array('Team B – Patrol Truck', '1166', '1348', '156', '672', '399', '825', '', '', '', '', '', ''),
+            array('Team B – Patrol Bike', '0', '0', '486', '905', '634', '302', '', '', '', '', '', ''),
+            array('Team C – Patrol Truck', '644', '959', '519', '696', '1063', '1391', '', '', '', '', '', ''),
+            array('Team C – Patrol Bike', '308', '28', '29', '364', '196', '53', '', '', '', '', '', ''),
+            array('Team D – Patrol Truck', '605', '126', '696', '920', '702', '', '', '', '', '', ''),
+            array('Team D – Patrol Bike', '319', '726', '145', '348', '665', '336', '', '', '', '', '', ''),
+            array('Powerhouse', '936', '738', '804', '660', '870', '744', '', '', '', '', '', ''),
+            array('Total', '5693', '5392', '4704', '6102', '5616', '5741', '', '', '', '', '', '')
+        );
 
-        $stmt = $pdo->prepare("INSERT INTO surveillance_security_patrol (team_name, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, `dec`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        foreach ($insertData as $data) {
-            $stmt->execute($data);
+        $stmt = $pdo->prepare("INSERT INTO surveillance_qr_scanned (team_name, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, `dec`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        foreach ($insertData as $dataRow) {
+            $stmt->execute($dataRow);
         }
     }
 
@@ -186,57 +172,11 @@ try {
 } catch (PDOException $e) {
     $message = "Error Database: " . $e->getMessage();
     $message_type = "error";
-    $data = [];
+    $data = array();
 }
 
-function sanitize($input) {
-    return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
-}
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Admin - Security Team Performance on QR Scanned Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'header-footer-bg': '#e53935',
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-header-footer-bg text-white px-6 py-4 shadow-lg">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <a href="../dashboard.php" class="text-white hover:text-gray-200">
-                    <i class="fas fa-arrow-left text-xl"></i>
-                </a>
-                <h1 class="text-2xl font-bold">Security Team Performance on QR Scanned Management</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="index.php" class="text-white hover:text-gray-200">
-                    <i class="fas fa-home mr-2"></i>Surveillance Index
-                </a>
-                <a href="../../surveillance.php" target="_blank" class="text-white hover:text-gray-200">
-                    <i class="fas fa-eye mr-2"></i>View Page
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-8">
-        <!-- Message Display -->
+    <!-- Message Display -->
         <?php if ($message): ?>
         <div class="mb-6 p-4 rounded-lg <?php echo $message_type == 'success' ? 'bg-green-100 text-green-700 border border-green-300' : 'bg-red-100 text-red-700 border border-red-300'; ?>">
             <i class="fas <?php echo $message_type == 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?> mr-2"></i>
@@ -312,12 +252,12 @@ function sanitize($input) {
                 </div>
 
                 <div class="flex space-x-4">
-                    <button type="submit" class="bg-header-footer-bg hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium">
+                    <button id="saveBtn" type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium inline-flex items-center" style="display:inline-block;">
                         <i class="fas <?php echo $edit_data ? 'fa-save' : 'fa-plus'; ?> mr-2"></i>
-                        <?php echo $edit_data ? 'Update' : 'Tambah'; ?>
+                        <span><?php echo $edit_data ? 'Update' : 'Tambah'; ?></span>
                     </button>
                     <?php if ($edit_data): ?>
-                    <a href="?cancel" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium">
+                    <a href="?cancel" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium inline-flex items-center">
                         <i class="fas fa-times mr-2"></i>Batal
                     </a>
                     <?php endif; ?>
@@ -399,5 +339,15 @@ function sanitize($input) {
             }
         }, 5000);
     </script>
-</body>
-</html>
+
+    <script>
+        // Defensive: ensure save button visible when editing
+        document.addEventListener('DOMContentLoaded', function() {
+            var saveBtn = document.getElementById('saveBtn');
+            if (saveBtn) {
+                saveBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
+
+<?php require_once 'template_footer.php'; ?>

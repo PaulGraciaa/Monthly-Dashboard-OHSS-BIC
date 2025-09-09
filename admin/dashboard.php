@@ -152,6 +152,20 @@ if (isset($_SESSION['admin_name'])) {
                         </div>
                     </div>
                 </a>
+
+                <!-- Fire Safety Management Module -->
+                <a href="firesafety/index.php" class="module-card group block bg-white rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-4 rounded-xl bg-orange-100 text-orange-600 shadow-sm group-hover:shadow group-hover:bg-orange-200 transition-all duration-300">
+                            <i class="fas fa-fire-extinguisher text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Module</p>
+                            <h3 class="text-lg font-bold text-gray-900 mt-1">Fire Safety Management</h3>
+                            <p class="text-sm text-gray-500 mt-1">Performance, Enforcement, Drills</p>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </main>

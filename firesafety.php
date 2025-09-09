@@ -1,3 +1,12 @@
+<?php
+require_once __DIR__ . '/config/database.php';
+try {
+  $stmt = $pdo->query("SELECT summary_text FROM fire_safety_performance WHERE is_active = 1 ORDER BY display_order ASC, id ASC");
+  $fireSafetySummaries = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (Exception $e) {
+  $fireSafetySummaries = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -249,11 +258,13 @@
     </div>
     <div class="bg-white border border-primary-blue border-t-0 rounded-b-lg px-6 py-4 mb-8 text-sm">
       <ol class="list-decimal pl-5 text-gray-800">
-        <li>Fire Safety responded to N/A emergency activations for the month of June 2025</li>
-        <li>Fire Safety conducted enforcement/inspection at 05 buildings. 03 fire hazard findings were identified.</li>
-        <li>Fire Safety executed and completed annual servicing and maintenance of firefighting and fire protection equipment at 06 building in BIP</li>
-        <li>Fire Safety executed repair impairment procedure and maintenance of firefighting equipment at N/A areas on Batamindo Industrial Park</li>
-        <li>There were 02 evacuation drill, 1 internal drill and 1 fire training conducted In BIP, Fire safety is currently slowly and carefully opening up to support companies maintain emergency readiness.</li>
+        <?php if (!empty($fireSafetySummaries)): ?>
+          <?php foreach ($fireSafetySummaries as $summaryText): ?>
+            <li><?= htmlspecialchars($summaryText) ?></li>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <li>Tidak ada data Fire Safety Performance Summary.</li>
+        <?php endif; ?>
       </ol>
     </div>
     

@@ -154,33 +154,9 @@ INSERT INTO `surveillance_qr_scanned` (`team_name`, `jan`, `feb`, `mar`, `apr`, 
 ('Powerhouse', '936', '738', '804', '660', '870', '744', '', '', '', '', '', ''),
 ('Total', '5693', '5392', '4704', '6102', '5616', '5741', '', '', '', '', '', '');
 
--- Tabel untuk Road Map CCTV & Surveillance Mapping
-CREATE TABLE IF NOT EXISTS `surveillance_roadmap_mapping` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `location_name` varchar(255) NOT NULL,
-  `location_number` int(11) NOT NULL,
-  `description` text,
-  `image_path` varchar(255) DEFAULT 'img/map.png',
-  `cctv_coverage` varchar(50) DEFAULT 'Yes',
-  `status` varchar(50) DEFAULT 'Active',
-  `notes` text,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `location_number` (`location_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Insert data awal untuk Road Map CCTV & Surveillance Mapping
-INSERT INTO `surveillance_roadmap_mapping` (`location_name`, `location_number`, `description`, `image_path`, `cctv_coverage`, `status`, `notes`) VALUES
-('BIP Parking Areas', 1, 'Parking area with CCTV monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('Multi Purpose Hall (MPH)', 2, 'Multi-purpose facility with surveillance', 'img/map.png', 'Yes', 'Active', ''),
-('Community Centre', 3, 'Community center area monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('Panasera Areas', 4, 'Panasera commercial area surveillance', 'img/map.png', 'Yes', 'Active', ''),
-('Power House #01', 5, 'Power house facility monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('Power House #4', 6, 'Power house facility monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('Power House #03', 7, 'Power house facility monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('STP WWTP areas', 8, 'Sewage treatment plant monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('WTP area', 9, 'Water treatment plant monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('Dormitory block', 10, 'Dormitory area surveillance', 'img/map.png', 'Yes', 'Active', ''),
-('OPS Area', 11, 'Operations area monitoring', 'img/map.png', 'Yes', 'Active', ''),
-('Wisma Batamindo', 12, 'Wisma Batamindo facility monitoring', 'img/map.png', 'Yes', 'Active', '');
+CREATE TABLE IF NOT EXISTS surveillance_roadmap_mapping (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    image VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
