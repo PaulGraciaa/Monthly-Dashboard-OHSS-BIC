@@ -61,587 +61,698 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fire Safety Management - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background-color: #0A4D9E;
-        }
-        .sidebar .nav-link {
-            color: white;
-        }
-        .sidebar .nav-link:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        .sidebar .nav-link.active {
-            background-color: rgba(255,255,255,0.2);
-        }
-        .main-content {
-            margin-left: 0;
-        }
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 250px;
+    <title>Fire Safety Management - Batamindo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF0000',
+                        secondary: '#1a1a1a',
+                    }
+                }
             }
         }
-        .card-header {
-            background-color: #0A4D9E;
-            color: white;
-        }
-        .btn-primary {
-            background-color: #0A4D9E;
-            border-color: #0A4D9E;
-        }
-        .btn-primary:hover {
-            background-color: #083a7a;
-            border-color: #083a7a;
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <h5 class="text-white">Admin Panel</h5>
+<body class="bg-gray-100 font-sans">
+    <!-- Red Header Section -->
+    <div class="bg-gradient-to-r from-red-600 to-red-800">
+        <header class="text-white py-4">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-4">
+                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                            <p class="text-red-200">Fire Safety Management System</p>
+                        </div>
                     </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="../dashboard.php">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../management/activities_tab.php">
-                                <i class="fas fa-calendar me-2"></i>
-                                Activities
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../OHS/index.php">
-                                <i class="fas fa-shield-alt me-2"></i>
-                                OHS
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../security/index.php">
-                                <i class="fas fa-user-shield me-2"></i>
-                                Security
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="index.php">
-                                <i class="fas fa-fire-extinguisher me-2"></i>
-                                Fire Safety
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../surveillance/index.php">
-                                <i class="fas fa-video me-2"></i>
-                                Surveillance
-                            </a>
-                        </li>
-                        <li class="nav-item mt-3">
-                            <a class="nav-link" href="../logout.php">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="hidden md:flex items-center space-x-3">
+                        <div class="text-right">
+                            <p class="text-sm text-white">Welcome, Admin</p>
+                            <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
+                    </div>
+                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </a>
+                    </div>
                 </div>
-            </nav>
+            </div>
+        </header>
+        <!-- Navigation -->
+        <div class="border-t border-red-500/30">
+            <div class="max-w-7xl mx-auto px-4 py-2">
+                <nav class="flex space-x-4">
+                    <a href="../dashboard.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-line mr-1"></i> Dashboard
+                    </a>
+                    <a href="../management/activities_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-tasks mr-1"></i> Activities
+                    </a>
+                    <a href="../OHS/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-shield-alt mr-1"></i> OHS
+                    </a>
+                    <a href="../security/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-user-shield mr-1"></i> Security
+                    </a>
+                    <a href="index.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-fire-extinguisher mr-1"></i> Fire Safety
+                    </a>
+                    <a href="../surveillance/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-video mr-1"></i> Surveillance
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </div>
 
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Fire Safety Management</h1>
+    <div class="container mx-auto px-4 py-8">
+        <?php if (!isset($_SESSION)) { session_start(); } ?>
+        <?php if (!empty($_SESSION['notif'])): ?>
+        <style>
+        @keyframes notifSlideIn {
+            0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes notifFadeOut {
+            to { opacity: 0; transform: translateY(-10px) scale(0.98); }
+        }
+        .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
+        .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
+        </style>
+        <div id="notifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
+            <div class="flex-shrink-0">
+                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+                    <i class="fas fa-check text-green-600 text-xl"></i>
+                </span>
+            </div>
+            <div class="flex-1 text-green-800 font-semibold text-sm">
+                <?php echo $_SESSION['notif']; unset($_SESSION['notif']); ?>
+            </div>
+            <button onclick="closeNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <script>
+        function closeNotif() {
+            var notif = document.getElementById('notifBox');
+            if (notif) {
+                notif.classList.remove('notif-animate-in');
+                notif.classList.add('notif-animate-out');
+                setTimeout(function(){ notif.remove(); }, 500);
+            }
+        }
+        setTimeout(closeNotif, 3000);
+        </script>
+        <?php endif; ?>
+
+        <!-- Quick Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <?php 
+            $total_performance = count($performance_data);
+            $total_emergency = count($emergency_data);
+            $total_details = count($details_data);
+            $total_enforcement = count($enforcement_data);
+            ?>
+            <!-- Performance Summary -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Performance</h3>
+                    <i class="fas fa-chart-line text-2xl opacity-75"></i>
+                </div>
+                <div class="text-3xl font-bold"><?php echo $total_performance; ?></div>
+                <div class="text-blue-100 text-sm mt-2">Performance summaries</div>
+            </div>
+
+            <!-- Emergency Activations -->
+            <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Emergency</h3>
+                    <i class="fas fa-exclamation-triangle text-2xl opacity-75"></i>
+                </div>
+                <div class="text-3xl font-bold"><?php echo $total_emergency; ?></div>
+                <div class="text-red-100 text-sm mt-2">Emergency activations</div>
+            </div>
+
+            <!-- Equipment Maintenance -->
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Maintenance</h3>
+                    <i class="fas fa-tools text-2xl opacity-75"></i>
+                </div>
+                <div class="text-3xl font-bold"><?php echo count($maintenance_data); ?></div>
+                <div class="text-green-100 text-sm mt-2">Maintenance records</div>
+                </div>
+
+            <!-- Safety Drills -->
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Drills</h3>
+                    <i class="fas fa-running text-2xl opacity-75"></i>
+                </div>
+                <div class="text-3xl font-bold"><?php echo count($drills_data); ?></div>
+                <div class="text-purple-100 text-sm mt-2">Safety drills conducted</div>
+            </div>
                 </div>
 
                 <!-- Fire Safety Performance Summary -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-line me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-line text-red-600 mr-3"></i>
                             Fire Safety Performance Summary
-                            <a href="performance/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="performance.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Summary Text</th>
-                                        <th>Display Order</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">No</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Summary Text</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Display Order</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($performance_data)): ?>
                                         <tr>
-                                            <td colspan="4" class="text-center">Tidak ada data</td>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No performance data available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($performance_data as $index => $item): ?>
-                                            <tr>
-                                                <td><?= $index + 1 ?></td>
-                                                <td><?= htmlspecialchars($item['summary_text']) ?></td>
-                                                <td><?= $item['display_order'] ?></td>
-                                                <td>
-                                                    <a href="performance/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="performance/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $index + 1 ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['summary_text']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['display_order'] ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="performance.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="performance.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Emergency Activation -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 mr-3"></i>
                             Emergency Activation
-                            <a href="emergency/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="emergency.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Jan</th>
-                                        <th>Feb</th>
-                                        <th>Mar</th>
-                                        <th>Apr</th>
-                                        <th>May</th>
-                                        <th>Jun</th>
-                                        <th>Total</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Category</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jan</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Feb</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Mar</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Apr</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">May</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jun</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Total</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($emergency_data)): ?>
                                         <tr>
-                                            <td colspan="9" class="text-center">Tidak ada data</td>
+                                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No emergency activation data available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($emergency_data as $item): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($item['category']) ?></td>
-                                                <td><?= $item['jan_value'] ?></td>
-                                                <td><?= $item['feb_value'] ?></td>
-                                                <td><?= $item['mar_value'] ?></td>
-                                                <td><?= $item['apr_value'] ?></td>
-                                                <td><?= $item['may_value'] ?></td>
-                                                <td><?= $item['jun_value'] ?></td>
-                                                <td><strong><?= $item['grand_total'] ?></strong></td>
-                                                <td>
-                                                    <a href="emergency/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="emergency/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($item['category']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['jan_value'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['feb_value'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['mar_value'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['apr_value'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['may_value'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['jun_value'] ?></td>
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-900 text-center"><?= $item['grand_total'] ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="emergency.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="emergency.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Emergency Details -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-list text-red-600 mr-3"></i>
                             Emergency Details
-                            <a href="details/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="details.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>S/N</th>
-                                        <th>Date</th>
-                                        <th>Category</th>
-                                        <th>Sub Category</th>
-                                        <th>Description</th>
-                                        <th>Location</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">S/N</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Date</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Category</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Sub Category</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Description</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Location</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($details_data)): ?>
                                         <tr>
-                                            <td colspan="7" class="text-center">Tidak ada data</td>
+                                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No emergency details available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($details_data as $item): ?>
-                                            <tr>
-                                                <td><?= $item['serial_number'] ?></td>
-                                                <td><?= date('d-M-y', strtotime($item['incident_date'])) ?></td>
-                                                <td><?= htmlspecialchars($item['category']) ?></td>
-                                                <td><?= htmlspecialchars($item['sub_category']) ?></td>
-                                                <td><?= htmlspecialchars(substr($item['description'], 0, 50)) ?>...</td>
-                                                <td><?= htmlspecialchars($item['location']) ?></td>
-                                                <td>
-                                                    <a href="details/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="details/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['serial_number'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= date('d-M-y', strtotime($item['incident_date'])) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['category']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['sub_category']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars(substr($item['description'], 0, 50)) ?>...</td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['location']) ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="details.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="details.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Fire Safety Enforcement -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-gavel me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-gavel text-red-600 mr-3"></i>
                             Fire Safety Enforcement
-                            <a href="enforcement/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="enforcement.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Month</th>
-                                        <th>Premises Count</th>
-                                        <th>Non-Compliance Count</th>
-                                        <th>Year</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Month</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Premises Count</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Non-Compliance Count</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Year</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($enforcement_data)): ?>
                                         <tr>
-                                            <td colspan="5" class="text-center">Tidak ada data</td>
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No enforcement data available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($enforcement_data as $item): ?>
-                                            <tr>
-                                                <td><?= $item['month_name'] ?></td>
-                                                <td><?= $item['premises_count'] ?></td>
-                                                <td><?= $item['non_compliance_count'] ?></td>
-                                                <td><?= $item['year'] ?></td>
-                                                <td>
-                                                    <a href="enforcement/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="enforcement/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['month_name'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['premises_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['non_compliance_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['year'] ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="enforcement.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="enforcement.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Fire Equipment Maintenance -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-tools me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-tools text-red-600 mr-3"></i>
                             Fire Equipment Maintenance
-                            <a href="maintenance/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="maintenance.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>S/N</th>
-                                        <th>Date</th>
-                                        <th>Location</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">S/N</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Date</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Location</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($maintenance_data)): ?>
                                         <tr>
-                                            <td colspan="4" class="text-center">Tidak ada data</td>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No maintenance data available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($maintenance_data as $item): ?>
-                                            <tr>
-                                                <td><?= $item['serial_number'] ?></td>
-                                                <td><?= date('d-M-y', strtotime($item['maintenance_date'])) ?></td>
-                                                <td><?= htmlspecialchars($item['location']) ?></td>
-                                                <td>
-                                                    <a href="maintenance/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="maintenance/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['serial_number'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= date('d-M-y', strtotime($item['maintenance_date'])) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['location']) ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="maintenance.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="maintenance.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Fire Equipment Statistics -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-bar text-red-600 mr-3"></i>
                             Fire Equipment Statistics
-                            <a href="statistics/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="statistics.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Equipment Type</th>
-                                        <th>Jan</th>
-                                        <th>Feb</th>
-                                        <th>Mar</th>
-                                        <th>Apr</th>
-                                        <th>May</th>
-                                        <th>Jun</th>
-                                        <th>Total</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Equipment Type</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jan</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Feb</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Mar</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Apr</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">May</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jun</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Total</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($statistics_data)): ?>
                                         <tr>
-                                            <td colspan="9" class="text-center">Tidak ada data</td>
+                                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No equipment statistics available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($statistics_data as $item): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($item['equipment_type']) ?></td>
-                                                <td><?= $item['jan_count'] ?></td>
-                                                <td><?= $item['feb_count'] ?></td>
-                                                <td><?= $item['mar_count'] ?></td>
-                                                <td><?= $item['apr_count'] ?></td>
-                                                <td><?= $item['may_count'] ?></td>
-                                                <td><?= $item['jun_count'] ?></td>
-                                                <td><strong><?= $item['grand_total'] ?></strong></td>
-                                                <td>
-                                                    <a href="statistics/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="statistics/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($item['equipment_type']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['jan_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['feb_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['mar_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['apr_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['may_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['jun_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-900 text-center"><?= $item['grand_total'] ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="statistics.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="statistics.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Fire Safety Repair Impairment -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-wrench me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-wrench text-red-600 mr-3"></i>
                             Fire Safety Repair Impairment
-                            <a href="repair/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="repair.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Month</th>
-                                        <th>Repair Count</th>
-                                        <th>Year</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Month</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Repair Count</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Year</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($repair_data)): ?>
                                         <tr>
-                                            <td colspan="4" class="text-center">Tidak ada data</td>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No repair data available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($repair_data as $item): ?>
-                                            <tr>
-                                                <td><?= $item['month_name'] ?></td>
-                                                <td><?= $item['repair_count'] ?></td>
-                                                <td><?= $item['year'] ?></td>
-                                                <td>
-                                                    <a href="repair/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="repair/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['month_name'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['repair_count'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['year'] ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="repair.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="repair.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Fire Safety Repair Details -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list-alt me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-list-alt text-red-600 mr-3"></i>
                             Fire Safety Repair Details
-                            <a href="repair_details/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="repair_details.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>S/No</th>
-                                        <th>Date</th>
-                                        <th>Project Name</th>
-                                        <th>Location</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">S/No</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Date</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Project Name</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Location</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Status</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($repair_details_data)): ?>
                                         <tr>
-                                            <td colspan="6" class="text-center">Tidak ada data</td>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No repair details available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($repair_details_data as $item): ?>
-                                            <tr>
-                                                <td><?= $item['serial_number'] ?></td>
-                                                <td><?= date('d-M-y', strtotime($item['repair_date'])) ?></td>
-                                                <td><?= htmlspecialchars(substr($item['project_name'], 0, 50)) ?>...</td>
-                                                <td><?= htmlspecialchars($item['location']) ?></td>
-                                                <td><?= htmlspecialchars(substr($item['status'], 0, 30)) ?>...</td>
-                                                <td>
-                                                    <a href="repair_details/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="repair_details/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['serial_number'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= date('d-M-y', strtotime($item['repair_date'])) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars(substr($item['project_name'], 0, 50)) ?>...</td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['location']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars(substr($item['status'], 0, 30)) ?>...</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="repair_details.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="repair_details.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Fire Safety Drills -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-running me-2"></i>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-running text-red-600 mr-3"></i>
                             Fire Safety Drills & Training
-                            <a href="drills/create.php" class="btn btn-sm btn-light float-end">
-                                <i class="fas fa-plus"></i> Tambah
+                    </h2>
+                    <a href="drills.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                        <i class="fas fa-plus mr-1"></i> Add New
                             </a>
-                        </h5>
+                </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>S/No</th>
-                                        <th>Date</th>
-                                        <th>Location</th>
-                                        <th>Subject</th>
-                                        <th>Type</th>
-                                        <th>Actions</th>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">S/No</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Date</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Location</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Subject</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Type</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                    <tbody class="divide-y divide-gray-200">
                                     <?php if (empty($drills_data)): ?>
                                         <tr>
-                                            <td colspan="6" class="text-center">Tidak ada data</td>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>No drills data available</p>
+                                </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($drills_data as $item): ?>
-                                            <tr>
-                                                <td><?= $item['serial_number'] ?></td>
-                                                <td><?= date('d-M-y', strtotime($item['drill_date'])) ?></td>
-                                                <td><?= htmlspecialchars($item['location']) ?></td>
-                                                <td><?= htmlspecialchars($item['subject']) ?></td>
-                                                <td>
-                                                    <span class="badge bg-<?= $item['drill_type'] == 'drill' ? 'primary' : 'success' ?>">
+                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['serial_number'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= date('d-M-y', strtotime($item['drill_date'])) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['location']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['subject']) ?></td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $item['drill_type'] == 'drill' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' ?>">
                                                         <?= ucfirst($item['drill_type']) ?>
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <a href="drills/edit.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="drills/delete.php?id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="drills.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <a href="drills.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                <i class="fas fa-trash mr-1"></i> Delete
+                                            </a>
+                                        </div>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -651,10 +762,22 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add animation to stat cards
+        document.querySelectorAll('.bg-gradient-to-br').forEach(card => {
+            card.classList.add('transition-transform', 'duration-200', 'hover:scale-105');
+        });
+
+        // Auto-hide alert messages after 5 seconds
+        const alerts = document.querySelectorAll('[role="alert"]');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s ease-out';
+                setTimeout(() => alert.remove(), 500);
+            }, 5000);
+        });
+    </script>
 </body>
 </html>

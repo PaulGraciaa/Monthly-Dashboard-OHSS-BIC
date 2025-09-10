@@ -350,3 +350,162 @@ INSERT INTO ohs_incidents (
 
 ALTER TABLE kpi_leading MODIFY target_value INT NULL, MODIFY notes TEXT NULL;
 ALTER TABLE kpi_lagging MODIFY target_value INT NULL, MODIFY notes TEXT NULL;
+
+-- =============================================
+-- FIRE SAFETY ADMIN MODULE TABLES (for admin/firesafety/index.php)
+-- =============================================
+
+-- 1) Fire Safety Performance Summary (text list)
+CREATE TABLE IF NOT EXISTS fire_safety_performance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    summary_text TEXT NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2) Emergency Activation (monthly values Jan–Jun + total)
+CREATE TABLE IF NOT EXISTS fire_safety_emergency_activation (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category VARCHAR(100) NOT NULL,
+    jan_value INT DEFAULT 0,
+    feb_value INT DEFAULT 0,
+    mar_value INT DEFAULT 0,
+    apr_value INT DEFAULT 0,
+    may_value INT DEFAULT 0,
+    jun_value INT DEFAULT 0,
+    jul_value INT DEFAULT 0,
+    aug_value INT DEFAULT 0,
+    sep_value INT DEFAULT 0,
+    oct_value INT DEFAULT 0,
+    nov_value INT DEFAULT 0,
+    dec_value INT DEFAULT 0,
+    grand_total INT GENERATED ALWAYS AS (jan_value + feb_value + mar_value + apr_value + may_value + jun_value + jul_value + aug_value + sep_value + oct_value + nov_value + dec_value) STORED,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_emergency_category (category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3) Emergency Details (list)
+CREATE TABLE IF NOT EXISTS fire_safety_emergency_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serial_number INT NOT NULL,
+    incident_date DATE NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    sub_category VARCHAR(150),
+    description TEXT,
+    location VARCHAR(255),
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4) Fire Safety Enforcement (per month row)
+CREATE TABLE IF NOT EXISTS fire_safety_enforcement (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    month_name VARCHAR(20) NOT NULL,
+    premises_count INT DEFAULT 0,
+    non_compliance_count INT DEFAULT 0,
+    year INT NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5) Fire Equipment Maintenance (list)
+CREATE TABLE IF NOT EXISTS fire_equipment_maintenance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serial_number INT NOT NULL,
+    maintenance_date DATE NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6) Fire Equipment Statistics (Jan–Jun + total)
+CREATE TABLE IF NOT EXISTS fire_equipment_statistics (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipment_type VARCHAR(100) NOT NULL,
+    jan_count INT DEFAULT 0,
+    feb_count INT DEFAULT 0,
+    mar_count INT DEFAULT 0,
+    apr_count INT DEFAULT 0,
+    may_count INT DEFAULT 0,
+    jun_count INT DEFAULT 0,
+    jul_count INT DEFAULT 0,
+    aug_count INT DEFAULT 0,
+    sep_count INT DEFAULT 0,
+    oct_count INT DEFAULT 0,
+    nov_count INT DEFAULT 0,
+    dec_count INT DEFAULT 0,
+    grand_total INT GENERATED ALWAYS AS (jan_count + feb_count + mar_count + apr_count + may_count + jun_count + jul_count + aug_count + sep_count + oct_count + nov_count + dec_count) STORED,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_equipment_type (equipment_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7) Fire Safety Repair Impairment (per month row)
+CREATE TABLE IF NOT EXISTS fire_safety_repair_impairment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    month_name VARCHAR(20) NOT NULL,
+    repair_count INT DEFAULT 0,
+    year INT NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8) Fire Safety Repair Details (list)
+CREATE TABLE IF NOT EXISTS fire_safety_repair_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serial_number INT NOT NULL,
+    repair_date DATE NOT NULL,
+    project_name VARCHAR(500) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NULL,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9) Fire Safety Drills & Training (list)
+CREATE TABLE IF NOT EXISTS fire_safety_drills (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serial_number INT NOT NULL,
+    drill_date DATE NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    drill_type ENUM('drill','training') NOT NULL DEFAULT 'drill',
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Optional seed data (minimal) to avoid empty pages
+INSERT INTO fire_safety_performance (summary_text, display_order) VALUES
+('Fire Safety responded to multiple incidents this month with zero injuries.', 1)
+ON DUPLICATE KEY UPDATE summary_text = VALUES(summary_text);
+
+INSERT INTO fire_safety_emergency_activation (category, jan_value, feb_value, mar_value, apr_value, may_value, jun_value, jul_value, aug_value, sep_value, oct_value, nov_value, dec_value, display_order)
+VALUES
+('Fire Incident', 0,0,0,0,0,0,0,0,0,0,0,0, 1),
+('Non-Rescue',  0,0,0,0,0,0,0,0,0,0,0,0, 2),
+('Technical Call', 0,0,0,0,0,0,0,0,0,0,0,0, 3),
+('Fire Call', 7,5,4,3,0,0,0,0,0,0,0,0, 4),
+('Operational Standby', 1,0,0,1,1,0,0,0,0,0,0,0, 5),
+('Spillage', 0,0,0,0,0,0,0,0,0,0,0,0, 6)
+ON DUPLICATE KEY UPDATE jan_value=VALUES(jan_value);
