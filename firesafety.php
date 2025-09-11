@@ -333,7 +333,7 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
                   <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['sep_value']) ? $item['sep_value'] : '0'; ?></td>
                   <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['oct_value']) ? $item['oct_value'] : '0'; ?></td>
                   <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['nov_value']) ? $item['nov_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue"><?php echo isset($item['dec_value']) ? $item['dec_value'] : '0'; ?></td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['dec_value']) ? $item['dec_value'] : '0'; ?></td>
                   <td class="py-2 px-3 border-b border-primary-blue font-bold"><?php echo isset($item['grand_total']) ? $item['grand_total'] : 0; ?></td>
                 </tr>
               <?php endforeach; ?>
