@@ -45,9 +45,9 @@ switch ($action) {
                 $error = 'Equipment Type tidak boleh kosong';
             } else {
                 // created_by not present in table schema; do not insert it
-                $query = "INSERT INTO fire_equipment_statistics (equipment_type, jan_count, feb_count, mar_count, apr_count, may_count, jun_count, jul_count, aug_count, sep_count, oct_count, nov_count, dec_count, grand_total, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiii", $equipment_type, $jan_count, $feb_count, $mar_count, $apr_count, $may_count, $jun_count, $jul_count, $aug_count, $sep_count, $oct_count, $nov_count, $dec_count, $grand_total, $display_order, $is_active);
+                    $query = "INSERT INTO fire_equipment_statistics (equipment_type, jan_count, feb_count, mar_count, apr_count, may_count, jun_count, jul_count, aug_count, sep_count, oct_count, nov_count, dec_count, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = mysqli_prepare($conn, $query);
+                    mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiii", $equipment_type, $jan_count, $feb_count, $mar_count, $apr_count, $may_count, $jun_count, $jul_count, $aug_count, $sep_count, $oct_count, $nov_count, $dec_count, $display_order, $is_active);
                 
                 if (mysqli_stmt_execute($stmt)) {
                     if (!isset($_SESSION)) { session_start(); }
@@ -106,9 +106,9 @@ switch ($action) {
             if (empty($equipment_type)) {
                 $error = 'Equipment Type tidak boleh kosong';
             } else {
-                $query = "UPDATE fire_equipment_statistics SET equipment_type = ?, jan_count = ?, feb_count = ?, mar_count = ?, apr_count = ?, may_count = ?, jun_count = ?, jul_count = ?, aug_count = ?, sep_count = ?, oct_count = ?, nov_count = ?, dec_count = ?, grand_total = ?, display_order = ?, is_active = ? WHERE id = ?";
+                $query = "UPDATE fire_equipment_statistics SET equipment_type = ?, jan_count = ?, feb_count = ?, mar_count = ?, apr_count = ?, may_count = ?, jun_count = ?, jul_count = ?, aug_count = ?, sep_count = ?, oct_count = ?, nov_count = ?, dec_count = ?, display_order = ?, is_active = ? WHERE id = ?";
                 $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiiii", $equipment_type, $jan_count, $feb_count, $mar_count, $apr_count, $may_count, $jun_count, $jul_count, $aug_count, $sep_count, $oct_count, $nov_count, $dec_count, $grand_total, $display_order, $is_active, $id);
+                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiii", $equipment_type, $jan_count, $feb_count, $mar_count, $apr_count, $may_count, $jun_count, $jul_count, $aug_count, $sep_count, $oct_count, $nov_count, $dec_count, $display_order, $is_active, $id);
                 
                 if (mysqli_stmt_execute($stmt)) {
                     $success = 'Data berhasil diperbarui';

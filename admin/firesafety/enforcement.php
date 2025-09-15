@@ -20,27 +20,31 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 switch ($action) {
     case 'create':
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $month_name = mysqli_real_escape_string($conn, $_POST['month_name']);
-            $premises_count = (int)$_POST['premises_count'];
-            $non_compliance_count = (int)$_POST['non_compliance_count'];
+            $category = mysqli_real_escape_string($conn, $_POST['category']);
+            $Jan = (int)$_POST['Jan'];
+            $Feb = (int)$_POST['Feb'];
+            $Mar = (int)$_POST['Mar'];
+            $Apr = (int)$_POST['Apr'];
+            $May = (int)$_POST['May'];
+            $Jun = (int)$_POST['Jun'];
+            $Jul = (int)$_POST['Jul'];
+            $Aug = (int)$_POST['Aug'];
+            $Sep = (int)$_POST['Sep'];
+            $Oct = (int)$_POST['Oct'];
+            $Nov = (int)$_POST['Nov'];
+            $Dec = (int)$_POST['Dec'];
             $year = (int)$_POST['year'];
             $display_order = (int)$_POST['display_order'];
             $is_active = isset($_POST['is_active']) ? 1 : 0;
-            // guard session user id (not used because table may not have created_by column)
-            $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
-            if (empty($month_name)) {
-                $error = 'Month name tidak boleh kosong';
+            if (empty($category)) {
+                $error = 'Category tidak boleh kosong';
             } else {
-                // Note: do not insert created_by if the column does not exist in the table
-                $query = "INSERT INTO fire_safety_enforcement (month_name, premises_count, non_compliance_count, year, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)";
+                $query = "INSERT INTO fire_safety_enforcement (category, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`, year, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = mysqli_prepare($conn, $query);
-                // types: s + 5 integers
-                mysqli_stmt_bind_param($stmt, "siiiii", $month_name, $premises_count, $non_compliance_count, $year, $display_order, $is_active);
-                
+                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiii", $category, $Jan, $Feb, $Mar, $Apr, $May, $Jun, $Jul, $Aug, $Sep, $Oct, $Nov, $Dec, $year, $display_order, $is_active);
+
                 if (mysqli_stmt_execute($stmt)) {
-                    // set session notification so index.php can show it
-                    if (!isset($_SESSION)) { session_start(); }
                     $_SESSION['notif'] = 'Data berhasil ditambahkan';
                     header('Location: index.php');
                     exit();
@@ -58,7 +62,6 @@ switch ($action) {
             exit();
         }
 
-        // Ambil data berdasarkan ID
         $query = "SELECT * FROM fire_safety_enforcement WHERE id = ?";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $id);
@@ -73,29 +76,34 @@ switch ($action) {
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $month_name = mysqli_real_escape_string($conn, $_POST['month_name']);
-            $premises_count = (int)$_POST['premises_count'];
-            $non_compliance_count = (int)$_POST['non_compliance_count'];
+            $category = mysqli_real_escape_string($conn, $_POST['category']);
+            $Jan = (int)$_POST['Jan'];
+            $Feb = (int)$_POST['Feb'];
+            $Mar = (int)$_POST['Mar'];
+            $Apr = (int)$_POST['Apr'];
+            $May = (int)$_POST['May'];
+            $Jun = (int)$_POST['Jun'];
+            $Jul = (int)$_POST['Jul'];
+            $Aug = (int)$_POST['Aug'];
+            $Sep = (int)$_POST['Sep'];
+            $Oct = (int)$_POST['Oct'];
+            $Nov = (int)$_POST['Nov'];
+            $Dec = (int)$_POST['Dec'];
             $year = (int)$_POST['year'];
             $display_order = (int)$_POST['display_order'];
             $is_active = isset($_POST['is_active']) ? 1 : 0;
 
-            if (empty($month_name)) {
-                $error = 'Month name tidak boleh kosong';
+            if (empty($category)) {
+                $error = 'Category tidak boleh kosong';
             } else {
-                $query = "UPDATE fire_safety_enforcement SET month_name = ?, premises_count = ?, non_compliance_count = ?, year = ?, display_order = ?, is_active = ? WHERE id = ?";
+                $query = "UPDATE fire_safety_enforcement SET category = ?, `Jan` = ?, `Feb` = ?, `Mar` = ?, `Apr` = ?, `May` = ?, `Jun` = ?, `Jul` = ?, `Aug` = ?, `Sep` = ?, `Oct` = ?, `Nov` = ?, `Dec` = ?, year = ?, display_order = ?, is_active = ? WHERE id = ?";
                 $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiiiii", $month_name, $premises_count, $non_compliance_count, $year, $display_order, $is_active, $id);
-                
+                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiiii", $category, $Jan, $Feb, $Mar, $Apr, $May, $Jun, $Jul, $Aug, $Sep, $Oct, $Nov, $Dec, $year, $display_order, $is_active, $id);
+
                 if (mysqli_stmt_execute($stmt)) {
-                    $success = 'Data berhasil diperbarui';
-                    // Update data yang ditampilkan
-                    $data['month_name'] = $month_name;
-                    $data['premises_count'] = $premises_count;
-                    $data['non_compliance_count'] = $non_compliance_count;
-                    $data['year'] = $year;
-                    $data['display_order'] = $display_order;
-                    $data['is_active'] = $is_active;
+                    $_SESSION['notif'] = 'Data berhasil diperbarui';
+                    header('Location: index.php');
+                    exit();
                 } else {
                     $error = 'Gagal memperbarui data: ' . mysqli_error($conn);
                 }
@@ -110,16 +118,13 @@ switch ($action) {
             exit();
         }
 
-        // Hapus data (soft delete - set is_active = 0)
         $query = "UPDATE fire_safety_enforcement SET is_active = 0 WHERE id = ?";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $id);
 
         if (mysqli_stmt_execute($stmt)) {
-            if (!isset($_SESSION)) { session_start(); }
             $_SESSION['notif'] = 'Data berhasil dihapus';
         } else {
-            if (!isset($_SESSION)) { session_start(); }
             $_SESSION['notif'] = 'Gagal menghapus data: ' . mysqli_error($conn);
         }
 
@@ -129,7 +134,6 @@ switch ($action) {
         break;
 
     default:
-        // Default action is 'list' - redirect to main index
         header('Location: index.php');
         exit();
 }
@@ -258,39 +262,88 @@ switch ($action) {
                 <form method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="month_name" class="block text-sm font-medium text-gray-700 mb-2">Month Name <span class="text-red-500">*</span></label>
-                            <select id="month_name" name="month_name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition-colors duration-200">
-                                <option value="">Pilih Bulan</option>
-                                <?php $months = array('Jan'=>'January','Feb'=>'February','Mar'=>'March','Apr'=>'April','May'=>'May','Jun'=>'June','Jul'=>'July','Aug'=>'August','Sep'=>'September','Oct'=>'October','Nov'=>'November','Dec'=>'December'); foreach($months as $k=>$v){ $sel = (($action == 'edit' && isset($data['month_name']) && $data['month_name'] == $k) || (isset($_POST['month_name']) && $_POST['month_name'] == $k)) ? 'selected' : ''; echo "<option value=\"".htmlspecialchars($k)."\" $sel>".htmlspecialchars($v)."</option>"; } ?>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="premises_count" class="block text-sm font-medium text-gray-700 mb-2">Premises Count</label>
-                            <input type="number" id="premises_count" name="premises_count" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['premises_count']) : (isset($_POST['premises_count']) ? htmlspecialchars($_POST['premises_count']) : '0')); ?>">
-                        </div>
-
-                        <div>
-                            <label for="non_compliance_count" class="block text-sm font-medium text-gray-700 mb-2">Non-Compliance Count</label>
-                            <input type="number" id="non_compliance_count" name="non_compliance_count" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['non_compliance_count']) : (isset($_POST['non_compliance_count']) ? htmlspecialchars($_POST['non_compliance_count']) : '0')); ?>">
+                            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
+                            <input type="text" id="category" name="category" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition-colors duration-200" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['category']) : (isset($_POST['category']) ? htmlspecialchars($_POST['category']) : '')); ?>">
                         </div>
 
                         <div>
                             <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Year</label>
                             <input type="number" id="year" name="year" min="2020" max="2030" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['year']) : (isset($_POST['year']) ? htmlspecialchars($_POST['year']) : date('Y'))); ?>">
                         </div>
-                    </div>
 
-                    <div>
-                        <label for="display_order" class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                        <input type="number" id="display_order" name="display_order" min="0" class="w-32 px-3 py-2 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['display_order']) : (isset($_POST['display_order']) ? htmlspecialchars($_POST['display_order']) : '0')); ?>">
-                        <p class="text-sm text-gray-500 mt-1">Urutan tampil data (0 = paling atas)</p>
-                    </div>
+                        <div>
+                            <label for="display_order" class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                            <input type="number" id="display_order" name="display_order" min="0" class="w-32 px-3 py-2 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['display_order']) : (isset($_POST['display_order']) ? htmlspecialchars($_POST['display_order']) : '0')); ?>">
+                            <p class="text-sm text-gray-500 mt-1">Urutan tampil data (0 = paling atas)</p>
+                        </div>
 
-                    <div class="flex items-center">
-                        <input type="checkbox" id="is_active" name="is_active" <?php echo ( ($action == 'edit' && isset($data['is_active']) && $data['is_active']) || ($action == 'create' && (!isset($_POST['is_active']) || $_POST['is_active'])) ) ? 'checked' : ''; ?> class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                        <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Aktif</label>
-                        <p class="text-sm text-gray-500 ml-4">Centang untuk menampilkan data ini</p>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label for="Jan" class="block text-sm font-medium text-gray-700 mb-2">January</label>
+                                <input type="number" id="Jan" name="Jan" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Jan']) : (isset($_POST['Jan']) ? htmlspecialchars($_POST['Jan']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Feb" class="block text-sm font-medium text-gray-700 mb-2">February</label>
+                                <input type="number" id="Feb" name="Feb" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Feb']) : (isset($_POST['Feb']) ? htmlspecialchars($_POST['Feb']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Mar" class="block text-sm font-medium text-gray-700 mb-2">March</label>
+                                <input type="number" id="Mar" name="Mar" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Mar']) : (isset($_POST['Mar']) ? htmlspecialchars($_POST['Mar']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Apr" class="block text-sm font-medium text-gray-700 mb-2">April</label>
+                                <input type="number" id="Apr" name="Apr" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Apr']) : (isset($_POST['Apr']) ? htmlspecialchars($_POST['Apr']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="May" class="block text-sm font-medium text-gray-700 mb-2">May</label>
+                                <input type="number" id="May" name="May" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['May']) : (isset($_POST['May']) ? htmlspecialchars($_POST['May']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Jun" class="block text-sm font-medium text-gray-700 mb-2">June</label>
+                                <input type="number" id="Jun" name="Jun" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Jun']) : (isset($_POST['Jun']) ? htmlspecialchars($_POST['Jun']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Jul" class="block text-sm font-medium text-gray-700 mb-2">July</label>
+                                <input type="number" id="Jul" name="Jul" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Jul']) : (isset($_POST['Jul']) ? htmlspecialchars($_POST['Jul']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Aug" class="block text-sm font-medium text-gray-700 mb-2">August</label>
+                                <input type="number" id="Aug" name="Aug" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Aug']) : (isset($_POST['Aug']) ? htmlspecialchars($_POST['Aug']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Sep" class="block text-sm font-medium text-gray-700 mb-2">September</label>
+                                <input type="number" id="Sep" name="Sep" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Sep']) : (isset($_POST['Sep']) ? htmlspecialchars($_POST['Sep']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Oct" class="block text-sm font-medium text-gray-700 mb-2">October</label>
+                                <input type="number" id="Oct" name="Oct" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Oct']) : (isset($_POST['Oct']) ? htmlspecialchars($_POST['Oct']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Nov" class="block text-sm font-medium text-gray-700 mb-2">November</label>
+                                <input type="number" id="Nov" name="Nov" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Nov']) : (isset($_POST['Nov']) ? htmlspecialchars($_POST['Nov']) : '0')); ?>">
+                            </div>
+
+                            <div>
+                                <label for="Dec" class="block text-sm font-medium text-gray-700 mb-2">December</label>
+                                <input type="number" id="Dec" name="Dec" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Dec']) : (isset($_POST['Dec']) ? htmlspecialchars($_POST['Dec']) : '0')); ?>">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" id="is_active" name="is_active" <?php echo ( ($action == 'edit' && isset($data['is_active']) && $data['is_active']) || ($action == 'create' && (!isset($_POST['is_active']) || $_POST['is_active'])) ) ? 'checked' : ''; ?> class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                            <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Aktif</label>
+                            <p class="text-sm text-gray-500 ml-4">Centang untuk menampilkan data ini</p>
+                        </div>
                     </div>
 
                     <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">

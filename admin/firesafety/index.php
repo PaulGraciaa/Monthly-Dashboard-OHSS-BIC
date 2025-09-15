@@ -408,40 +408,60 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center">
                         <i class="fas fa-gavel text-red-600 mr-3"></i>
-                            Fire Safety Enforcement
+                        Fire Safety Enforcement
                     </h2>
                     <a href="enforcement.php?action=create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
                         <i class="fas fa-plus mr-1"></i> Add New
-                            </a>
+                    </a>
                 </div>
-                    </div>
-            
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full table-auto">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Month</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Premises Count</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Non-Compliance Count</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Year</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Category</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jan</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Feb</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Mar</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Apr</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">May</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jun</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jul</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Aug</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Sep</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Oct</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Nov</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Dec</th>
+                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Total</th>
                             <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
-                                    </tr>
-                                </thead>
+                        </tr>
+                    </thead>
                     <tbody class="divide-y divide-gray-200">
-                                    <?php if (empty($enforcement_data)): ?>
-                                        <tr>
-                                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                        <?php if (empty($enforcement_data)): ?>
+                            <tr>
+                                <td colspan="15" class="px-6 py-8 text-center text-gray-500">
                                     <i class="fas fa-inbox text-4xl mb-2"></i>
                                     <p>No enforcement data available</p>
                                 </td>
-                                        </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($enforcement_data as $item): ?>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($enforcement_data as $item): ?>
                                 <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['month_name'] ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['premises_count'] ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['non_compliance_count'] ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['year'] ?></td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($item['category']) ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Jan'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Feb'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Mar'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Apr'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['May'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Jun'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Jul'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Aug'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Sep'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Oct'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Nov'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Dec'] ?></td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['Total'] ?></td>
                                     <td class="px-6 py-4 text-center">
                                         <div class="flex items-center justify-center space-x-2">
                                             <a href="enforcement.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
@@ -451,14 +471,14 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
                                                 <i class="fas fa-trash mr-1"></i> Delete
                                             </a>
                                         </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                    </div>
-                </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
                 <!-- Fire Equipment Maintenance -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">

@@ -340,7 +340,7 @@ INSERT INTO ohs_incidents (
 ) VALUES (
     'Lesson Learned: Incident at Trash Storage Checkpoint B (First Aid Case)', '2025-07-04', '21:05:00',
     'Security Officer Didit Cahyono', '25567',
-    'Officer attempted to close a damaged metal door (~40–50kg) at Checkpoint B. Door collapsed, trapping his right thumb and ring finger → laceration injuries.',
+    'Officer attempted to close a damaged metal door (~40–50kg) at Checkpoint B. Door collapsed, trapping his right thumb and ring finger and causing laceration injuries.',
     'Treated at BIP Clinic. No property damage or lost time reported.',
     '- Lack of pre-task hazard assessment and lighting check during night shift.\n- Checkpoint placed near a known hazard (damaged structure).\n- Inadequate hazard reporting and delayed action on known damage.\n- No barricade/warning signs on damaged infrastructure.\n- Lack of training in handling damaged or unstable equipment.',
     '- Always assess risk before acting, especially on damaged equipment.\n- Ensure hazard reporting is immediate and followed up.\n- Night shift operations must be supported by adequate lighting and supervision.\n- Checkpoint placement must avoid hazardous zones.\n- Preventive maintenance and housekeeping are critical to safety.',
@@ -407,10 +407,23 @@ CREATE TABLE IF NOT EXISTS fire_safety_emergency_details (
 -- 4) Fire Safety Enforcement (per month row)
 CREATE TABLE IF NOT EXISTS fire_safety_enforcement (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    month_name VARCHAR(20) NOT NULL,
-    premises_count INT DEFAULT 0,
-    non_compliance_count INT DEFAULT 0,
     year INT NOT NULL,
+    `Jan` INT DEFAULT 0,
+    `Feb` INT DEFAULT 0,
+    `Mar` INT DEFAULT 0,
+    `Apr` INT DEFAULT 0,
+    `May` INT DEFAULT 0,
+    `Jun` INT DEFAULT 0,
+    `Jul` INT DEFAULT 0,
+    `Aug` INT DEFAULT 0,
+    `Sep` INT DEFAULT 0,
+    `Oct` INT DEFAULT 0,
+    `Nov` INT DEFAULT 0,
+    `Dec` INT DEFAULT 0,
+    Total INT GENERATED ALWAYS AS (
+        `Jan` + `Feb` + `Mar` + `Apr` + `May` + `Jun` + `Jul` + `Aug` + `Sep` + `Oct` + `Nov` + `Dec`
+    ) STORED,
+    category VARCHAR(50) NOT NULL,
     display_order INT DEFAULT 0,
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -509,3 +522,9 @@ VALUES
 ('Operational Standby', 1,0,0,1,1,0,0,0,0,0,0,0, 5),
 ('Spillage', 0,0,0,0,0,0,0,0,0,0,0,0, 6)
 ON DUPLICATE KEY UPDATE jan_value=VALUES(jan_value);
+
+-- Insert default data for Fire Safety Enforcement
+INSERT INTO fire_safety_enforcement (category, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`, year, display_order, is_active)
+VALUES
+('No of Premises', 9, 36, 25, 7, 5, 6, 0, 0, 0, 0, 0, 0, 2025, 1, 1),
+('Non-Compliance Cases', 3, 5, 13, 1, 2, 3, 0, 0, 0, 0, 0, 0, 2025, 2, 1);

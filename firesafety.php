@@ -303,13 +303,13 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Mar</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Apr</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">May</th>
-              <th class="py-2 px-3 border-b border-primary-blue border-r font-bold bg-green-400 text-black">Jun</th>
+              <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Jun</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Jul</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Aug</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Sep</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Oct</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Nov</th>
-              <th class="py-2 px-3 border-b border-primary-blue font-bold">Dec</th>
+              <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Dec</th>
               <th class="py-2 px-3 border-b border-primary-blue font-bold">Grand Total</th>
             </tr>
           </thead>
@@ -321,20 +321,48 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
             <?php else: ?>
               <?php foreach ($emergency_data as $item): ?>
                 <tr class="hover:bg-blue-50">
-                  <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left font-bold"><?php echo htmlspecialchars($item['category']); ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['jan_value']) ? $item['jan_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['feb_value']) ? $item['feb_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['mar_value']) ? $item['mar_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['apr_value']) ? $item['apr_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['may_value']) ? $item['may_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold"><?php echo isset($item['jun_value']) ? $item['jun_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['jul_value']) ? $item['jul_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['aug_value']) ? $item['aug_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['sep_value']) ? $item['sep_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['oct_value']) ? $item['oct_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['nov_value']) ? $item['nov_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?php echo isset($item['dec_value']) ? $item['dec_value'] : '0'; ?></td>
-                  <td class="py-2 px-3 border-b border-primary-blue font-bold"><?php echo isset($item['grand_total']) ? $item['grand_total'] : 0; ?></td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left font-bold">
+                    <?php echo htmlspecialchars($item['category']); ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['jan_value']) ? $item['jan_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['feb_value']) ? $item['feb_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['mar_value']) ? $item['mar_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['apr_value']) ? $item['apr_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['may_value']) ? $item['may_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['jun_value']) ? $item['jun_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['jul_value']) ? $item['jul_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['aug_value']) ? $item['aug_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['sep_value']) ? $item['sep_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['oct_value']) ? $item['oct_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['nov_value']) ? $item['nov_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?php echo isset($item['dec_value']) ? $item['dec_value'] : '0'; ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue font-bold">
+                    <?php echo isset($item['grand_total']) ? $item['grand_total'] : '0'; ?>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
@@ -393,13 +421,13 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
         <table class="min-w-full border border-primary-blue rounded-lg text-sm shadow">
           <thead>
             <tr class="bg-primary-blue text-white text-center">
-              <th class="py-2 px-3 border-b border-primary-blue border-r border-l font-bold">Year 2025</th>
+              <th class="py-2 px-3 border-b border-primary-blue border-r border-l font-bold">Category</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Jan</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Feb</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Mar</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Apr</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">May</th>
-              <th class="py-2 px-3 border-b border-primary-blue border-r font-bold bg-green-400 text-black">Jun</th>
+              <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Jun</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Jul</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Aug</th>
               <th class="py-2 px-3 border-b border-primary-blue border-r font-bold">Sep</th>
@@ -410,38 +438,58 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
             </tr>
           </thead>
           <tbody class="text-center">
-            <tr class="bg-blue-50 font-bold">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left">No of Premises</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">09</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">36</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">25</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">07</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">05</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold">06</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue"></td>
-              <td class="py-2 px-3 border-b border-primary-blue font-bold">89</td>
-            </tr>
-            <tr class="bg-blue-100 font-bold">
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r border-l text-left">Non-Compliance Cases</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">03</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">05</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">13</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">01</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">02</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r bg-green-100 text-black font-bold">03</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue font-bold">27</td>
-            </tr>
+            <?php if (empty($enforcement_data)): ?>
+              <tr>
+                <td colspan="14" class="py-6">No enforcement data available</td>
+              </tr>
+            <?php else: ?>
+              <?php foreach ($enforcement_data as $data): ?>
+                <tr class="hover:bg-blue-50">
+                  <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left font-bold">
+                      <?= htmlspecialchars($data['category'] ?? 'category') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Jan'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Feb'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Mar'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Apr'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['May'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Jun'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Jul'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Aug'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Sep'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Oct'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Nov'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                      <?= htmlspecialchars($data['Dec'] ?? '0') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue font-bold">
+                      <?= htmlspecialchars($data['Total'] ?? '0') ?>
+                  </td> 
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -487,31 +535,30 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
             </tr>
           </thead>
           <tbody class="text-center font-extrabold">
-            <tr class="bg-blue-100">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l">01</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">5-Jun-2025</td>
-              <td class="py-2 px-3 border-b border-primary-blue">PT. PC Partner</td>
-            </tr>
-            <tr class="bg-white">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l">02</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">17-Jun-2025</td>
-              <td class="py-2 px-3 border-b border-primary-blue">PT. Greenlam Asia Pasific</td>
-            </tr>
-            <tr class="bg-blue-100">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l">03</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">24-Jun-2025</td>
-              <td class="py-2 px-3 border-b border-primary-blue">PT. Sanwa Engineering Batam</td>
-            </tr>
-            <tr class="bg-white">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l">04</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">25-Jun-2025</td>
-              <td class="py-2 px-3 border-b border-primary-blue">PT. Asiatech Manufacturing Indonesia</td>
-            </tr>
-            <tr class="bg-blue-100">
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r border-l">05</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">26-Jun-2025</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue">PT. Wolhrab Indonesia</td>
-            </tr>
+            <?php
+            // Query untuk mengambil data dari tabel Fire Equipment Maintenance
+            $query = "SELECT serial_number, maintenance_date, location FROM fire_equipment_maintenance WHERE is_active = 1 ORDER BY display_order ASC";
+            $result = $conn->query($query);
+
+            if ($result->num_rows > 0) {
+                $fireEquipmentData = $result->fetch_all(MYSQLI_ASSOC);
+            } else {
+                $fireEquipmentData = [];
+            }
+            ?>
+            <?php if (!empty($fireEquipmentData)): ?>
+              <?php foreach ($fireEquipmentData as $index => $row): ?>
+                <tr class="<?= $index % 2 === 0 ? 'bg-blue-100' : 'bg-white' ?>">
+                  <td class="py-2 px-3 border-b border-primary-blue border-r border-l"><?= htmlspecialchars($row['serial_number']) ?></td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r"><?= htmlspecialchars(date('d-M-Y', strtotime($row['maintenance_date']))) ?></td>
+                  <td class="py-2 px-3 border-b border-primary-blue"><?= htmlspecialchars($row['location']) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <tr>
+                <td colspan="3" class="py-2 px-3 border-b border-primary-blue text-center">No data available</td>
+              </tr>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -540,86 +587,58 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
             </tr>
           </thead>
           <tbody class="text-center font-bold">
-            <tr class="bg-blue-100">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left">Fire Alarm Panels</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">9</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">34</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">25</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">7</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">5</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold">2</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue font-extrabold">82</td>
-            </tr>
-            <tr class="bg-white">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left">Manual Call Points</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">62</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">190</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">128</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">47</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">27</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold">26</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue font-extrabold">480</td>
-            </tr>
-            <tr class="bg-blue-100">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left">Alarm Bells</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">62</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">190</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">128</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">47</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">27</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold">26</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue font-extrabold">480</td>
-            </tr>
-            <tr class="bg-white">
-              <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left">Fire Extinguishers</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">307</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">888</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">443</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">256</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r">94</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold">260</td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b border-primary-blue font-extrabold">2248</td>
-            </tr>
-            <tr class="bg-blue-100">
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r border-l text-left">Fire Hosereels</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">43</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">156</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">85</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">38</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r">19</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r bg-green-100 text-black font-bold">26</td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue border-r"></td>
-              <td class="py-2 px-3 border-b-0 border-primary-blue font-extrabold">367</td>
-            </tr>
+            <?php if (empty($statistics_data)): ?>
+              <tr>
+                <td colspan="14" class="py-6">No fire equipment statistics data available</td>
+              </tr>
+            <?php else: ?>
+              <?php foreach ($statistics_data as $row): ?>
+                <tr class="<?= ($row['display_order'] ?? 0) % 2 === 0 ? 'bg-blue-100' : 'bg-white' ?>">
+                  <td class="py-2 px-3 border-b border-primary-blue border-r border-l text-left">
+                    <?= htmlspecialchars($row['equipment_type'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['jan_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['feb_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['mar_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['apr_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['may_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r bg-green-100 text-black font-bold">
+                    <?= htmlspecialchars($row['jun_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['jul_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['aug_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['sep_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['oct_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['nov_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue border-r">
+                    <?= htmlspecialchars($row['dec_count'] ?? '') ?>
+                  </td>
+                  <td class="py-2 px-3 border-b border-primary-blue font-extrabold">
+                    <?= htmlspecialchars($row['grand_total'] ?? '') ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>
@@ -760,7 +779,7 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
         </li>
       </ol>
     </div>
-  </main>
+    
 
   <footer class="bg-header-footer-bg text-white text-center py-2 mt-3 text-xs">
     <p>&copy; 2025 Batamindo Investment Cakrawala. All rights reserved</p>
@@ -823,12 +842,14 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
       
       // Chart Emergency Activation WY2025
       const ctx = document.getElementById('emergencyBarChart').getContext('2d');
+      const emergencyData = <?php echo json_encode(array_column($emergency_data, 'grand_total')); ?>;
+      const emergencyLabels = <?php echo json_encode(array_column($emergency_data, 'category')); ?>;
       new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['SPILLAGE', 'TECHNICAL CALL', 'OPERATIONAL STANDBY', 'NON-RESCUE', 'FIRE CALL', 'FIRE INCIDENT'],
+          labels: emergencyLabels,
           datasets: [{
-            data: [0, 2, 3, 13, 19, 0],
+            data: emergencyData,
             backgroundColor: '#4B7FD6',
             borderRadius: 6,
             barPercentage: 0.7,
