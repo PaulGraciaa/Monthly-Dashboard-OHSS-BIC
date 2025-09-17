@@ -20,21 +20,29 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 switch ($action) {
     case 'create':
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $month_name = mysqli_real_escape_string($conn, $_POST['month_name']);
-            $repair_count = (int)$_POST['repair_count'];
+            $category = mysqli_real_escape_string($conn, $_POST['category']);
+            $jan_count = (int)$_POST['jan_count'];
+            $feb_count = (int)$_POST['feb_count'];
+            $mar_count = (int)$_POST['mar_count'];
+            $apr_count = (int)$_POST['apr_count'];
+            $may_count = (int)$_POST['may_count'];
+            $jun_count = (int)$_POST['jun_count'];
+            $jul_count = (int)$_POST['jul_count'];
+            $aug_count = (int)$_POST['aug_count'];
+            $sep_count = (int)$_POST['sep_count'];
+            $oct_count = (int)$_POST['oct_count'];
+            $nov_count = (int)$_POST['nov_count'];
+            $dec_count = (int)$_POST['dec_count'];
             $year = (int)$_POST['year'];
             $display_order = (int)$_POST['display_order'];
             $is_active = isset($_POST['is_active']) ? 1 : 0;
-            $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
-            if (empty($month_name)) {
-                $error = 'Month name tidak boleh kosong';
+            if (empty($category)) {
+                $error = 'Category tidak boleh kosong';
             } else {
-                // created_by not present in table schema; do not insert it
-                $query = "INSERT INTO fire_safety_repair_impairment (month_name, repair_count, year, display_order, is_active) VALUES (?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiii", $month_name, $repair_count, $year, $display_order, $is_active);
-                
+                    $query = "INSERT INTO fire_safety_repair_impairment (category, jan_count, feb_count, mar_count, apr_count, may_count, jun_count, jul_count, aug_count, sep_count, oct_count, nov_count, dec_count, year, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = mysqli_prepare($conn, $query);
+                    mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiii", $category, $jan_count, $feb_count, $mar_count, $apr_count, $may_count, $jun_count, $jul_count, $aug_count, $sep_count, $oct_count, $nov_count, $dec_count, $year, $display_order, $is_active);
                 if (mysqli_stmt_execute($stmt)) {
                     if (!isset($_SESSION)) { session_start(); }
                     $_SESSION['notif'] = 'Data berhasil ditambahkan';
@@ -69,24 +77,45 @@ switch ($action) {
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $month_name = mysqli_real_escape_string($conn, $_POST['month_name']);
-            $repair_count = (int)$_POST['repair_count'];
+            $category = mysqli_real_escape_string($conn, $_POST['category']);
+            $jan_count = (int)$_POST['jan_count'];
+            $feb_count = (int)$_POST['feb_count'];
+            $mar_count = (int)$_POST['mar_count'];
+            $apr_count = (int)$_POST['apr_count'];
+            $may_count = (int)$_POST['may_count'];
+            $jun_count = (int)$_POST['jun_count'];
+            $jul_count = (int)$_POST['jul_count'];
+            $aug_count = (int)$_POST['aug_count'];
+            $sep_count = (int)$_POST['sep_count'];
+            $oct_count = (int)$_POST['oct_count'];
+            $nov_count = (int)$_POST['nov_count'];
+            $dec_count = (int)$_POST['dec_count'];
             $year = (int)$_POST['year'];
             $display_order = (int)$_POST['display_order'];
             $is_active = isset($_POST['is_active']) ? 1 : 0;
 
-            if (empty($month_name)) {
-                $error = 'Month name tidak boleh kosong';
+            if (empty($category)) {
+                $error = 'Category tidak boleh kosong';
             } else {
-                $query = "UPDATE fire_safety_repair_impairment SET month_name = ?, repair_count = ?, year = ?, display_order = ?, is_active = ? WHERE id = ?";
+                $query = "UPDATE fire_safety_repair_impairment SET category = ?, jan_count = ?, feb_count = ?, mar_count = ?, apr_count = ?, may_count = ?, jun_count = ?, jul_count = ?, aug_count = ?, sep_count = ?, oct_count = ?, nov_count = ?, dec_count = ?, year = ?, display_order = ?, is_active = ? WHERE id = ?";
                 $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiiii", $month_name, $repair_count, $year, $display_order, $is_active, $id);
-                
+                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiiii", $category, $jan_count, $feb_count, $mar_count, $apr_count, $may_count, $jun_count, $jul_count, $aug_count, $sep_count, $oct_count, $nov_count, $dec_count, $year, $display_order, $is_active, $id);
                 if (mysqli_stmt_execute($stmt)) {
                     $success = 'Data berhasil diperbarui';
                     // Update data yang ditampilkan
-                    $data['month_name'] = $month_name;
-                    $data['repair_count'] = $repair_count;
+                    $data['category'] = $category;
+                    $data['jan_count'] = $jan_count;
+                    $data['feb_count'] = $feb_count;
+                    $data['mar_count'] = $mar_count;
+                    $data['apr_count'] = $apr_count;
+                    $data['may_count'] = $may_count;
+                    $data['jun_count'] = $jun_count;
+                    $data['jul_count'] = $jul_count;
+                    $data['aug_count'] = $aug_count;
+                    $data['sep_count'] = $sep_count;
+                    $data['oct_count'] = $oct_count;
+                    $data['nov_count'] = $nov_count;
+                    $data['dec_count'] = $dec_count;
                     $data['year'] = $year;
                     $data['display_order'] = $display_order;
                     $data['is_active'] = $is_active;
@@ -266,41 +295,38 @@ $page_title .= ' Fire Safety Repair Impairment';
                     <div class="card-body">
                         <form method="POST">
                             <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="month_name" class="form-label">Month Name <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="month_name" name="month_name" required>
-                                        <option value="">Pilih Bulan</option>
-                                        <option value="Jan" <?php echo (($action == 'edit' && $data['month_name'] == 'Jan') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Jan')) ? 'selected' : ''; ?>>January</option>
-                                        <option value="Feb" <?php echo (($action == 'edit' && $data['month_name'] == 'Feb') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Feb')) ? 'selected' : ''; ?>>February</option>
-                                        <option value="Mar" <?php echo (($action == 'edit' && $data['month_name'] == 'Mar') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Mar')) ? 'selected' : ''; ?>>March</option>
-                                        <option value="Apr" <?php echo (($action == 'edit' && $data['month_name'] == 'Apr') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Apr')) ? 'selected' : ''; ?>>April</option>
-                                        <option value="May" <?php echo (($action == 'edit' && $data['month_name'] == 'May') || (isset($_POST['month_name']) && $_POST['month_name'] == 'May')) ? 'selected' : ''; ?>>May</option>
-                                        <option value="Jun" <?php echo (($action == 'edit' && $data['month_name'] == 'Jun') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Jun')) ? 'selected' : ''; ?>>June</option>
-                                        <option value="Jul" <?php echo (($action == 'edit' && $data['month_name'] == 'Jul') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Jul')) ? 'selected' : ''; ?>>July</option>
-                                        <option value="Aug" <?php echo (($action == 'edit' && $data['month_name'] == 'Aug') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Aug')) ? 'selected' : ''; ?>>August</option>
-                                        <option value="Sep" <?php echo (($action == 'edit' && $data['month_name'] == 'Sep') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Sep')) ? 'selected' : ''; ?>>September</option>
-                                        <option value="Oct" <?php echo (($action == 'edit' && $data['month_name'] == 'Oct') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Oct')) ? 'selected' : ''; ?>>October</option>
-                                        <option value="Nov" <?php echo (($action == 'edit' && $data['month_name'] == 'Nov') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Nov')) ? 'selected' : ''; ?>>November</option>
-                                        <option value="Dec" <?php echo (($action == 'edit' && $data['month_name'] == 'Dec') || (isset($_POST['month_name']) && $_POST['month_name'] == 'Dec')) ? 'selected' : ''; ?>>December</option>
-                                    </select>
+                                <div class="col-md-4 mb-3">
+                                    <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="category" name="category" required value="<?php echo ($action == 'edit') ? htmlspecialchars($data['category']) : (isset($_POST['category']) ? htmlspecialchars($_POST['category']) : ''); ?>">
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="repair_count" class="form-label">Repair Count</label>
-                                    <input type="number" class="form-control" id="repair_count" name="repair_count" 
-                                           value="<?php echo ($action == 'edit') ? $data['repair_count'] : (isset($_POST['repair_count']) ? $_POST['repair_count'] : '0'); ?>" 
-                                           min="0">
+                                <?php
+                                $months = [
+                                    'jan_count' => 'Jan',
+                                    'feb_count' => 'Feb',
+                                    'mar_count' => 'Mar',
+                                    'apr_count' => 'Apr',
+                                    'may_count' => 'May',
+                                    'jun_count' => 'Jun',
+                                    'jul_count' => 'Jul',
+                                    'aug_count' => 'Aug',
+                                    'sep_count' => 'Sep',
+                                    'oct_count' => 'Oct',
+                                    'nov_count' => 'Nov',
+                                    'dec_count' => 'Dec',
+                                ];
+                                foreach ($months as $field => $label): ?>
+                                <div class="col-md-2 mb-3">
+                                    <label for="<?= $field ?>" class="form-label"><?= $label ?></label>
+                                    <input type="number" class="form-control" id="<?= $field ?>" name="<?= $field ?>" min="0" value="<?php echo ($action == 'edit') ? $data[$field] : (isset($_POST[$field]) ? $_POST[$field] : '0'); ?>">
                                 </div>
-                                <div class="col-md-3 mb-3">
+                                <?php endforeach; ?>
+                                <div class="col-md-2 mb-3">
                                     <label for="year" class="form-label">Year</label>
-                                    <input type="number" class="form-control" id="year" name="year" 
-                                           value="<?php echo ($action == 'edit') ? $data['year'] : (isset($_POST['year']) ? $_POST['year'] : '2025'); ?>" 
-                                           min="2020" max="2030">
+                                    <input type="number" class="form-control" id="year" name="year" min="2020" max="2030" value="<?php echo ($action == 'edit') ? $data['year'] : (isset($_POST['year']) ? $_POST['year'] : '2025'); ?>">
                                 </div>
-                                <div class="col-md-3 mb-3">
+                                <div class="col-md-2 mb-3">
                                     <label for="display_order" class="form-label">Display Order</label>
-                                    <input type="number" class="form-control" id="display_order" name="display_order" 
-                                           value="<?php echo ($action == 'edit') ? $data['display_order'] : (isset($_POST['display_order']) ? $_POST['display_order'] : '0'); ?>" 
-                                           min="0">
+                                    <input type="number" class="form-control" id="display_order" name="display_order" min="0" value="<?php echo ($action == 'edit') ? $data['display_order'] : (isset($_POST['display_order']) ? $_POST['display_order'] : '0'); ?>">
                                 </div>
                             </div>
 

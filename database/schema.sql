@@ -471,8 +471,22 @@ CREATE TABLE IF NOT EXISTS fire_equipment_statistics (
 -- 7) Fire Safety Repair Impairment (per month row)
 CREATE TABLE IF NOT EXISTS fire_safety_repair_impairment (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    month_name VARCHAR(20) NOT NULL,
-    repair_count INT DEFAULT 0,
+    category VARCHAR(255) NOT NULL,
+    jan_count INT DEFAULT 0,
+    feb_count INT DEFAULT 0,
+    mar_count INT DEFAULT 0,
+    apr_count INT DEFAULT 0,
+    may_count INT DEFAULT 0,
+    jun_count INT DEFAULT 0,
+    jul_count INT DEFAULT 0,
+    aug_count INT DEFAULT 0,
+    sep_count INT DEFAULT 0,
+    oct_count INT DEFAULT 0,
+    nov_count INT DEFAULT 0,
+    dec_count INT DEFAULT 0,
+    total INT GENERATED ALWAYS AS (
+        jan_count + feb_count + mar_count + apr_count + may_count + jun_count + jul_count + aug_count + sep_count + oct_count + nov_count + dec_count
+    ) STORED,
     year INT NOT NULL,
     display_order INT DEFAULT 0,
     is_active TINYINT(1) DEFAULT 1,

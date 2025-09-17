@@ -617,44 +617,66 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
                     </div>
             
             <div class="overflow-x-auto">
-                <table class="min-w-full table-auto">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Month</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Repair Count</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Year</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
-                                    </tr>
-                                </thead>
-                    <tbody class="divide-y divide-gray-200">
-                                    <?php if (empty($repair_data)): ?>
-                                        <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                                    <i class="fas fa-inbox text-4xl mb-2"></i>
-                                    <p>No repair data available</p>
-                                </td>
+                    <table class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Category</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jan</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Feb</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Mar</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Apr</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">May</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jun</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Jul</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Aug</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Sep</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Oct</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Nov</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Dec</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Total</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <?php if (empty($repair_data)): ?>
+                                <tr>
+                                    <td colspan="15" class="px-6 py-8 text-center text-gray-500">
+                                        <i class="fas fa-inbox text-4xl mb-2"></i>
+                                        <p>No repair impairment data available</p>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($repair_data as $item): ?>
+                                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($item['category'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['jan_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['feb_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['mar_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['apr_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['may_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['jun_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['jul_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['aug_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['sep_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['oct_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['nov_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['dec_count'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-bold"><?= htmlspecialchars($item['total'] ?? '') ?></td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex items-center justify-center space-x-2">
+                                                    <a href="repair.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                        <i class="fas fa-edit mr-1"></i> Edit
+                                                    </a>
+                                                    <a href="repair.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                        <i class="fas fa-trash mr-1"></i> Delete
+                                                    </a>
+                                                </div>
+                                            </td>
                                         </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($repair_data as $item): ?>
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['month_name'] ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['repair_count'] ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 text-center"><?= $item['year'] ?></td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center space-x-2">
-                                            <a href="repair.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
-                                                <i class="fas fa-edit mr-1"></i> Edit
-                                            </a>
-                                            <a href="repair.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
-                                                <i class="fas fa-trash mr-1"></i> Delete
-                                            </a>
-                                        </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                     </div>
                 </div>
 
