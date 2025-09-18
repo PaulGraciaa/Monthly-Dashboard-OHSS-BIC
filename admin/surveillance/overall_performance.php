@@ -1,6 +1,10 @@
 <?php
+require_once 'template_header.php';
+// Sanitize function for PHP 5.3.8
+function sanitize($str) {
+    return htmlspecialchars(trim($str), ENT_QUOTES, 'UTF-8');
+}
 
-// Proses CRUD
 $message = '';
 $message_type = '';
 
@@ -10,55 +14,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $indicator = sanitize($_POST['indicator']);
         $current_month = sanitize($_POST['current_month']);
         $cumulative = sanitize($_POST['cumulative']);
-        
+
         if ($_POST['action'] == 'add') {
-            $stmt = $pdo->prepare("INSERT INTO surveillance_overall_performance (indicator, current_month, cumulative) VALUES (?, ?, ?)");
-            if ($stmt->execute([$indicator, $current_month, $cumulative])) {
+            $stmt = mysqli_prepare($conn, "INSERT INTO surveillance_overall_performance (indicator, current_month, cumulative) VALUES (?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, "sss", $indicator, $current_month, $cumulative);
+            if (mysqli_stmt_execute($stmt)) {
                 $message = "Data berhasil ditambahkan!";
                 $message_type = "success";
             } else {
                 $message = "Gagal menambahkan data!";
                 $message_type = "error";
             }
+            mysqli_stmt_close($stmt);
         } elseif ($_POST['action'] == 'edit') {
-            $id = sanitize($_POST['id']);
-            $stmt = $pdo->prepare("UPDATE surveillance_overall_performance SET indicator = ?, current_month = ?, cumulative = ? WHERE id = ?");
-            if ($stmt->execute([$indicator, $current_month, $cumulative, $id])) {
+            $id = (int)sanitize($_POST['id']);
+            $stmt = mysqli_prepare($conn, "UPDATE surveillance_overall_performance SET indicator = ?, current_month = ?, cumulative = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, "sssi", $indicator, $current_month, $cumulative, $id);
+            if (mysqli_stmt_execute($stmt)) {
                 $message = "Data berhasil diperbarui!";
                 $message_type = "success";
             } else {
                 $message = "Gagal memperbarui data!";
                 $message_type = "error";
             }
+            mysqli_stmt_close($stmt);
         }
     }
 }
 
 // Delete
 if (isset($_GET['delete'])) {
-    $id = sanitize($_GET['delete']);
-    $stmt = $pdo->prepare("DELETE FROM surveillance_overall_performance WHERE id = ?");
-    if ($stmt->execute([$id])) {
+    $id = (int)sanitize($_GET['delete']);
+    $stmt = mysqli_prepare($conn, "DELETE FROM surveillance_overall_performance WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
         $message = "Data berhasil dihapus!";
         $message_type = "success";
     } else {
         $message = "Gagal menghapus data!";
         $message_type = "error";
     }
+    mysqli_stmt_close($stmt);
 }
 
 // Ambil data untuk edit
 $edit_data = null;
 if (isset($_GET['edit'])) {
-    $id = sanitize($_GET['edit']);
-    $stmt = $pdo->prepare("SELECT * FROM surveillance_overall_performance WHERE id = ?");
-    $stmt->execute([$id]);
-    $edit_data = $stmt->fetch();
+    $id = (int)sanitize($_GET['edit']);
+    $stmt = mysqli_prepare($conn, "SELECT * FROM surveillance_overall_performance WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $edit_data = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
 }
 
 // Ambil semua data
-$stmt = $pdo->query("SELECT * FROM surveillance_overall_performance ORDER BY id ASC");
-$data = $stmt->fetchAll();
+$data = array();
+$result = mysqli_query($conn, "SELECT * FROM surveillance_overall_performance ORDER BY id ASC");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
     <!-- Main Content -->

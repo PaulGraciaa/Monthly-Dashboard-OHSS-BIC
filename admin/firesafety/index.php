@@ -1,13 +1,6 @@
 <?php
-session_start();
-require_once '../auth.php';
-
-// Pastikan user sudah login
-if (!isAdminLoggedIn()) {
-    header('Location: ../login.php');
-    exit();
-}
-
+$page_title = 'Fire Safety Management';
+require_once 'template_header.php';
 require_once '../../config/database.php';
 
 // Ambil data Fire Safety Performance Summary
@@ -79,22 +72,23 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
 </head>
 <body class="bg-gray-100 font-sans">
     <!-- Red Header Section -->
+    <!-- Navbar: Connected to all modules in admin folder -->
     <div class="bg-gradient-to-r from-red-600 to-red-800">
         <header class="text-white py-4">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center space-x-4">
                         <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                            <p class="text-red-200">Fire Safety Management System</p>
-                        </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
+                                <p class="text-red-200">Fire Safety Management System</p>
+                            </div>
                     </div>
                     <div class="hidden md:flex items-center space-x-3">
                         <div class="text-right">
                             <p class="text-sm text-white">Welcome, Admin</p>
                             <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
-                    </div>
+                        </div>
                         <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
                             <i class="fas fa-sign-out-alt mr-1"></i> Logout
                         </a>
@@ -118,7 +112,7 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
                     <a href="../security/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-user-shield mr-1"></i> Security
                     </a>
-                    <a href="index.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="../firesafety/index.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-fire-extinguisher mr-1"></i> Fire Safety
                     </a>
                     <a href="../surveillance/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
@@ -802,6 +796,70 @@ $drills_data = mysqli_fetch_all($result_drills, MYSQLI_ASSOC);
                                 </tbody>
                             </table>
                         </div>
+
+                                        </div>
+                                        <!-- Fire Safety Training (separate box, UI mirip Drills) -->
+                                        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                                            <div class="p-6 border-b border-gray-200">
+                                                <div class="flex items-center justify-between">
+                                                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                                        <i class="fas fa-chalkboard-teacher text-yellow-600 mr-3"></i>
+                                                        Fire Safety Training
+                                                    </h2>
+                                                    <a href="training.php?action=create" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                                                        <i class="fas fa-plus mr-1"></i> Add New
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full table-auto">
+                                                    <thead class="bg-gray-50">
+                                                        <tr>
+                                                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">S/No</th>
+                                                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Date</th>
+                                                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Location</th>
+                                                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Subject</th>
+                                                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Type</th>
+                                                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-gray-200">
+                                                        <?php if (empty($training_data)): ?>
+                                                            <tr>
+                                                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                                                    <p>No training data available</p>
+                                                                </td>
+                                                            </tr>
+                                                        <?php else: ?>
+                                                            <?php foreach ($training_data as $item): ?>
+                                                                <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['serial_number'] ?></td>
+                                                                    <td class="px-6 py-4 text-sm text-gray-900"><?= date('d-M-y', strtotime($item['training_date'])) ?></td>
+                                                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['location']) ?></td>
+                                                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['subject']) ?></td>
+                                                                    <td class="px-6 py-4 text-center">
+                                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                            Training
+                                                                        </span>
+                                                                    </td>
+                                                                    <td class="px-6 py-4 text-center">
+                                                                        <div class="flex items-center justify-center space-x-2">
+                                                                            <a href="training.php?action=edit&id=<?= $item['id'] ?>" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                                                <i class="fas fa-edit mr-1"></i> Edit
+                                                                            </a>
+                                                                            <a href="training.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                                                <i class="fas fa-trash mr-1"></i> Delete
+                                                                            </a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                     </div>
                 </div>
 

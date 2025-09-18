@@ -522,6 +522,24 @@ CREATE TABLE IF NOT EXISTS fire_safety_drills (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- SQL for fire_safety_training table
+CREATE TABLE fire_safety_training (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serial_number INT NOT NULL,
+    training_date DATE NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1
+);
+
+-- Example insert data
+INSERT INTO fire_safety_training (serial_number, training_date, location, subject, display_order, is_active) VALUES
+(1, '2025-09-01', 'Main Hall', 'Fire Extinguisher Training', 1, 1),
+(2, '2025-09-05', 'Warehouse', 'Evacuation Training', 2, 1),
+(3, '2025-09-10', 'Office', 'First Aid Training', 3, 1);
+
+
 -- Optional seed data (minimal) to avoid empty pages
 INSERT INTO fire_safety_performance (summary_text, display_order) VALUES
 ('Fire Safety responded to multiple incidents this month with zero injuries.', 1)

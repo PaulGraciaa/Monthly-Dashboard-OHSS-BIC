@@ -952,8 +952,8 @@ $drills_data = fetch_table($pdo, "SELECT * FROM fire_safety_drills WHERE is_acti
             datalabels: {
               anchor: 'end',
               align: 'right',
-              color: '#fff',
-              font: { weight: 'bold', size: 18 }
+              color: '#0000f4ff', // bright red for visibility
+              font: { weight: 'bold', size: 20 }
             }
           },
           scales: {

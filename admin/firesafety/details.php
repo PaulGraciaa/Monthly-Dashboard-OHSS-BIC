@@ -1,239 +1,103 @@
 <?php
 session_start();
 require_once '../auth.php';
-
-// Pastikan user sudah login
 if (!isAdminLoggedIn()) {
     header('Location: ../login.php');
     exit();
 }
-
 require_once '../../config/database.php';
+require_once 'template_header.php';
 
+// Prevent undefined variable warnings
+
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+$data = array();
 $error = '';
 $success = '';
-$data = null;
-$action = isset($_GET['action']) ? $_GET['action'] : 'list';
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$message = '';
+$message_type = '';
 
-// helper: normalize/validate date input and return Y-m-d or false
-function normalize_date_for_db($input)
-{
-    $input = trim($input);
-    if ($input === '') {
-        return false;
-    }
+// Create/Update
 
-    // numeric timestamps
-    if (ctype_digit($input)) {
-        $ts = (int)$input;
-        // handle possible milliseconds
-        if ($ts > 9999999999) {
-            $ts = (int)($ts / 1000);
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $serial_number = isset($_POST['serial_number']) ? (int)$_POST['serial_number'] : 0;
+    $incident_date = isset($_POST['incident_date']) ? $_POST['incident_date'] : '';
+    $category = isset($_POST['category']) ? sanitize($_POST['category']) : '';
+    $sub_category = isset($_POST['sub_category']) ? sanitize($_POST['sub_category']) : '';
+    $description = isset($_POST['description']) ? sanitize($_POST['description']) : '';
+    $location = isset($_POST['location']) ? sanitize($_POST['location']) : '';
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    $form_action = isset($_POST['action']) ? $_POST['action'] : 'add';
+
+    if ($form_action == 'add') {
+        $stmt = mysqli_prepare($conn, "INSERT INTO fire_safety_emergency_details (serial_number, incident_date, category, sub_category, description, location, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "issssssi", $serial_number, $incident_date, $category, $sub_category, $description, $location, $display_order, $is_active);
+        if (mysqli_stmt_execute($stmt)) {
+            $message = 'Data berhasil ditambahkan!';
+            $message_type = 'success';
+        } else {
+            $message = 'Gagal menambahkan data!';
+            $message_type = 'error';
         }
-        try {
-            $d = new DateTime('@' . $ts);
-            $d->setTimezone(new DateTimeZone(date_default_timezone_get()));
-        } catch (Exception $e) {
-            $d = false;
+        mysqli_stmt_close($stmt);
+    } elseif ($form_action == 'edit' && isset($_POST['id'])) {
+        $id = (int)$_POST['id'];
+        $stmt = mysqli_prepare($conn, "UPDATE fire_safety_emergency_details SET serial_number = ?, incident_date = ?, category = ?, sub_category = ?, description = ?, location = ?, display_order = ?, is_active = ? WHERE id = ?");
+        mysqli_stmt_bind_param($stmt, "issssssii", $serial_number, $incident_date, $category, $sub_category, $description, $location, $display_order, $is_active, $id);
+        if (mysqli_stmt_execute($stmt)) {
+            $message = 'Data berhasil diperbarui!';
+            $message_type = 'success';
+        } else {
+            $message = 'Gagal memperbarui data!';
+            $message_type = 'error';
         }
-    } else {
-        // try Y-m-d
-        $d = DateTime::createFromFormat('Y-m-d', $input);
-        if (!$d) {
-            // try d/m/Y
-            $d = DateTime::createFromFormat('d/m/Y', $input);
-        }
-        if (!$d) {
-            // fallback to strtotime
-            $ts = strtotime($input);
-            if ($ts !== false) {
-                $d = new DateTime('@' . $ts);
-                $d->setTimezone(new DateTimeZone(date_default_timezone_get()));
-            } else {
-                $d = false;
-            }
-        }
+        mysqli_stmt_close($stmt);
     }
-
-    if (!$d) {
-        return false;
-    }
-
-    $year = (int)$d->format('Y');
-    if ($year < 1900 || $year > 2100) {
-        return false;
-    }
-
-    return $d->format('Y-m-d');
 }
 
-// Handle different actions
-switch ($action) {
-    case 'create':
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $serial_number = (int)$_POST['serial_number'];
-            $incident_date_raw = isset($_POST['incident_date']) ? $_POST['incident_date'] : '';
-            $incident_date = normalize_date_for_db($incident_date_raw);
-            $category = mysqli_real_escape_string($conn, $_POST['category']);
-            $sub_category = mysqli_real_escape_string($conn, $_POST['sub_category']);
-            $description = mysqli_real_escape_string($conn, $_POST['description']);
-            $location = mysqli_real_escape_string($conn, $_POST['location']);
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-            // Ensure session user id is available; default to 0 if not set
-            $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+// Delete
+if (isset($_GET['delete'])) {
+    $id = (int)$_GET['delete'];
+    $stmt = mysqli_prepare($conn, "DELETE FROM fire_safety_emergency_details WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
+        $message = 'Data berhasil dihapus!';
+        $message_type = 'success';
+    } else {
+        $message = 'Gagal menghapus data!';
+        $message_type = 'error';
+    }
+    mysqli_stmt_close($stmt);
+}
 
-            if (empty($category) || empty($sub_category) || empty($description) || empty($location)) {
-                $error = 'Semua field wajib diisi';
-            } elseif ($incident_date === false) {
-                $error = 'Tanggal tidak valid. Gunakan format YYYY-MM-DD.';
-            } else {
-                // Note: DB schema for fire_safety_emergency_details does not include created_by column
-                $query = "INSERT INTO fire_safety_emergency_details (serial_number, incident_date, category, sub_category, description, location, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                // types: i (serial_number), s (incident_date), s (category), s (sub_category), s (description), s (location), i (display_order), i (is_active)
-                mysqli_stmt_bind_param($stmt, "isssssii", $serial_number, $incident_date, $category, $sub_category, $description, $location, $display_order, $is_active);
-                
-                if (mysqli_stmt_execute($stmt)) {
-                    $success = 'Data berhasil ditambahkan';
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $error = 'Gagal menambahkan data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
+// Edit data
+$edit_data = null;
+if (isset($_GET['edit'])) {
+    $id = (int)$_GET['edit'];
+    $stmt = mysqli_prepare($conn, "SELECT * FROM fire_safety_emergency_details WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $edit_data = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+}
 
-    case 'edit':
-        if ($id <= 0) {
-            header('Location: index.php');
-            exit();
-        }
-
-        // Ambil data berdasarkan ID
-        $query = "SELECT * FROM fire_safety_emergency_details WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-
-        if (!$data) {
-            header('Location: index.php');
-            exit();
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $serial_number = (int)$_POST['serial_number'];
-            $incident_date_raw = isset($_POST['incident_date']) ? $_POST['incident_date'] : '';
-            $incident_date = normalize_date_for_db($incident_date_raw);
-            $category = mysqli_real_escape_string($conn, $_POST['category']);
-            $sub_category = mysqli_real_escape_string($conn, $_POST['sub_category']);
-            $description = mysqli_real_escape_string($conn, $_POST['description']);
-            $location = mysqli_real_escape_string($conn, $_POST['location']);
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-
-            if (empty($category) || empty($sub_category) || empty($description) || empty($location)) {
-                $error = 'Semua field wajib diisi';
-            } elseif ($incident_date === false) {
-                $error = 'Tanggal tidak valid. Gunakan format YYYY-MM-DD.';
-            } else {
-                $query = "UPDATE fire_safety_emergency_details SET serial_number = ?, incident_date = ?, category = ?, sub_category = ?, description = ?, location = ?, display_order = ?, is_active = ? WHERE id = ?";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "isssssiii", $serial_number, $incident_date, $category, $sub_category, $description, $location, $display_order, $is_active, $id);
-                
-                if (mysqli_stmt_execute($stmt)) {
-                    $success = 'Data berhasil diperbarui';
-                    // Update data yang ditampilkan
-                    $data['serial_number'] = $serial_number;
-                    $data['incident_date'] = $incident_date;
-                    $data['category'] = $category;
-                    $data['sub_category'] = $sub_category;
-                    $data['description'] = $description;
-                    $data['location'] = $location;
-                    $data['display_order'] = $display_order;
-                    $data['is_active'] = $is_active;
-                } else {
-                    $error = 'Gagal memperbarui data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-
-    case 'delete':
-        if ($id <= 0) {
-            header('Location: index.php');
-            exit();
-        }
-
-        // Hapus data (soft delete - set is_active = 0)
-        $query = "UPDATE fire_safety_emergency_details SET is_active = 0 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-
-        if (mysqli_stmt_execute($stmt)) {
-            $_SESSION['success_message'] = 'Data berhasil dihapus';
-        } else {
-            $_SESSION['error_message'] = 'Gagal menghapus data: ' . mysqli_error($conn);
-        }
-
-        mysqli_stmt_close($stmt);
-        header('Location: index.php');
-        exit();
-        break;
-
-    default:
-        // Default action is 'list' - redirect to main index
-        header('Location: index.php');
-        exit();
+// Get all data
+$data = array();
+$result = mysqli_query($conn, "SELECT * FROM fire_safety_emergency_details ORDER BY display_order ASC, id ASC");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo ($action == 'create' ? 'Tambah' : 'Edit'); ?> Emergency Details - Batamindo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FF0000',
-                        secondary: '#1a1a1a',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @keyframes notifSlideIn {
-            0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes notifFadeOut {
-            to { opacity: 0; transform: translateY(-10px) scale(0.98); }
-        }
-        .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
-        .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
-    </style>
-</head>
-<body class="bg-gray-100 font-sans">
-    <div class="bg-gradient-to-r from-red-600 to-red-800">
-        <header class="text-white py-4">
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <header class="bg-gradient-to-r from-red-600 to-red-800 shadow-lg">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between py-4">
                     <div class="flex items-center space-x-4">
-                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-200">
                         <div>
                             <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
                             <p class="text-red-200">Fire Safety Management System</p>
@@ -251,207 +115,244 @@ switch ($action) {
                 </div>
             </div>
         </header>
-        <div class="border-t border-red-500/30">
-            <div class="max-w-7xl mx-auto px-4 py-2">
-                <nav class="flex space-x-4">
-                    <a href="index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-fire-extinguisher mr-1"></i> Fire Safety
-                    </a>
-                    <a href="performance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-line mr-1"></i> Performance
-                    </a>
-                    <a href="emergency.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-exclamation-triangle mr-1"></i> Emergency
-                    </a>
-                    <a href="details.php" class="bg-red-800 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-list mr-1"></i> Details
-                    </a>
-                    <a href="enforcement.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-gavel mr-1"></i> Enforcement
-                    </a>
-                    <a href="maintenance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-tools mr-1"></i> Maintenance
-                    </a>
-                    <a href="statistics.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-bar mr-1"></i> Statistics
-                    </a>
-                    <a href="repair.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-wrench mr-1"></i> Repair
-                    </a>
-                    <a href="repair_details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-list-alt mr-1"></i> Repair Details
-                    </a>
-                    <a href="drills.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-running mr-1"></i> Drills
-                    </a>
-                </nav>
-            </div>
-        </div>
-    </div>
 
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-<?php echo ($action == 'create' ? 'plus' : 'edit'); ?> text-red-600 mr-3"></i>
-                    <?php echo ($action == 'create' ? 'Tambah' : 'Edit'); ?> Emergency Details
-                </h1>
-                <p class="text-gray-600 mt-2"><?php echo ($action == 'create' ? 'Add new emergency details' : 'Edit emergency details'); ?></p>
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 space-y-4 md:space-y-0">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-list text-red-600 mr-3"></i>
+                        Emergency Details
+                    </h1>
+                    <p class="text-gray-600 mt-2">Manage emergency details and incidents</p>
+                </div>
+                <button onclick="openModal('add')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Tambah Data
+                </button>
             </div>
-            <a href="index.php" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                <i class="fas fa-arrow-left mr-1"></i> Back to List
-            </a>
-        </div>
 
-        <?php if ($error): ?>
-        <div id="errorNotifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-red-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(239,68,68,0.15);">
-            <div class="flex-shrink-0">
-                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
-                    <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
-                </span>
-            </div>
-            <div class="flex-1 text-red-800 font-semibold text-sm">
-                <?php echo $error; ?>
-            </div>
-            <button onclick="closeErrorNotif()" class="ml-2 text-red-400 hover:text-red-700 focus:outline-none">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <script>
-        function closeErrorNotif() {
-            var notif = document.getElementById('errorNotifBox');
-            if (notif) {
-                notif.classList.remove('notif-animate-in');
-                notif.classList.add('notif-animate-out');
-                setTimeout(function(){ notif.remove(); }, 500);
-            }
-        }
-        setTimeout(closeErrorNotif, 5000);
-        </script>
-        <?php endif; ?>
-
-        <?php if ($success): ?>
-        <div id="successNotifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
-            <div class="flex-shrink-0">
-                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
-                    <i class="fas fa-check text-green-600 text-xl"></i>
-                </span>
-            </div>
-            <div class="flex-1 text-green-800 font-semibold text-sm">
-                <?php echo $success; ?>
-            </div>
-            <button onclick="closeSuccessNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <script>
-        function closeSuccessNotif() {
-            var notif = document.getElementById('successNotifBox');
-            if (notif) {
-                notif.classList.remove('notif-animate-in');
-                notif.classList.add('notif-animate-out');
-                setTimeout(function(){ notif.remove(); }, 500);
-            }
-        }
-        setTimeout(closeSuccessNotif, 5000);
-        </script>
-        <?php endif; ?>
-
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-<?php echo ($action == 'create' ? 'plus' : 'edit'); ?> text-red-600 mr-3"></i>
-                    <?php echo ($action == 'create' ? 'Form Tambah Data' : 'Form Edit Data'); ?>
-                </h2>
-                <p class="text-sm text-gray-600 mt-1"><?php echo ($action == 'create' ? 'Fill in the form below to add new emergency detail' : 'Update the emergency detail below'); ?></p>
-            </div>
-            <div class="p-6">
-                <form method="POST" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-1">Serial Number <span class="text-red-500">*</span></label>
-                            <input type="number" id="serial_number" name="serial_number" required min="1"
-                                   value="<?php echo ($action == 'edit' ? $data['serial_number'] : (isset($_POST['serial_number']) ? $_POST['serial_number'] : '')); ?>"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
-                        </div>
-                        <div>
-                            <label for="incident_date" class="block text-sm font-medium text-gray-700 mb-1">Incident Date <span class="text-red-500">*</span></label>
-                            <input type="date" id="incident_date" name="incident_date" required
-                                   value="<?php echo ($action == 'edit' ? $data['incident_date'] : (isset($_POST['incident_date']) ? $_POST['incident_date'] : '')); ?>"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
-                        </div>
-                        <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category <span class="text-red-500">*</span></label>
-                            <select id="category" name="category" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
-                                <option value="">Pilih Category</option>
-                                <option value="Fire Incident" <?php echo (($action == 'edit' && $data['category'] == 'Fire Incident') || (isset($_POST['category']) && $_POST['category'] == 'Fire Incident')) ? 'selected' : ''; ?>>Fire Incident</option>
-                                <option value="Non-Rescue" <?php echo (($action == 'edit' && $data['category'] == 'Non-Rescue') || (isset($_POST['category']) && $_POST['category'] == 'Non-Rescue')) ? 'selected' : ''; ?>>Non-Rescue</option>
-                                <option value="Technical Call" <?php echo (($action == 'edit' && $data['category'] == 'Technical Call') || (isset($_POST['category']) && $_POST['category'] == 'Technical Call')) ? 'selected' : ''; ?>>Technical Call</option>
-                                <option value="Fire Call" <?php echo (($action == 'edit' && $data['category'] == 'Fire Call') || (isset($_POST['category']) && $_POST['category'] == 'Fire Call')) ? 'selected' : ''; ?>>Fire Call</option>
-                                <option value="Operational Standby" <?php echo (($action == 'edit' && $data['category'] == 'Operational Standby') || (isset($_POST['category']) && $_POST['category'] == 'Operational Standby')) ? 'selected' : ''; ?>>Operational Standby</option>
-                                <option value="Spillage" <?php echo (($action == 'edit' && $data['category'] == 'Spillage') || (isset($_POST['category']) && $_POST['category'] == 'Spillage')) ? 'selected' : ''; ?>>Spillage</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="display_order" class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
-                            <input type="number" id="display_order" name="display_order" min="0"
-                                   value="<?php echo ($action == 'edit' ? $data['display_order'] : (isset($_POST['display_order']) ? $_POST['display_order'] : '0')); ?>"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+            <?php if ($message): ?>
+            <div id="notificationAlert" class="mb-4 px-6 py-4 rounded-lg shadow-md border <?php echo ($message_type == 'success') ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'; ?> transform transition-all duration-300 opacity-0 translate-y-3">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-<?php echo ($message_type == 'success') ? 'check-circle text-green-400' : 'exclamation-circle text-red-400'; ?> text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium <?php echo ($message_type == 'success') ? 'text-green-800' : 'text-red-800'; ?>"><?php echo $message; ?></p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <div class="-mx-1.5 -my-1.5">
+                            <button onclick="this.closest('#notificationAlert').remove()" class="inline-flex rounded-md p-1.5 <?php echo ($message_type == 'success') ? 'text-green-500 hover:bg-green-100' : 'text-red-500 hover:bg-red-100'; ?> transition-colors duration-200">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
-
-                    <div>
-                        <label for="sub_category" class="block text-sm font-medium text-gray-700 mb-1">Sub Category <span class="text-red-500">*</span></label>
-                        <input type="text" id="sub_category" name="sub_category" required
-                               value="<?php echo ($action == 'edit' ? htmlspecialchars($data['sub_category']) : (isset($_POST['sub_category']) ? htmlspecialchars($_POST['sub_category']) : '')); ?>"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
-                        <p class="text-sm text-gray-500 mt-1">Contoh: May Day Activity, Snake Catching, Hydrant Leakage, dll</p>
-                    </div>
-
-                    <div>
-                        <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location <span class="text-red-500">*</span></label>
-                        <input type="text" id="location" name="location" required
-                               value="<?php echo ($action == 'edit' ? htmlspecialchars($data['location']) : (isset($_POST['location']) ? htmlspecialchars($_POST['location']) : '')); ?>"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
-                        <p class="text-sm text-gray-500 mt-1">Lokasi kejadian</p>
-                    </div>
-
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
-                        <textarea id="description" name="description" rows="4" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"><?php echo ($action == 'edit' ? htmlspecialchars($data['description']) : (isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '')); ?></textarea>
-                        <p class="text-sm text-gray-500 mt-1">Deskripsi detail kejadian</p>
-                    </div>
-
-                    <div class="flex items-center">
-                        <input type="checkbox" id="is_active" name="is_active" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" <?php echo (($action == 'edit' && $data['is_active']) || ($action == 'create' && (!isset($_POST['is_active']) || $_POST['is_active'])) ) ? 'checked' : ''; ?>>
-                        <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Aktif</label>
-                        <p class="text-sm text-gray-500 ml-4">Centang untuk menampilkan data ini</p>
-                    </div>
-
-                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                        <a href="index.php" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
-                        <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
-                            <i class="fas fa-save mr-2"></i><?php echo ($action == 'create' ? 'Simpan' : 'Simpan Perubahan'); ?>
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
-    </div>
+            <script>
+                // Animate notification on page load
+                setTimeout(() => {
+                    const notification = document.getElementById('notificationAlert');
+                    if (notification) {
+                        notification.style.opacity = '1';
+                        notification.style.transform = 'translateY(0)';
+                    }
+                }, 100);
 
-    <script>
-        const notifications = document.querySelectorAll('[id$="NotifBox"]');
-        notifications.forEach(notif => {
-            setTimeout(() => {
-                if (notif) {
-                    notif.style.opacity = '0';
-                    notif.style.transition = 'opacity 0.5s ease-out';
-                    setTimeout(() => notif.remove(), 500);
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    const notification = document.getElementById('notificationAlert');
+                    if (notification) {
+                        notification.style.opacity = '0';
+                        notification.style.transform = 'translateY(-10px)';
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, 5000);
+            </script>
+            <?php endif; ?>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">S/No</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Date</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Category</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Sub Category</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Location</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Description</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Display Order</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Actions</th>
+                            </tr>
+                        </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <?php if (empty($data)): ?>
+                            <tr>
+                                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p>Tidak ada data emergency detail.</p>
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($data as $item): ?>
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?php echo $item['serial_number']; ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo date('d-M-y', strtotime($item['incident_date'])); ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['category']); ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['sub_category']); ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['location']); ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['description']); ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo $item['display_order']; ?></td>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="openModal('edit', <?php echo $item['id']; ?>)" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
+                                            <i class="fas fa-edit mr-1"></i> Edit
+                                        </button>
+                                        <a href="details.php?delete=<?php echo $item['id']; ?>" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105" 
+                                           onclick="return confirm('Yakin ingin menghapus data ini?')"
+                                           onmouseover="this.querySelector('i').classList.remove('fa-trash');this.querySelector('i').classList.add('fa-trash-alt')"
+                                           onmouseout="this.querySelector('i').classList.remove('fa-trash-alt');this.querySelector('i').classList.add('fa-trash')">
+                                            <i class="fas fa-trash mr-1"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal Popup for Add/Edit -->
+            <div id="modalForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden transition-opacity duration-300">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-8 relative transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                    <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-plus text-red-600 mr-2" id="modalIcon"></i>
+                        <span id="modalAction">Tambah</span> Emergency Detail
+                    </h2>
+                    <form id="formModal" method="POST" class="space-y-6">
+                        <input type="hidden" name="action" id="formAction" value="add">
+                        <input type="hidden" name="id" id="formId" value="">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="modal_serial_number" class="block text-sm font-medium text-gray-700">Serial Number <span class="text-red-500">*</span></label>
+                                <input type="number" id="modal_serial_number" name="serial_number" required min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            </div>
+                            <div>
+                                <label for="modal_incident_date" class="block text-sm font-medium text-gray-700">Incident Date <span class="text-red-500">*</span></label>
+                                <input type="date" id="modal_incident_date" name="incident_date" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            </div>
+                            <div>
+                                <label for="modal_category" class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
+                                <select id="modal_category" name="category" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                                    <option value="">Pilih Category</option>
+                                    <option value="Fire Incident">Fire Incident</option>
+                                    <option value="Non-Rescue">Non-Rescue</option>
+                                    <option value="Technical Call">Technical Call</option>
+                                    <option value="Fire Call">Fire Call</option>
+                                    <option value="Operational Standby">Operational Standby</option>
+                                    <option value="Spillage">Spillage</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="modal_display_order" class="block text-sm font-medium text-gray-700">Display Order</label>
+                                <input type="number" id="modal_display_order" name="display_order" min="0" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="modal_sub_category" class="block text-sm font-medium text-gray-700">Sub Category <span class="text-red-500">*</span></label>
+                            <input type="text" id="modal_sub_category" name="sub_category" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <p class="text-xs text-gray-500 mt-1">Contoh: May Day Activity, Snake Catching, Hydrant Leakage, dll</p>
+                        </div>
+                        <div>
+                            <label for="modal_location" class="block text-sm font-medium text-gray-700">Location <span class="text-red-500">*</span></label>
+                            <input type="text" id="modal_location" name="location" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <p class="text-xs text-gray-500 mt-1">Lokasi kejadian</p>
+                        </div>
+                        <div>
+                            <label for="modal_description" class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+                            <textarea id="modal_description" name="description" rows="3" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Deskripsi detail kejadian</p>
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <input type="checkbox" id="modal_is_active" name="is_active" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                            <label for="modal_is_active" class="ml-2 text-sm text-gray-700">Aktif</label>
+                            <span class="text-xs text-gray-500 ml-4">Centang untuk menampilkan data ini</span>
+                        </div>
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
+                                <i class="fas fa-save mr-1"></i> <span id="modalBtnText">Simpan</span>
+                            </button>
+                            <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
+                                <i class="fas fa-times mr-1"></i> Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <script>
+            function openModal(type, id) {
+                const modal = document.getElementById('modalForm');
+                const modalContent = document.getElementById('modalContent');
+                
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                    modalContent.style.opacity = '1';
+                    modalContent.style.transform = 'scale(1)';
+                }, 10);
+                
+                document.getElementById('modalAction').innerText = type === 'edit' ? 'Edit' : 'Tambah';
+                document.getElementById('modalIcon').className = type === 'edit' ? 'fas fa-edit text-yellow-500 mr-2' : 'fas fa-plus text-red-600 mr-2';
+                document.getElementById('modalBtnText').innerText = type === 'edit' ? 'Simpan Perubahan' : 'Simpan';
+                document.getElementById('formAction').value = type === 'edit' ? 'edit' : 'add';
+                if (type === 'edit' && id) {
+                    var row = document.querySelector('button[onclick*="openModal(\'edit\', ' + id + ')"]').closest('tr');
+                    document.getElementById('formId').value = id;
+                    document.getElementById('modal_serial_number').value = row.children[0].innerText;
+                    document.getElementById('modal_incident_date').value = row.children[1].innerText;
+                    document.getElementById('modal_category').value = row.children[2].innerText;
+                    document.getElementById('modal_sub_category').value = row.children[3].innerText;
+                    document.getElementById('modal_location').value = row.children[4].innerText;
+                    document.getElementById('modal_description').value = row.children[5].innerText;
+                    document.getElementById('modal_display_order').value = row.children[6].innerText;
+                    document.getElementById('modal_is_active').checked = true;
+                } else {
+                    document.getElementById('formId').value = '';
+                    document.getElementById('modal_serial_number').value = '';
+                    document.getElementById('modal_incident_date').value = '';
+                    document.getElementById('modal_category').value = '';
+                    document.getElementById('modal_sub_category').value = '';
+                    document.getElementById('modal_location').value = '';
+                    document.getElementById('modal_description').value = '';
+                    document.getElementById('modal_display_order').value = '';
+                    document.getElementById('modal_is_active').checked = true;
                 }
-            }, 5000);
-        });
-    </script>
+            }
+            function closeModal() {
+                const modal = document.getElementById('modalForm');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalContent.style.opacity = '0';
+                modalContent.style.transform = 'scale(0.95)';
+                modal.style.opacity = '0';
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            // Add loading animation for form submission
+            document.getElementById('formModal').addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i>Processing...';
+            });
+            </script>
+        </div>
+    </div>
 </body>
 </html>

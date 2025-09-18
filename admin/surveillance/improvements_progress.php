@@ -1,8 +1,13 @@
 <?php
 $page_title = 'Improvements Project Progress';
 require_once 'template_header.php';
+require_once '../../config/database.php';
 
-// Proses CRUD
+// Sanitize function for PHP 5.3.8
+function sanitize($str) {
+    return htmlspecialchars(trim($str), ENT_QUOTES, 'UTF-8');
+}
+
 $message = '';
 $message_type = '';
 
@@ -13,55 +18,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $description = sanitize($_POST['description']);
         $status = sanitize($_POST['status']);
         $percentage = sanitize($_POST['percentage']);
-        
+
         if ($_POST['action'] == 'add') {
-            $stmt = $pdo->prepare("INSERT INTO surveillance_improvements_progress (project_title, description, status, percentage) VALUES (?, ?, ?, ?)");
-            if ($stmt->execute([$project_title, $description, $status, $percentage])) {
+            $stmt = mysqli_prepare($conn, "INSERT INTO surveillance_improvements_progress (project_title, description, status, percentage) VALUES (?, ?, ?, ?)");
+            mysqli_stmt_bind_param($stmt, "ssss", $project_title, $description, $status, $percentage);
+            if (mysqli_stmt_execute($stmt)) {
                 $message = "Data berhasil ditambahkan!";
                 $message_type = "success";
             } else {
                 $message = "Gagal menambahkan data!";
                 $message_type = "error";
             }
+            mysqli_stmt_close($stmt);
         } elseif ($_POST['action'] == 'edit') {
-            $id = sanitize($_POST['id']);
-            $stmt = $pdo->prepare("UPDATE surveillance_improvements_progress SET project_title = ?, description = ?, status = ?, percentage = ? WHERE id = ?");
-            if ($stmt->execute([$project_title, $description, $status, $percentage, $id])) {
+            $id = (int)sanitize($_POST['id']);
+            $stmt = mysqli_prepare($conn, "UPDATE surveillance_improvements_progress SET project_title = ?, description = ?, status = ?, percentage = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, "ssssi", $project_title, $description, $status, $percentage, $id);
+            if (mysqli_stmt_execute($stmt)) {
                 $message = "Data berhasil diperbarui!";
                 $message_type = "success";
             } else {
                 $message = "Gagal memperbarui data!";
                 $message_type = "error";
             }
+            mysqli_stmt_close($stmt);
         }
     }
 }
 
 // Delete
 if (isset($_GET['delete'])) {
-    $id = sanitize($_GET['delete']);
-    $stmt = $pdo->prepare("DELETE FROM surveillance_improvements_progress WHERE id = ?");
-    if ($stmt->execute([$id])) {
+    $id = (int)sanitize($_GET['delete']);
+    $stmt = mysqli_prepare($conn, "DELETE FROM surveillance_improvements_progress WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
         $message = "Data berhasil dihapus!";
         $message_type = "success";
     } else {
         $message = "Gagal menghapus data!";
         $message_type = "error";
     }
+    mysqli_stmt_close($stmt);
 }
 
 // Ambil data untuk edit
 $edit_data = null;
 if (isset($_GET['edit'])) {
-    $id = sanitize($_GET['edit']);
-    $stmt = $pdo->prepare("SELECT * FROM surveillance_improvements_progress WHERE id = ?");
-    $stmt->execute([$id]);
-    $edit_data = $stmt->fetch();
+    $id = (int)sanitize($_GET['edit']);
+    $stmt = mysqli_prepare($conn, "SELECT * FROM surveillance_improvements_progress WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $edit_data = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
 }
 
 // Ambil semua data
-$stmt = $pdo->query("SELECT * FROM surveillance_improvements_progress ORDER BY id ASC");
-$data = $stmt->fetchAll();
+$data = array();
+$result = mysqli_query($conn, "SELECT * FROM surveillance_improvements_progress ORDER BY id ASC");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
