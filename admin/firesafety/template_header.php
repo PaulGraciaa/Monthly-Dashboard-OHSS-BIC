@@ -57,24 +57,38 @@ if (!function_exists('sanitize')) {
         <!-- Navigation -->
         <div class="border-t border-red-500/30">
             <div class="max-w-7xl mx-auto px-4 py-2">
+        <div class="border-t border-red-500/30">
+            <div class="max-w-7xl mx-auto px-4 py-2">
                 <nav class="flex space-x-4">
-                    <a href="../dashboard.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-line mr-1"></i> Dashboard
-                    </a>
-                    <a href="../management/activities_tab.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-tasks mr-1"></i> Activities
-                    </a>
-                    <a href="../OHS/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-shield-alt mr-1"></i> OHS
-                    </a>
-                    <a href="../security/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-user-shield mr-1"></i> Security
-                    </a>
                     <a href="index.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-fire-extinguisher mr-1"></i> Fire Safety
                     </a>
-                    <a href="../surveillance/index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-video mr-1"></i> Surveillance
+                    <a href="performance.php" class="bg-red-800 text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-line mr-1"></i> Performance
+                    </a>
+                    <a href="emergency.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Emergency
+                    </a>
+                    <a href="details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-1"></i> Details
+                    </a>
+                    <a href="enforcement.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-gavel mr-1"></i> Enforcement
+                    </a>
+                    <a href="maintenance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-tools mr-1"></i> Maintenance
+                    </a>
+                    <a href="statistics.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-chart-bar mr-1"></i> Statistics
+                    </a>
+                    <a href="repair.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-wrench mr-1"></i> Repair
+                    </a>
+                    <a href="repair_details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list-alt mr-1"></i> Repair Details
+                    </a>
+                    <a href="drills.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-running mr-1"></i> Drills
                     </a>
                 </nav>
             </div>

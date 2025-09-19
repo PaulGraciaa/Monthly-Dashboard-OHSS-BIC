@@ -92,30 +92,6 @@ if ($result) {
     }
 }
 ?>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <header class="bg-gradient-to-r from-red-600 to-red-800 shadow-lg">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between py-4">
-                    <div class="flex items-center space-x-4">
-                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-200">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                            <p class="text-red-200">Fire Safety Management System</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:flex items-center space-x-3">
-                        <div class="text-right">
-                            <p class="text-sm text-white">Welcome, Admin</p>
-                            <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
-                        </div>
-                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
-                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </header>
-
         <div class="container mx-auto px-4 py-8">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 space-y-4 md:space-y-0">
                 <div>
