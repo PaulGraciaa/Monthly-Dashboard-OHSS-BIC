@@ -1,363 +1,483 @@
 <?php
-session_start();
-require_once '../auth.php';
-
-// Pastikan user sudah login
-if (!isAdminLoggedIn()) {
-    header('Location: ../login.php');
-    exit();
-}
-
-require_once '../../config/database.php';
-
-$error = '';
-$success = '';
-$data = null;
-$action = isset($_GET['action']) ? $_GET['action'] : 'list';
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
-// Handle different actions
-switch ($action) {
-    case 'create':
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $category = mysqli_real_escape_string($conn, $_POST['category']);
-            $Jan = (int)$_POST['Jan'];
-            $Feb = (int)$_POST['Feb'];
-            $Mar = (int)$_POST['Mar'];
-            $Apr = (int)$_POST['Apr'];
-            $May = (int)$_POST['May'];
-            $Jun = (int)$_POST['Jun'];
-            $Jul = (int)$_POST['Jul'];
-            $Aug = (int)$_POST['Aug'];
-            $Sep = (int)$_POST['Sep'];
-            $Oct = (int)$_POST['Oct'];
-            $Nov = (int)$_POST['Nov'];
-            $Dec = (int)$_POST['Dec'];
-            $year = (int)$_POST['year'];
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-
-            if (empty($category)) {
-                $error = 'Category tidak boleh kosong';
-            } else {
-                $query = "INSERT INTO fire_safety_enforcement (category, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`, year, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiii", $category, $Jan, $Feb, $Mar, $Apr, $May, $Jun, $Jul, $Aug, $Sep, $Oct, $Nov, $Dec, $year, $display_order, $is_active);
-
-                if (mysqli_stmt_execute($stmt)) {
-                    $_SESSION['notif'] = 'Data berhasil ditambahkan';
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $error = 'Gagal menambahkan data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-
-    case 'edit':
-        if ($id <= 0) {
-            header('Location: index.php');
-            exit();
-        }
-
-        $query = "SELECT * FROM fire_safety_enforcement WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-
-        if (!$data) {
-            header('Location: index.php');
-            exit();
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $category = mysqli_real_escape_string($conn, $_POST['category']);
-            $Jan = (int)$_POST['Jan'];
-            $Feb = (int)$_POST['Feb'];
-            $Mar = (int)$_POST['Mar'];
-            $Apr = (int)$_POST['Apr'];
-            $May = (int)$_POST['May'];
-            $Jun = (int)$_POST['Jun'];
-            $Jul = (int)$_POST['Jul'];
-            $Aug = (int)$_POST['Aug'];
-            $Sep = (int)$_POST['Sep'];
-            $Oct = (int)$_POST['Oct'];
-            $Nov = (int)$_POST['Nov'];
-            $Dec = (int)$_POST['Dec'];
-            $year = (int)$_POST['year'];
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-
-            if (empty($category)) {
-                $error = 'Category tidak boleh kosong';
-            } else {
-                $query = "UPDATE fire_safety_enforcement SET category = ?, `Jan` = ?, `Feb` = ?, `Mar` = ?, `Apr` = ?, `May` = ?, `Jun` = ?, `Jul` = ?, `Aug` = ?, `Sep` = ?, `Oct` = ?, `Nov` = ?, `Dec` = ?, year = ?, display_order = ?, is_active = ? WHERE id = ?";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiiii", $category, $Jan, $Feb, $Mar, $Apr, $May, $Jun, $Jul, $Aug, $Sep, $Oct, $Nov, $Dec, $year, $display_order, $is_active, $id);
-
-                if (mysqli_stmt_execute($stmt)) {
-                    $_SESSION['notif'] = 'Data berhasil diperbarui';
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $error = 'Gagal memperbarui data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-
-    case 'delete':
-        if ($id <= 0) {
-            header('Location: index.php');
-            exit();
-        }
-
-        $query = "UPDATE fire_safety_enforcement SET is_active = 0 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-
-        if (mysqli_stmt_execute($stmt)) {
-            $_SESSION['notif'] = 'Data berhasil dihapus';
-        } else {
-            $_SESSION['notif'] = 'Gagal menghapus data: ' . mysqli_error($conn);
-        }
-
-        mysqli_stmt_close($stmt);
-        header('Location: index.php');
-        exit();
-        break;
-
-    default:
-        header('Location: index.php');
-        exit();
-}
+require_once 'template_header.php';
 ?>
-
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo ($action == 'create' ? 'Tambah' : 'Edit'); ?> Enforcement - Batamindo</title>
+    <title>Enforcement - Fire Safety</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FF0000',
-                        secondary: '#1a1a1a',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        @keyframes notifSlideIn { 0% { opacity: 0; transform: translateY(-30px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes notifFadeOut { to { opacity: 0; transform: translateY(-10px) scale(0.98); } }
-        .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
-        .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
+        .modal-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.2s ease-in-out;
+        }
+        .modal-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
-    <div class="bg-gradient-to-r from-red-600 to-red-800">
-        <header class="text-white py-4">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-4">
-                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                            <p class="text-red-200">Fire Safety Management System</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:flex items-center space-x-3">
-                        <div class="text-right">
-                            <p class="text-sm text-white">Welcome, Admin</p>
-                            <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
-                        </div>
-                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
-                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                        </a>
-                    </div>
+<body class="bg-gray-100">
+<?php
+$error = '';
+$success = '';
+$data = null;
+
+// Proses tambah data
+if (isset($_POST['action']) && $_POST['action'] == 'create') {
+    $category = isset($_POST['category']) ? $_POST['category'] : '';
+    $year = isset($_POST['year']) ? (int)$_POST['year'] : date('Y');
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $Jan = isset($_POST['Jan']) ? (int)$_POST['Jan'] : 0;
+    $Feb = isset($_POST['Feb']) ? (int)$_POST['Feb'] : 0;
+    $Mar = isset($_POST['Mar']) ? (int)$_POST['Mar'] : 0;
+    $Apr = isset($_POST['Apr']) ? (int)$_POST['Apr'] : 0;
+    $May = isset($_POST['May']) ? (int)$_POST['May'] : 0;
+    $Jun = isset($_POST['Jun']) ? (int)$_POST['Jun'] : 0;
+    $Jul = isset($_POST['Jul']) ? (int)$_POST['Jul'] : 0;
+    $Aug = isset($_POST['Aug']) ? (int)$_POST['Aug'] : 0;
+    $Sep = isset($_POST['Sep']) ? (int)$_POST['Sep'] : 0;
+    $Oct = isset($_POST['Oct']) ? (int)$_POST['Oct'] : 0;
+    $Nov = isset($_POST['Nov']) ? (int)$_POST['Nov'] : 0;
+    $Dec = isset($_POST['Dec']) ? (int)$_POST['Dec'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+
+    if (empty($category)) {
+        $error = 'Category tidak boleh kosong';
+    } else {
+        $query = "INSERT INTO fire_safety_enforcement (category, year, display_order, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiii", $category, $year, $display_order, $Jan, $Feb, $Mar, $Apr, $May, $Jun, $Jul, $Aug, $Sep, $Oct, $Nov, $Dec, $is_active);
+        if (mysqli_stmt_execute($stmt)) {
+            $success = 'Data berhasil ditambahkan';
+        } else {
+            $error = 'Gagal menambahkan data: ' . mysqli_error($conn);
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
+
+// Proses edit data
+if (isset($_POST['action']) && $_POST['action'] == 'edit' && isset($_POST['id'])) {
+    $id = (int)$_POST['id'];
+    $category = isset($_POST['category']) ? $_POST['category'] : '';
+    $year = isset($_POST['year']) ? (int)$_POST['year'] : date('Y');
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $Jan = isset($_POST['Jan']) ? (int)$_POST['Jan'] : 0;
+    $Feb = isset($_POST['Feb']) ? (int)$_POST['Feb'] : 0;
+    $Mar = isset($_POST['Mar']) ? (int)$_POST['Mar'] : 0;
+    $Apr = isset($_POST['Apr']) ? (int)$_POST['Apr'] : 0;
+    $May = isset($_POST['May']) ? (int)$_Post['May'] : 0;
+    $Jun = isset($_POST['Jun']) ? (int)$_POST['Jun'] : 0;
+    $Jul = isset($_POST['Jul']) ? (int)$_POST['Jul'] : 0;
+    $Aug = isset($_POST['Aug']) ? (int)$_POST['Aug'] : 0;
+    $Sep = isset($_POST['Sep']) ? (int)$_POST['Sep'] : 0;
+    $Oct = isset($_POST['Oct']) ? (int)$_POST['Oct'] : 0;
+    $Nov = isset($_POST['Nov']) ? (int)$_POST['Nov'] : 0;
+    $Dec = isset($_POST['Dec']) ? (int)$_POST['Dec'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+
+    if (empty($category)) {
+        $error = 'Category tidak boleh kosong';
+    } else {
+        $query = "UPDATE fire_safety_enforcement SET category=?, year=?, display_order=?, Jan=?, Feb=?, Mar=?, Apr=?, May=?, Jun=?, Jul=?, Aug=?, Sep=?, Oct=?, Nov=?, Dec=?, is_active=? WHERE id=?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "siiiiiiiiiiiiiiii", $category, $year, $display_order, $Jan, $Feb, $Mar, $Apr, $May, $Jun, $Jul, $Aug, $Sep, $Oct, $Nov, $Dec, $is_active, $id);
+        if (mysqli_stmt_execute($stmt)) {
+            $success = 'Data berhasil diupdate';
+        } else {
+            $error = 'Gagal update data: ' . mysqli_error($conn);
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
+
+// Proses hapus data
+if (isset($_POST['action']) && $_POST['action'] == 'delete' && isset($_POST['id'])) {
+    $id = (int)$_POST['id'];
+    $query = "UPDATE fire_safety_enforcement SET is_active=0 WHERE id=?";
+    $stmt = mysqli_prepare($conn, $query);
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
+        $success = 'Data berhasil dihapus';
+    } else {
+        $error = 'Gagal hapus data: ' . mysqli_error($conn);
+    }
+    mysqli_stmt_close($stmt);
+}
+
+// Ambil data enforcement
+$enforcement = array();
+$result = mysqli_query($conn, "SELECT * FROM fire_safety_enforcement WHERE is_active=1 ORDER BY display_order ASC, year DESC");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $enforcement[] = $row;
+    }
+}
+?>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-gavel text-red-600 mr-3"></i>
+                Enforcement
+            </h1>
+            <p class="text-gray-600 mt-2">Manage fire safety enforcement records</p>
+        </div>
+        <button onclick="openModal('add')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg flex items-center">
+            <i class="fas fa-plus mr-2"></i> Tambah Data
+        </button>
+    </div>
+
+    <?php if (!empty($error)): ?>
+    <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800 flex items-center">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <?php echo htmlspecialchars($error); ?>
+    </div>
+    <?php endif; ?>
+    <?php if (!empty($success)): ?>
+    <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-green-50 border-green-200 text-green-800 flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <?php echo htmlspecialchars($success); ?>
+    </div>
+    <?php endif; ?>
+
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Category</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Year</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Order</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Jan</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Feb</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Mar</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Apr</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">May</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Jun</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Jul</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Aug</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Sep</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Oct</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Nov</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Dec</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Total</th>
+                        <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Actions</th>
+                    </tr>
+                </thead>
+            <tbody class="divide-y divide-gray-200">
+                <?php if (empty($enforcement)): ?>
+                    <tr>
+                        <td colspan="17" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2"></i>
+                            <p>Tidak ada data enforcement.</p>
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($enforcement as $row): ?>
+                    <?php $total = $row['Jan'] + $row['Feb'] + $row['Mar'] + $row['Apr'] + $row['May'] + $row['Jun'] + $row['Jul'] + $row['Aug'] + $row['Sep'] + $row['Oct'] + $row['Nov'] + $row['Dec']; ?>
+                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($row['category']); ?></td>
+                        <td class="px-4 py-3 text-sm text-gray-900"><?php echo $row['year']; ?></td>
+                        <td class="px-4 py-3 text-sm text-gray-900"><?php echo $row['display_order']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Jan']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Feb']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Mar']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Apr']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['May']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Jun']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Jul']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Aug']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Sep']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Oct']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Nov']; ?></td>
+                        <td class="px-2 py-3 text-sm text-gray-900 text-center"><?php echo $row['Dec']; ?></td>
+                        <td class="px-2 py-3 text-sm font-bold text-gray-900 text-center"><?php echo $total; ?></td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                <button onclick="openModal('edit', <?php echo $row['id']; ?>)" 
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                </button>
+                                <button onclick="openDeleteModal(<?php echo $row['id']; ?>)"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Form -->
+<div id="modalForm" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-40" onclick="closeModal()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4" style="pointer-events:none;">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-8 relative modal-content" id="modalContent" style="pointer-events:auto;">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors duration-200">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-plus text-red-600 mr-2" id="modalIcon"></i>
+                <span id="modalTitleText">Tambah</span> Enforcement
+            </h2>
+            <form id="formEnforcement" method="POST" class="space-y-6">
+            <input type="hidden" name="action" id="modalAction" value="create">
+            <input type="hidden" name="id" id="modalId" value="">
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label for="modalCategory" class="block text-sm font-medium text-gray-700 mb-1">Category <span class="text-red-500">*</span></label>
+                    <input type="text" id="modalCategory" name="category" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                </div>
+                <div>
+                    <label for="modalYear" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                    <input type="number" id="modalYear" name="year" min="2020" max="2030" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
                 </div>
             </div>
-        </header>
-        <div class="border-t border-red-500/30">
-            <div class="max-w-7xl mx-auto px-4 py-2">
-                <nav class="flex space-x-4">
-                    <a href="index.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-fire-extinguisher mr-1"></i> Fire Safety</a>
-                    <a href="performance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-chart-line mr-1"></i> Performance</a>
-                    <a href="emergency.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-exclamation-triangle mr-1"></i> Emergency</a>
-                    <a href="details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-list mr-1"></i> Details</a>
-                    <a href="enforcement.php" class="bg-red-800 text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-gavel mr-1"></i> Enforcement</a>
-                    <a href="maintenance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-tools mr-1"></i> Maintenance</a>
-                    <a href="statistics.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-chart-bar mr-1"></i> Statistics</a>
-                    <a href="repair.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-wrench mr-1"></i> Repair</a>
-                    <a href="repair_details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-list-alt mr-1"></i> Repair Details</a>
-                    <a href="drills.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium"><i class="fas fa-running mr-1"></i> Drills</a>
-                </nav>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex items-center justify-between mb-8">
+            
             <div>
-                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-<?php echo ($action == 'create' ? 'plus' : 'edit'); ?> text-red-600 mr-3"></i>
-                    <?php echo ($action == 'create' ? 'Tambah' : 'Edit'); ?> Enforcement
-                </h1>
-                <p class="text-gray-600 mt-2"><?php echo ($action == 'create' ? 'Add new enforcement data' : 'Edit enforcement data'); ?></p>
+                <label for="modalOrder" class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+                <input type="number" id="modalOrder" name="display_order" min="0" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
             </div>
-            <a href="index.php" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                <i class="fas fa-arrow-left mr-1"></i> Back to List
-            </a>
-        </div>
-
-        <?php if ($error): ?>
-        <div id="errorNotifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-red-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(239,68,68,0.15);">
-            <div class="flex-shrink-0">
-                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
-                    <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
-                </span>
-            </div>
-            <div class="flex-1 text-red-800 font-semibold text-sm">
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-            <button onclick="closeErrorNotif()" class="ml-2 text-red-400 hover:text-red-700 focus:outline-none"><i class="fas fa-times"></i></button>
-        </div>
-        <script>
-        function closeErrorNotif() { var notif = document.getElementById('errorNotifBox'); if (notif) { notif.classList.remove('notif-animate-in'); notif.classList.add('notif-animate-out'); setTimeout(function(){ notif.remove(); }, 500); } }
-        setTimeout(closeErrorNotif, 5000);
-        </script>
-        <?php endif; ?>
-
-        <?php if ($success): ?>
-        <div id="successNotifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
-            <div class="flex-shrink-0"><span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100"><i class="fas fa-check text-green-600 text-xl"></i></span></div>
-            <div class="flex-1 text-green-800 font-semibold text-sm"><?php echo htmlspecialchars($success); ?></div>
-            <button onclick="closeSuccessNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none"><i class="fas fa-times"></i></button>
-        </div>
-        <script>
-        function closeSuccessNotif() { var notif = document.getElementById('successNotifBox'); if (notif) { notif.classList.remove('notif-animate-in'); notif.classList.add('notif-animate-out'); setTimeout(function(){ notif.remove(); }, 500); } }
-        setTimeout(closeSuccessNotif, 5000);
-        </script>
-        <?php endif; ?>
-
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center"><i class="fas fa-<?php echo ($action == 'create' ? 'plus' : 'edit'); ?> text-red-600 mr-3"></i>Form <?php echo ($action == 'create' ? 'Tambah' : 'Edit'); ?> Data</h2>
-                <p class="text-sm text-gray-600 mt-1"><?php echo ($action == 'create' ? 'Fill in the form below to add new enforcement data' : 'Update the enforcement data below'); ?></p>
-            </div>
-
-            <div class="p-6">
-                <form method="POST" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
-                            <input type="text" id="category" name="category" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition-colors duration-200" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['category']) : (isset($_POST['category']) ? htmlspecialchars($_POST['category']) : '')); ?>">
-                        </div>
-
-                        <div>
-                            <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Year</label>
-                            <input type="number" id="year" name="year" min="2020" max="2030" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['year']) : (isset($_POST['year']) ? htmlspecialchars($_POST['year']) : date('Y'))); ?>">
-                        </div>
-
-                        <div>
-                            <label for="display_order" class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" id="display_order" name="display_order" min="0" class="w-32 px-3 py-2 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['display_order']) : (isset($_POST['display_order']) ? htmlspecialchars($_POST['display_order']) : '0')); ?>">
-                            <p class="text-sm text-gray-500 mt-1">Urutan tampil data (0 = paling atas)</p>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4">
-                            <div>
-                                <label for="Jan" class="block text-sm font-medium text-gray-700 mb-2">January</label>
-                                <input type="number" id="Jan" name="Jan" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Jan']) : (isset($_POST['Jan']) ? htmlspecialchars($_POST['Jan']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Feb" class="block text-sm font-medium text-gray-700 mb-2">February</label>
-                                <input type="number" id="Feb" name="Feb" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Feb']) : (isset($_POST['Feb']) ? htmlspecialchars($_POST['Feb']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Mar" class="block text-sm font-medium text-gray-700 mb-2">March</label>
-                                <input type="number" id="Mar" name="Mar" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Mar']) : (isset($_POST['Mar']) ? htmlspecialchars($_POST['Mar']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Apr" class="block text-sm font-medium text-gray-700 mb-2">April</label>
-                                <input type="number" id="Apr" name="Apr" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Apr']) : (isset($_POST['Apr']) ? htmlspecialchars($_POST['Apr']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="May" class="block text-sm font-medium text-gray-700 mb-2">May</label>
-                                <input type="number" id="May" name="May" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['May']) : (isset($_POST['May']) ? htmlspecialchars($_POST['May']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Jun" class="block text-sm font-medium text-gray-700 mb-2">June</label>
-                                <input type="number" id="Jun" name="Jun" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Jun']) : (isset($_POST['Jun']) ? htmlspecialchars($_POST['Jun']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Jul" class="block text-sm font-medium text-gray-700 mb-2">July</label>
-                                <input type="number" id="Jul" name="Jul" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Jul']) : (isset($_POST['Jul']) ? htmlspecialchars($_POST['Jul']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Aug" class="block text-sm font-medium text-gray-700 mb-2">August</label>
-                                <input type="number" id="Aug" name="Aug" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Aug']) : (isset($_POST['Aug']) ? htmlspecialchars($_POST['Aug']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Sep" class="block text-sm font-medium text-gray-700 mb-2">September</label>
-                                <input type="number" id="Sep" name="Sep" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Sep']) : (isset($_POST['Sep']) ? htmlspecialchars($_POST['Sep']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Oct" class="block text-sm font-medium text-gray-700 mb-2">October</label>
-                                <input type="number" id="Oct" name="Oct" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Oct']) : (isset($_POST['Oct']) ? htmlspecialchars($_POST['Oct']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Nov" class="block text-sm font-medium text-gray-700 mb-2">November</label>
-                                <input type="number" id="Nov" name="Nov" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Nov']) : (isset($_POST['Nov']) ? htmlspecialchars($_POST['Nov']) : '0')); ?>">
-                            </div>
-
-                            <div>
-                                <label for="Dec" class="block text-sm font-medium text-gray-700 mb-2">December</label>
-                                <input type="number" id="Dec" name="Dec" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg" value="<?php echo ($action == 'edit' ? htmlspecialchars($data['Dec']) : (isset($_POST['Dec']) ? htmlspecialchars($_POST['Dec']) : '0')); ?>">
-                            </div>
-                        </div>
-
-                        <div class="flex items-center">
-                            <input type="checkbox" id="is_active" name="is_active" <?php echo ( ($action == 'edit' && isset($data['is_active']) && $data['is_active']) || ($action == 'create' && (!isset($_POST['is_active']) || $_POST['is_active'])) ) ? 'checked' : ''; ?> class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                            <label for="is_active" class="ml-2 text-sm font-medium text-gray-700">Aktif</label>
-                            <p class="text-sm text-gray-500 ml-4">Centang untuk menampilkan data ini</p>
-                        </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Monthly Values</h3>
+                <div class="grid grid-cols-6 gap-3">
+                    <?php $months = array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'); foreach($months as $m): ?>
+                    <div>
+                        <label for="modal<?php echo $m; ?>" class="block text-xs font-medium text-gray-600 mb-1"><?php echo $m; ?></label>
+                        <input type="number" id="modal<?php echo $m; ?>" name="<?php echo $m; ?>" min="0" 
+                               class="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm">
                     </div>
-
-                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                        <a href="index.php" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"><i class="fas fa-times mr-2"></i>Cancel</a>
-                        <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"><i class="fas fa-save mr-2"></i><?php echo ($action == 'create' ? 'Save' : 'Save Changes'); ?></button>
-                    </div>
-                </form>
+                    <?php endforeach; ?>
+                </div>
             </div>
+            
+            <div class="flex items-center">
+                <input type="checkbox" id="modalActive" name="is_active" 
+                       class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" checked>
+                <label for="modalActive" class="ml-2 text-sm text-gray-700">Aktif</label>
+            </div>
+            
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" onclick="closeModal()" 
+                        class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Delete -->
+<div id="modalDelete" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-40" onclick="closeModalDelete()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4" style="pointer-events:none;">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 relative modal-content" id="deleteModalContent" style="pointer-events:auto;">
+            <button onclick="closeModalDelete()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors duration-200">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-trash text-red-600 mr-2"></i>
+                Konfirmasi Hapus
+            </h2>
+            <form id="formDelete" method="POST">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" id="deleteId" value="">
+                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeModalDelete()" 
+                            class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                        Batal
+                    </button>
+                    <button type="submit" id="deleteSubmitBtn"
+                            class="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center">
+                        <i class="fas fa-trash mr-2"></i> Delete
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        // Small UI tweaks
-        document.querySelectorAll('input, select').forEach(element => { element.classList.add('transition-all', 'duration-200'); });
-    </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial year in add form to current year
+    const currentYear = new Date().getFullYear();
+    document.getElementById('modalYear').value = currentYear;
+
+    // Set initial values to 0 for all month inputs
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    months.forEach(function(month) {
+        document.getElementById('modal' + month).value = 0;
+    });
+
+    // Ensure modals start hidden using Tailwind
+    const modalForm = document.getElementById('modalForm');
+    const modalDelete = document.getElementById('modalDelete');
+    modalForm.classList.add('hidden');
+    modalDelete.classList.add('hidden');
+
+    // Prevent form submission if category is empty
+    document.getElementById('formEnforcement').addEventListener('submit', function(e) {
+        const category = document.getElementById('modalCategory').value.trim();
+        if (!category) {
+            e.preventDefault();
+            alert('Category tidak boleh kosong');
+        }
+    });
+
+    // Debug delete form submission
+    document.getElementById('formDelete').addEventListener('submit', function(e) {
+        console.log('Delete form submitted');
+    });
+});
+
+function openModal(type, id) {
+    const modal = document.getElementById('modalForm');
+    const modalContent = document.getElementById('modalContent');
+    const form = document.getElementById('formEnforcement');
+    const titleText = document.getElementById('modalTitleText');
+    const modalIcon = document.getElementById('modalIcon');
+
+    // Reset form
+    form.reset();
+    document.getElementById('modalAction').value = type === 'edit' ? 'edit' : 'create';
+    document.getElementById('modalId').value = '';
+    document.getElementById('modalYear').value = new Date().getFullYear();
+    document.getElementById('modalActive').checked = true;
+
+    // Reset all month values to 0
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    months.forEach(function(month) {
+        document.getElementById('modal' + month).value = 0;
+    });
+
+    // Configure modal based on action
+    if (type === 'edit' && id) {
+        titleText.textContent = 'Edit';
+        modalIcon.className = 'fas fa-edit text-red-600 mr-2';
+        const data = <?php echo json_encode($enforcement); ?>;
+        const record = data.find(item => item.id == id);
+        if (record) {
+            document.getElementById('modalId').value = record.id;
+            document.getElementById('modalCategory').value = record.category;
+            document.getElementById('modalYear').value = record.year;
+            document.getElementById('modalOrder').value = record.display_order;
+            months.forEach(function(month) {
+                document.getElementById('modal' + month).value = record[month] || 0;
+            });
+            document.getElementById('modalActive').checked = record.is_active == '1';
+        }
+    } else {
+        titleText.textContent = 'Tambah';
+        modalIcon.className = 'fas fa-plus text-red-600 mr-2';
+    }
+
+    // Hide delete modal if open
+    document.getElementById('modalDelete').classList.add('hidden');
+    document.getElementById('deleteModalContent').classList.remove('show');
+    // Show modal using Tailwind class
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        modalContent.classList.add('show');
+    });
+}
+
+function closeModal() {
+    const modal = document.getElementById('modalForm');
+    const modalContent = document.getElementById('modalContent');
+    modalContent.classList.remove('show');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 200);
+}
+
+function openDeleteModal(id) {
+    // Hide add/edit modal if open
+    document.getElementById('modalForm').classList.add('hidden');
+    document.getElementById('modalContent').classList.remove('show');
+    
+    const modal = document.getElementById('modalDelete');
+    const modalContent = document.getElementById('deleteModalContent');
+    
+    // Set the ID to be deleted
+    document.getElementById('deleteId').value = id;
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        modalContent.classList.add('show');
+    });
+}
+
+function closeModalDelete() {
+    const modal = document.getElementById('modalDelete');
+    const modalContent = document.getElementById('deleteModalContent');
+    modalContent.classList.remove('show');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 200);
+}
+
+// Close modals when clicking outside
+window.addEventListener('click', function(event) {
+    const modalForm = document.getElementById('modalForm');
+    const modalDelete = document.getElementById('modalDelete');
+
+    if (event.target === modalForm) {
+        closeModal();
+    }
+    if (event.target === modalDelete) {
+        closeModalDelete();
+    }
+});
+
+// Close modals when pressing ESC
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+        closeModalDelete();
+    }
+});
+
+// Prevent clicks inside modal from propagating
+document.getElementById('modalContent').addEventListener('click', function(e) {
+    e.stopPropagation();
+});
+document.getElementById('deleteModalContent').addEventListener('click', function(e) {
+    e.stopPropagation();
+});
+
+// Add transitions to form elements
+document.querySelectorAll('input, select').forEach(function(element) {
+    element.classList.add('transition-all', 'duration-200');
+});
+
+// Add hover effects to interactive elements
+document.querySelectorAll('button, input[type="checkbox"]').forEach(function(element) {
+    element.classList.add('transform', 'hover:scale-105', 'transition-transform', 'duration-200');
+});
+</script>
 </body>
 </html>
