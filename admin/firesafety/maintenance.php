@@ -81,42 +81,43 @@ if ($result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 font-sans">
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-tools text-red-600 mr-3"></i>
-                    Maintenance List
-                </h1>
-                <p class="text-gray-600 mt-2">Manage maintenance records.</p>
+    <div class="min-h-screen p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-500 p-2 rounded-lg">
+                        <i class="fas fa-tools text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-800">Maintenance List</h1>
+                </div>
+                <button onclick="openModal('add')" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded transition duration-200 flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-plus"></i>
+                    <span>Tambah Maintenance</span>
+                </button>
             </div>
-            <button onclick="openModal('add')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg flex items-center">
-                <i class="fas fa-plus mr-2"></i> Tambah Maintenance
-            </button>
-        </div>
-        <?php if (!empty($error)): ?>
-        <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars((string)$error); ?>
-        </div>
-        <?php endif; ?>
-        <?php if (!empty($success)): ?>
-        <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-green-50 border-green-200 text-green-800">
-            <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars((string)$success); ?>
-        </div>
-        <?php endif; ?>
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            <div class="overflow-x-auto">
-                <table class="min-w-full table-auto">
-                    <thead>
-                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Serial Number</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Maintenance Date</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Location</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Order</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
+            <?php if (!empty($error)): ?>
+            <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800">
+                <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars((string)$error); ?>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($success)): ?>
+            <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-green-50 border-green-200 text-green-800">
+                <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars((string)$success); ?>
+            </div>
+            <?php endif; ?>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="overflow-x-auto">
+                    <table class="w-full table-fixed">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="w-20 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Serial</th>
+                                <th class="w-24 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Maintenance Date</th>
+                                <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Location</th>
+                                <th class="w-12 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Order</th>
+                                <th class="w-24 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                         <?php if (empty($maintenance)): ?>
                             <tr>
                                 <td colspan="5" class="px-6 py-8 text-center text-gray-500">
@@ -126,29 +127,24 @@ if ($result) {
                             </tr>
                         <?php else: ?>
                             <?php foreach ($maintenance as $row): ?>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-4 py-3 text-sm text-gray-900"><?php echo $row['serial_number']; ?></td>
-                                <td class="px-4 py-3 text-sm text-gray-900"><?php echo $row['maintenance_date']; ?></td>
-                                <td class="px-4 py-3 text-sm text-gray-900"><?php echo htmlspecialchars($row['location']); ?></td>
-                                <td class="px-4 py-3 text-sm text-gray-900"><?php echo $row['display_order']; ?></td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <button 
-                                            onclick="openModal('edit', this.dataset)"
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
+                                <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['maintenance_date']; ?></td>
+                                <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['location']); ?></td>
+                                <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
+                                <td class="py-2 px-2 text-center flex justify-center space-x-1">
+                                    <button onclick="openModal('edit', this.dataset)"
                                             data-id="<?php echo $row['id']; ?>"
                                             data-serial_number="<?php echo $row['serial_number']; ?>"
                                             data-maintenance_date="<?php echo $row['maintenance_date']; ?>"
                                             data-location="<?php echo htmlspecialchars($row['location']); ?>"
                                             data-display_order="<?php echo $row['display_order']; ?>"
-                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
-                                            <i class="fas fa-edit mr-1"></i> Edit
-                                        </button>
-                                        <button 
-                                            onclick="openDeleteModal(<?php echo $row['id']; ?>)"
-                                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
-                                            <i class="fas fa-trash mr-1"></i> Delete
-                                        </button>
-                                    </div>
+                                            class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                        <i class="fas fa-edit text-[11px]"></i>
+                                    </button>
+                                    <button onclick="openDeleteModal(<?php echo $row['id']; ?>)" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                        <i class="fas fa-trash text-[11px]"></i>
+                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

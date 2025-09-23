@@ -97,20 +97,20 @@ if ($result) {
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
-        <div class="container mx-auto px-4 py-8">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 space-y-4 md:space-y-0">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-                        <i class="fas fa-fire-extinguisher text-red-600 mr-3"></i>
-                        Fire Safety Drills
-                    </h1>
-                    <p class="text-gray-600 mt-2">Manage fire safety drills and training sessions</p>
+    <div class="min-h-screen p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-500 p-2 rounded-lg">
+                        <i class="fas fa-fire-extinguisher text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-800">Fire Safety Drills</h1>
                 </div>
-                <button onclick="openModal('add')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg flex items-center">
-                    <i class="fas fa-plus mr-2"></i> Tambah Data
+                <button onclick="openModal('add')" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded transition duration-200 flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-plus"></i>
+                    <span>Tambah Data</span>
                 </button>
             </div>
-
             <?php if ($message): ?>
             <div id="notificationAlert" class="mb-4 px-6 py-4 rounded-lg shadow-md border <?php echo ($message_type == 'success') ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'; ?> transform transition-all duration-300 opacity-0 translate-y-3">
                 <div class="flex items-center">
@@ -130,51 +130,46 @@ if ($result) {
                 </div>
             </div>
             <?php endif; ?>
-
-            <!-- Table -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
+                    <table class="w-full table-fixed">
                         <thead>
-                            <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">S/No</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Date</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Location</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Subject</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Type</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Display Order</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Actions</th>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="w-10 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">No</th>
+                                <th class="w-20 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Serial</th>
+                                <th class="w-24 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Drill Date</th>
+                                <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Location</th>
+                                <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Subject</th>
+                                <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Type</th>
+                                <th class="w-12 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Order</th>
+                                <th class="w-24 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody>
                             <?php if (empty($data)): ?>
                                 <tr>
-                                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                    <td colspan="7" class="px-2 py-8 text-center text-gray-500">
                                         <i class="fas fa-inbox text-4xl mb-2"></i>
                                         <p>Tidak ada data fire safety drills.</p>
                                     </td>
                                 </tr>
                             <?php else: ?>
-                                <?php foreach ($data as $item): ?>
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?php echo $item['serial_number']; ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo date('d-M-y', strtotime($item['drill_date'])); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['location']); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['subject']); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($item['drill_type']); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo $item['display_order']; ?></td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center space-x-2">
-                                            <button onclick="openModal('edit', <?php echo $item['id']; ?>)" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
-                                                <i class="fas fa-edit mr-1"></i> Edit
-                                            </button>
-                                            <a href="drills.php?delete=<?php echo $item['id']; ?>" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105" 
-                                               onclick="return confirm('Yakin ingin menghapus data ini?')"
-                                               onmouseover="this.querySelector('i').classList.remove('fa-trash');this.querySelector('i').classList.add('fa-trash-alt')"
-                                               onmouseout="this.querySelector('i').classList.remove('fa-trash-alt');this.querySelector('i').classList.add('fa-trash')">
-                                                <i class="fas fa-trash mr-1"></i> Delete
-                                            </a>
-                                        </div>
+                                <?php $no=1; foreach ($data as $item): ?>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $item['serial_number']; ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo date('d-M-y', strtotime($item['drill_date'])); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['location']); ?>"><?php echo htmlspecialchars($item['location']); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['subject']); ?>"><?php echo htmlspecialchars($item['subject']); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['drill_type']); ?>"><?php echo htmlspecialchars($item['drill_type']); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $item['display_order']; ?></td>
+                                    <td class="py-2 px-2 text-center flex justify-center space-x-1">
+                                        <button onclick="openModal('edit', <?php echo $item['id']; ?>)" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                            <i class="fas fa-edit text-[11px]"></i>
+                                        </button>
+                                        <a href="drills.php?delete=<?php echo $item['id']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                            <i class="fas fa-trash text-[11px]"></i>
+                                        </a>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -185,62 +180,46 @@ if ($result) {
             </div>
 
             <!-- Modal Form -->
-            <div id="modalForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden transition-opacity duration-300">
-                <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-8 relative transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
-                    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors duration-200">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                    <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-plus text-red-600 mr-2" id="modalIcon"></i>
-                        <span id="modalAction">Tambah</span> Fire Safety Drill
-                    </h2>
-                    <form id="formModal" method="POST" class="space-y-6">
+            <!-- Modal Add/Edit -->
+            <div id="modalForm" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-hidden h-full w-full z-50">
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] shadow-xl rounded-lg bg-white" id="modalContent">
+                    <form id="formModal" method="POST">
                         <input type="hidden" name="action" id="formAction" value="add">
                         <input type="hidden" name="id" id="formId" value="">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="modal_serial_number" class="block text-sm font-medium text-gray-700">Serial Number <span class="text-red-500">*</span></label>
-                                <input type="number" id="modal_serial_number" name="serial_number" required min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                        <div class="flex justify-between items-center border-b border-gray-200 p-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-red-500 p-2 rounded">
+                                    <i class="fas fa-plus text-white text-sm" id="modalIcon"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-800"><span id="modalAction">Tambah</span> Data</h3>
                             </div>
-                            <div>
-                                <label for="modal_drill_date" class="block text-sm font-medium text-gray-700">Drill Date <span class="text-red-500">*</span></label>
-                                <input type="date" id="modal_drill_date" name="drill_date" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
-                            </div>
-                            <div>
-                                <label for="modal_drill_type" class="block text-sm font-medium text-gray-700">Drill Type <span class="text-red-500">*</span></label>
-                                <select id="modal_drill_type" name="drill_type" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
-                                    <option value="">Pilih Type</option>
-                                    <option value="drill">Drill</option>
-                                    <option value="training">Training</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="modal_display_order" class="block text-sm font-medium text-gray-700">Display Order</label>
-                                <input type="number" id="modal_display_order" name="display_order" min="0" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500 transition-colors"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="p-6">
+                            <label class="block text-gray-600 text-sm mb-2">Serial Number</label>
+                            <input type="number" name="serial_number" id="modal_serial_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                            <label class="block text-gray-600 text-sm mb-2 mt-4">Drill Date</label>
+                            <input type="date" name="drill_date" id="modal_drill_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                            <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
+                            <input type="text" name="location" id="modal_location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                            <label class="block text-gray-600 text-sm mb-2 mt-4">Subject</label>
+                            <input type="text" name="subject" id="modal_subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                            <label class="block text-gray-600 text-sm mb-2 mt-4">Drill Type</label>
+                            <select name="drill_type" id="modal_drill_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                                <option value="">Pilih Type</option>
+                                <option value="drill">Drill</option>
+                                <option value="training">Training</option>
+                            </select>
+                            <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
+                            <input type="number" name="display_order" id="modal_display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="0">
+                            <div class="mt-4 flex items-center">
+                                <input type="checkbox" name="is_active" id="modal_is_active" class="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500" checked>
+                                <label class="ml-2 block text-sm text-gray-600" for="modal_is_active">Set sebagai data aktif</label>
                             </div>
                         </div>
-                        <div>
-                            <label for="modal_location" class="block text-sm font-medium text-gray-700">Location <span class="text-red-500">*</span></label>
-                            <input type="text" id="modal_location" name="location" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
-                            <p class="text-xs text-gray-500 mt-1">Lokasi drill atau training</p>
-                        </div>
-                        <div>
-                            <label for="modal_subject" class="block text-sm font-medium text-gray-700">Subject <span class="text-red-500">*</span></label>
-                            <input type="text" id="modal_subject" name="subject" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
-                            <p class="text-xs text-gray-500 mt-1">Subjek atau topik drill/training</p>
-                        </div>
-                        <div class="flex items-center mt-2">
-                            <input type="checkbox" id="modal_is_active" name="is_active" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                            <label for="modal_is_active" class="ml-2 text-sm text-gray-700">Aktif</label>
-                            <span class="text-xs text-gray-500 ml-4">Centang untuk menampilkan data ini</span>
-                        </div>
-                        <div class="flex justify-end gap-3 mt-6">
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
-                                <i class="fas fa-save mr-1"></i> <span id="modalBtnText">Simpan</span>
-                            </button>
-                            <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
-                                <i class="fas fa-times mr-1"></i> Batal
-                            </button>
+                        <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Batal</button>
+                            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"><i class="fas fa-save mr-2"></i><span id="modalBtnText">Simpan</span></button>
                         </div>
                     </form>
                 </div>

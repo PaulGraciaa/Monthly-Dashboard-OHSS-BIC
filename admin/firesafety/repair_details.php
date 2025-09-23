@@ -1,344 +1,230 @@
 <?php
-session_start();
-require_once '../auth.php';
-
-// Pastikan user sudah login
-if (!isAdminLoggedIn()) {
-    header('Location: ../login.php');
-    exit();
-}
-
-require_once '../../config/database.php';
-
+require_once 'template_header.php';
+$notif = isset($_SESSION['notif']) ? $_SESSION['notif'] : '';
+unset($_SESSION['notif']);
 $error = '';
 $success = '';
-$data = null;
-$action = isset($_GET['action']) ? $_GET['action'] : 'list';
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-// Handle different actions
-switch ($action) {
-    case 'create':
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $serial_number = (int)$_POST['serial_number'];
-            $repair_date = $_POST['repair_date'];
-            $project_name = mysqli_real_escape_string($conn, $_POST['project_name']);
-            $location = mysqli_real_escape_string($conn, $_POST['location']);
-            $status = mysqli_real_escape_string($conn, $_POST['status']);
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-            $created_by = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
-
-            if (empty($project_name) || empty($location) || empty($status)) {
-                $error = 'Project Name, Location, dan Status tidak boleh kosong';
-            } else {
-                // created_by not present in table schema; do not insert it
-                $query = "INSERT INTO fire_safety_repair_details (serial_number, repair_date, project_name, location, status, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "issssii", $serial_number, $repair_date, $project_name, $location, $status, $display_order, $is_active);
-                
-                if (mysqli_stmt_execute($stmt)) {
-                    if (!isset($_SESSION)) { session_start(); }
-                    $_SESSION['notif'] = 'Data berhasil ditambahkan';
-                    header('Location: index.php');
-                    exit();
-                } else {
-                    $error = 'Gagal menambahkan data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-
-    case 'edit':
-        if ($id <= 0) {
-            header('Location: index.php');
-            exit();
-        }
-
-        // Ambil data berdasarkan ID
-        $query = "SELECT * FROM fire_safety_repair_details WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-
-        if (!$data) {
-            header('Location: index.php');
-            exit();
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $serial_number = (int)$_POST['serial_number'];
-            $repair_date = $_POST['repair_date'];
-            $project_name = mysqli_real_escape_string($conn, $_POST['project_name']);
-            $location = mysqli_real_escape_string($conn, $_POST['location']);
-            $status = mysqli_real_escape_string($conn, $_POST['status']);
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-
-            if (empty($project_name) || empty($location) || empty($status)) {
-                $error = 'Project Name, Location, dan Status tidak boleh kosong';
-            } else {
-                $query = "UPDATE fire_safety_repair_details SET serial_number = ?, repair_date = ?, project_name = ?, location = ?, status = ?, display_order = ?, is_active = ? WHERE id = ?";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "issssiii", $serial_number, $repair_date, $project_name, $location, $status, $display_order, $is_active, $id);
-                
-                if (mysqli_stmt_execute($stmt)) {
-                    $success = 'Data berhasil diperbarui';
-                    // Update data yang ditampilkan
-                    $data['serial_number'] = $serial_number;
-                    $data['repair_date'] = $repair_date;
-                    $data['project_name'] = $project_name;
-                    $data['location'] = $location;
-                    $data['status'] = $status;
-                    $data['display_order'] = $display_order;
-                    $data['is_active'] = $is_active;
-                } else {
-                    $error = 'Gagal memperbarui data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-
-    case 'delete':
-        if ($id <= 0) {
-            header('Location: index.php');
-            exit();
-        }
-
-        // Hapus data (soft delete - set is_active = 0)
-        $query = "UPDATE fire_safety_repair_details SET is_active = 0 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-
-        if (mysqli_stmt_execute($stmt)) {
-            $_SESSION['success_message'] = 'Data berhasil dihapus';
+// Handle edit data
+if (isset($_POST['edit_submit']) && isset($_POST['edit_id'])) {
+    $serial_number = isset($_POST['serial_number']) ? (int)$_POST['serial_number'] : 0;
+    $repair_date = isset($_POST['repair_date']) ? $_POST['repair_date'] : '';
+    $project_name = isset($_POST['project_name']) ? mysqli_real_escape_string($conn, $_POST['project_name']) : '';
+    $location = isset($_POST['location']) ? mysqli_real_escape_string($conn, $_POST['location']) : '';
+    $status = isset($_POST['status']) ? mysqli_real_escape_string($conn, $_POST['status']) : '';
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    if (empty($project_name) || empty($location) || empty($status)) {
+        $error = 'Project Name, Location, dan Status tidak boleh kosong';
+    } else {
+        $query = "INSERT INTO fire_safety_repair_details (serial_number, repair_date, project_name, location, status, display_order, is_active) VALUES ($serial_number, '$repair_date', '$project_name', '$location', '$status', $display_order, $is_active)";
+        if (mysqli_query($conn, $query)) {
+            $success = 'Data berhasil ditambahkan';
         } else {
-            $_SESSION['error_message'] = 'Gagal menghapus data: ' . mysqli_error($conn);
-        }
-
-        mysqli_stmt_close($stmt);
-        header('Location: index.php');
-        exit();
-        break;
-
-    default:
-        // Default action is 'list' - redirect to main index
-        header('Location: index.php');
-        exit();
+            $error = 'Gagal menambahkan data: '.mysqli_error($conn);
 }
 
-// Determine page title based on action
-$page_title = ($action == 'create') ? 'Tambah' : 'Edit';
-$page_title .= ' Fire Safety Repair Details';
-?>
+// Handle delete data (soft delete)
+if (isset($_GET['delete_id'])) {
+    $delete_id = (int)$_GET['delete_id'];
+    if ($delete_id > 0) {
+        $query = "UPDATE fire_safety_repair_details SET is_active=0 WHERE id=$delete_id";
+        if (mysqli_query($conn, $query)) {
+            $success = 'Data berhasil dihapus';
+        } else {
+            $error = 'Gagal menghapus data: '.mysqli_error($conn);
+        }
+    }
+        }
+    }
+}
 
+// Handle edit data
+if (isset($_POST['edit_submit']) && isset($_POST['edit_id'])) {
+    $edit_id = (int)$_POST['edit_id'];
+    $serial_number = isset($_POST['serial_number']) ? (int)$_POST['serial_number'] : 0;
+    $repair_date = isset($_POST['repair_date']) ? $_POST['repair_date'] : '';
+    $project_name = isset($_POST['project_name']) ? mysqli_real_escape_string($conn, $_POST['project_name']) : '';
+    $location = isset($_POST['location']) ? mysqli_real_escape_string($conn, $_POST['location']) : '';
+    $status = isset($_POST['status']) ? mysqli_real_escape_string($conn, $_POST['status']) : '';
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    if (empty($project_name) || empty($location) || empty($status)) {
+        $error = 'Project Name, Location, dan Status tidak boleh kosong';
+    } else {
+        $query = "UPDATE fire_safety_repair_details SET serial_number=$serial_number, repair_date='$repair_date', project_name='$project_name', location='$location', status='$status', display_order=$display_order, is_active=$is_active WHERE id=$edit_id";
+        if (mysqli_query($conn, $query)) {
+            $success = 'Data berhasil diperbarui';
+        } else {
+            $error = 'Gagal memperbarui data: '.mysqli_error($conn);
+        }
+    }
+}
+
+// Ambil data untuk list
+$list = array();
+$result = mysqli_query($conn, "SELECT * FROM fire_safety_repair_details WHERE is_active = 1 ORDER BY display_order ASC, id DESC");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $list[] = $row;
+    }
+}
+
+$page_title = 'Fire Safety Repair Details';
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background-color: #0A4D9E;
-        }
-        .sidebar .nav-link {
-            color: white;
-        }
-        .sidebar .nav-link:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        .sidebar .nav-link.active {
-            background-color: rgba(255,255,255,0.2);
-        }
-        .main-content {
-            margin-left: 0;
-        }
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 250px;
-            }
-        }
-        .card-header {
-            background-color: #0A4D9E;
-            color: white;
-        }
-        .btn-primary {
-            background-color: #0A4D9E;
-            border-color: #0A4D9E;
-        }
-        .btn-primary:hover {
-            background-color: #083a7a;
-            border-color: #083a7a;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <h5 class="text-white">Admin Panel</h5>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="../dashboard.php">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../management/activities_tab.php">
-                                <i class="fas fa-calendar me-2"></i>
-                                Activities
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../OHS/index.php">
-                                <i class="fas fa-shield-alt me-2"></i>
-                                OHS
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../security/index.php">
-                                <i class="fas fa-user-shield me-2"></i>
-                                Security
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="index.php">
-                                <i class="fas fa-fire-extinguisher me-2"></i>
-                                Fire Safety
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="../surveillance/index.php">
-                                <i class="fas fa-video me-2"></i>
-                                Surveillance
-                            </a>
-                        </li>
-                        <li class="nav-item mt-3">
-                            <a class="nav-link" href="../logout.php">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                Logout
-                            </a>
-                        </li>
-                    </ul>
+<body class="bg-gray-100">
+<div class="min-h-screen p-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="bg-red-500 p-2 rounded-lg">
+                    <i class="fas fa-wrench text-white text-xl"></i>
                 </div>
-            </nav>
-
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2"><?php echo $page_title; ?></h1>
-                    <a href="index.php" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Kembali
-                    </a>
-                </div>
-
-                <?php if ($error): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <?php echo $error; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($success): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <?php echo $success; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-<?php echo ($action == 'create') ? 'plus' : 'edit'; ?> me-2"></i>
-                            Form <?php echo ($action == 'create') ? 'Tambah' : 'Edit'; ?> Data
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST">
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="serial_number" class="form-label">Serial Number <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="serial_number" name="serial_number" 
-                                           value="<?php echo ($action == 'edit') ? $data['serial_number'] : (isset($_POST['serial_number']) ? $_POST['serial_number'] : ''); ?>" 
-                                           required min="1">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="repair_date" class="form-label">Repair Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="repair_date" name="repair_date" 
-                                           value="<?php echo ($action == 'edit') ? $data['repair_date'] : (isset($_POST['repair_date']) ? $_POST['repair_date'] : ''); ?>" 
-                                           required>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="display_order" class="form-label">Display Order</label>
-                                    <input type="number" class="form-control" id="display_order" name="display_order" 
-                                           value="<?php echo ($action == 'edit') ? $data['display_order'] : (isset($_POST['display_order']) ? $_POST['display_order'] : '0'); ?>" 
-                                           min="0">
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="project_name" class="form-label">Project Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="project_name" name="project_name" 
-                                           value="<?php echo ($action == 'edit') ? htmlspecialchars($data['project_name']) : (isset($_POST['project_name']) ? htmlspecialchars($_POST['project_name']) : ''); ?>" 
-                                           required>
-                                    <div class="form-text">Nama proyek repair</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="location" name="location" 
-                                           value="<?php echo ($action == 'edit') ? htmlspecialchars($data['location']) : (isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''); ?>" 
-                                           required>
-                                    <div class="form-text">Lokasi repair</div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="status" name="status" rows="3" required><?php echo ($action == 'edit') ? htmlspecialchars($data['status']) : (isset($_POST['status']) ? htmlspecialchars($_POST['status']) : ''); ?></textarea>
-                                <div class="form-text">Status repair atau progress</div>
-                            </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
-                                       <?php echo (($action == 'edit' && $data['is_active']) || ($action == 'create' && (!isset($_POST['is_active']) || $_POST['is_active']))) ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="is_active">
-                                    Aktif
-                                </label>
-                                <div class="form-text">Centang untuk menampilkan data ini</div>
-                            </div>
-
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a href="index.php" class="btn btn-secondary me-md-2">
-                                    <i class="fas fa-times me-2"></i>Batal
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-2"></i><?php echo ($action == 'create') ? 'Simpan' : 'Simpan Perubahan'; ?>
+                <h1 class="text-xl font-bold text-gray-800">Fire Safety Repair Details</h1>
+            </div>
+            <button onclick="document.getElementById('modalAdd').classList.remove('hidden')" 
+                class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded transition duration-200 flex items-center gap-2 shadow-sm">
+                <i class="fas fa-plus"></i>
+                <span>Tambah Data</span>
+            </button>
+        </div>
+        <?php if ($error) { ?>
+            <div class="bg-red-100 border border-red-200 text-red-700 p-3 rounded-md mb-4 text-sm"> <?php echo $error; ?> </div>
+        <?php } ?>
+        <?php if ($success) { ?>
+            <div class="bg-green-100 border border-green-200 text-green-700 p-3 rounded-md mb-4 text-sm"> <?php echo $success; ?> </div>
+        <?php } ?>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="w-full table-fixed">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="w-10 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">No</th>
+                            <th class="w-20 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Serial</th>
+                            <th class="w-24 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Repair Date</th>
+                            <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Project Name</th>
+                            <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Location</th>
+                            <th class="w-40 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Status</th>
+                            <th class="w-12 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Order</th>
+                            <th class="w-24 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $no=1; foreach ($list as $row) { ?>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['repair_date']; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['project_name']); ?>"><?php echo htmlspecialchars($row['project_name']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['location']); ?>"><?php echo htmlspecialchars($row['location']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['status']); ?>"><?php echo htmlspecialchars($row['status']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
+                            <td class="py-2 px-2 text-center flex justify-center space-x-1">
+                                <button onclick="document.getElementById('modalEdit<?php echo $row['id']; ?>').classList.remove('hidden')" 
+                                            class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-edit text-[11px]"></i>
                                 </button>
+                                <a href="?delete_id=<?php echo $row['id']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-trash text-[11px]"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Modal Edit -->
+                        <div id="modalEdit<?php echo $row['id']; ?>" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-hidden h-full w-full z-50">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] shadow-xl rounded-lg bg-white">
+                                <form method="POST">
+                                    <input type="hidden" name="edit_id" value="<?php echo $row['id']; ?>">
+                                    <div class="flex justify-between items-center border-b border-gray-200 p-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="bg-red-500 p-2 rounded">
+                                                <i class="fas fa-edit text-white text-sm"></i>
+                                            </div>
+                                            <h3 class="text-lg font-semibold text-gray-800">Edit Data</h3>
+                                        </div>
+                                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" 
+                                            class="text-gray-400 hover:text-gray-500 transition-colors">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="p-6">
+                                        <label class="block text-gray-600 text-sm mb-2">Serial Number</label>
+                                        <input type="number" name="serial_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['serial_number']; ?>" required>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Repair Date</label>
+                                        <input type="date" name="repair_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['repair_date']; ?>">
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Project Name</label>
+                                        <input type="text" name="project_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['project_name']); ?>" required>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
+                                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['location']); ?>" required>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Status</label>
+                                        <textarea name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required><?php echo htmlspecialchars($row['status']); ?></textarea>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
+                                        <input type="number" name="display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['display_order']; ?>">
+                                        <div class="mt-4 flex items-center">
+                                            <input type="checkbox" name="is_active" class="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500" <?php echo ($row['is_active'] ? 'checked' : ''); ?> >
+                                            <label class="ml-2 block text-sm text-gray-600">Set sebagai data aktif</label>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3">
+                                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Batal</button>
+                                        <button type="submit" name="edit_submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"><i class="fas fa-save mr-2"></i>Simpan Perubahan</button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Modal Add -->
+        <div id="modalAdd" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-hidden h-full w-full z-50">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] shadow-xl rounded-lg bg-white">
+                <form method="POST">
+                    <div class="flex justify-between items-center border-b border-gray-200 p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-red-500 p-2 rounded">
+                                <i class="fas fa-plus text-white text-sm"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Tambah Data</h3>
+                        </div>
+                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 transition-colors"><i class="fas fa-times"></i></button>
                     </div>
-                </div>
-            </main>
+                    <div class="p-6">
+                        <label class="block text-gray-600 text-sm mb-2">Serial Number</label>
+                        <input type="number" name="serial_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Repair Date</label>
+                        <input type="date" name="repair_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm">
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Project Name</label>
+                        <input type="text" name="project_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
+                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Status</label>
+                        <textarea name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required></textarea>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
+                        <input type="number" name="display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="0">
+                        <div class="mt-4 flex items-center">
+                            <input type="checkbox" name="is_active" class="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500" checked>
+                            <label class="ml-2 block text-sm text-gray-600">Set sebagai data aktif</label>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3">
+                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Batal</button>
+                        <button type="submit" name="add_submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"><i class="fas fa-save mr-2"></i>Simpan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
 </body>
 </html>

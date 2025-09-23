@@ -1,8 +1,5 @@
 <?php
-session_start();
-require_once '../auth.php';
-require_once '../../config/database.php';
-requireAdminLogin();
+require_once 'template_header.php';
 
 $error = '';
 $success = '';
@@ -84,98 +81,24 @@ $page_title = 'Fire Safety Performance';
     <title><?php echo $page_title; ?> - Batamindo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FF0000',
-                        secondary: '#1a1a1a',
-                    }
-                }
-            }
-        }
-    </script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <!-- Red Header Section -->
-    <div class="bg-gradient-to-r from-red-600 to-red-800">
-        <header class="text-white py-4">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-4">
-                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                            <p class="text-red-200">Fire Safety Management System</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:flex items-center space-x-3">
-                        <div class="text-right">
-                            <p class="text-sm text-white">Welcome, Admin</p>
-                            <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
-                        </div>
-                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
-                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
-                        </a>
-                    </div>
+<div class="min-h-screen p-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="bg-red-500 p-2 rounded-lg">
+                    <i class="fas fa-trophy text-white text-xl"></i>
                 </div>
-                    </div>
-        </header>
-        <!-- Navigation -->
-        <div class="border-t border-red-500/30">
-            <div class="max-w-7xl mx-auto px-4 py-2">
-                <nav class="flex space-x-4">
-                    <a href="index.php" class="bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-fire-extinguisher mr-1"></i> Fire Safety
-                    </a>
-                    <a href="performance.php" class="bg-red-800 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-line mr-1"></i> Performance
-                    </a>
-                    <a href="emergency.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-exclamation-triangle mr-1"></i> Emergency
-                    </a>
-                    <a href="details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-list mr-1"></i> Details
-                    </a>
-                    <a href="enforcement.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-gavel mr-1"></i> Enforcement
-                    </a>
-                    <a href="maintenance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-tools mr-1"></i> Maintenance
-                    </a>
-                    <a href="statistics.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-bar mr-1"></i> Statistics
-                    </a>
-                    <a href="repair.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-wrench mr-1"></i> Repair
-                    </a>
-                    <a href="repair_details.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-list-alt mr-1"></i> Repair Details
-                    </a>
-                    <a href="drills.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-running mr-1"></i> Drills
-                    </a>
-                </nav>
+                <h1 class="text-xl font-bold text-gray-800">Fire Safety Performance</h1>
             </div>
-        </div>
-        </div>
-
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-trophy text-red-600 mr-3"></i>
-                    Fire Safety Performance
-                </h1>
-                <p class="text-gray-600 mt-2">Manage Fire Safety Performance summaries.</p>
-            </div>
-            <button onclick="openModal('add')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-lg flex items-center">
-                <i class="fas fa-plus mr-2"></i> Tambah Data
+            <button onclick="openModal('add')" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded transition duration-200 flex items-center gap-2 shadow-sm">
+                <i class="fas fa-plus"></i>
+                <span>Tambah Data</span>
             </button>
+            <script>
+            </script>
         </div>
-
         <?php if ($error): ?>
         <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800">
             <i class="fas fa-exclamation-circle mr-2"></i> <?php echo $error; ?>
@@ -186,89 +109,91 @@ $page_title = 'Fire Safety Performance';
             <i class="fas fa-check-circle mr-2"></i> <?php echo $success; ?>
         </div>
         <?php endif; ?>
-
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="overflow-x-auto">
-                <table class="min-w-full table-auto">
+                <table class="w-full table-fixed">
                     <thead>
-                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">No</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Summary</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-left">Display Order</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Actions</th>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="w-10 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">No</th>
+                            <th class="w-64 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Summary</th>
+                            <th class="w-12 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Order</th>
+                            <th class="w-24 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody>
                         <?php if (empty($data)): ?>
-                            <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                                    <i class="fas fa-inbox text-4xl mb-2"></i>
-                                    <p>Tidak ada data performance.</p>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="4" class="px-2 py-8 text-center text-gray-500">
+                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                <p>Tidak ada data performance.</p>
+                            </td>
+                        </tr>
                         <?php else: ?>
-                            <?php foreach ($data as $i => $row): ?>
-                            <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?php echo $i + 1; ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($row['summary_text']); ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-900"><?php echo $row['display_order']; ?></td>
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <button onclick="openModal('edit', <?php echo $row['id']; ?>)" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105">
-                                            <i class="fas fa-edit mr-1"></i> Edit
-                                        </button>
-                                        <a href="performance.php?delete=<?php echo $row['id']; ?>" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 transform hover:scale-105" onclick="return confirm('Yakin ingin menghapus data ini?')">
-                                            <i class="fas fa-trash mr-1"></i> Delete
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
+                        <?php foreach ($data as $i => $row): ?>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $i + 1; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['summary_text']); ?>"><?php echo htmlspecialchars($row['summary_text']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
+                            <td class="py-2 px-2 text-center flex justify-center space-x-1">
+                                <button onclick="openModal('edit', this.dataset)"
+                                        data-id="<?php echo $row['id']; ?>"
+                                        data-summary_text="<?php echo htmlspecialchars($row['summary_text']); ?>"
+                                        data-display_order="<?php echo $row['display_order']; ?>"
+                                        data-is_active="<?php echo $row['is_active']; ?>"
+                                        class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-edit text-[11px]"></i>
+                                </button>
+                                <a href="performance.php?delete=<?php echo $row['id']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-trash text-[11px]"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- Modal Popup for Add/Edit -->
-        <div id="modalForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden transition-opacity duration-300">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-8 relative transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
-                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors duration-200">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-                <h2 id="modalTitle" class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-plus text-red-600 mr-2" id="modalIcon"></i>
-                    <span id="modalAction">Tambah</span> Performance
-                </h2>
-                <form id="formModal" method="POST" class="space-y-6">
+        <!-- Modal Add/Edit -->
+        <div id="modalForm" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-hidden h-full w-full z-50">
+            <div class="flex items-center justify-center min-h-screen">
+                <div class="w-full max-w-xl shadow-xl rounded-lg bg-white mx-4" id="modalContent">
+                <form id="formModal" method="POST">
                     <input type="hidden" name="action" id="formAction" value="add">
                     <input type="hidden" name="id" id="formId" value="">
-                    <div>
-                        <label for="modal_summary_text" class="block text-sm font-medium text-gray-700">Summary Text <span class="text-red-500">*</span></label>
-                        <textarea id="modal_summary_text" name="summary_text" rows="4" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"></textarea>
+                    <div class="flex justify-between items-center border-b border-gray-200 p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-red-500 p-2 rounded">
+                                <i class="fas fa-plus text-white text-sm" id="modalIcon"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800"><span id="modalAction">Tambah</span> Performance</h3>
+                        </div>
+                        <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500 transition-colors"><i class="fas fa-times"></i></button>
                     </div>
-                    <div>
-                        <label for="modal_display_order" class="block text-sm font-medium text-gray-700">Display Order</label>
-                        <input type="number" id="modal_display_order" name="display_order" min="0" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                    <div class="p-6">
+                        <label class="block text-gray-600 text-sm mb-2">Summary Text</label>
+                        <textarea name="summary_text" id="modal_summary_text" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required></textarea>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
+                        <input type="number" name="display_order" id="modal_display_order" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="0">
+                        <div class="mt-4 flex items-center">
+                            <input type="checkbox" name="is_active" id="modal_is_active" class="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500" checked>
+                            <label class="ml-2 block text-sm text-gray-600" for="modal_is_active">Set sebagai data aktif</label>
+                        </div>
                     </div>
-                    <div class="flex items-center mt-2">
-                        <input type="checkbox" id="modal_is_active" name="is_active" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500" checked>
-                        <label for="modal_is_active" class="ml-2 text-sm text-gray-700">Aktif</label>
-                        <span class="text-xs text-gray-500 ml-4">Centang untuk menampilkan data ini</span>
-                    </div>
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
-                            <i class="fas fa-save mr-1"></i> <span id="modalBtnText">Simpan</span>
-                        </button>
-                        <button type="button" onclick="closeModal()" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
-                            <i class="fas fa-times mr-1"></i> Batal
-                        </button>
+                    <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"><i class="fas fa-save mr-2"></i><span id="modalBtnText">Simpan</span></button>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
-        <script>
-        function openModal(type, id) {
+    </div>
+</div>
+<script>
+        function openModal(type, dataset) {
+            // dataset default ke null jika tidak ada
+            if (typeof dataset === 'undefined') dataset = null;
             const modal = document.getElementById('modalForm');
             const modalContent = document.getElementById('modalContent');
             modal.classList.remove('hidden');
@@ -281,13 +206,11 @@ $page_title = 'Fire Safety Performance';
             document.getElementById('modalIcon').className = type === 'edit' ? 'fas fa-edit text-yellow-500 mr-2' : 'fas fa-plus text-red-600 mr-2';
             document.getElementById('modalBtnText').innerText = type === 'edit' ? 'Simpan Perubahan' : 'Simpan';
             document.getElementById('formAction').value = type === 'edit' ? 'edit' : 'add';
-            if (type === 'edit' && id) {
-                <?php if ($edit_data): ?>
-                document.getElementById('formId').value = <?php echo json_encode($edit_data['id']); ?>;
-                document.getElementById('modal_summary_text').value = <?php echo json_encode($edit_data['summary_text']); ?>;
-                document.getElementById('modal_display_order').value = <?php echo json_encode($edit_data['display_order']); ?>;
-                document.getElementById('modal_is_active').checked = <?php echo ($edit_data['is_active'] ? 'true' : 'false'); ?>;
-                <?php endif; ?>
+            if (type === 'edit' && dataset) {
+                document.getElementById('formId').value = dataset.id || '';
+                document.getElementById('modal_summary_text').value = dataset.summary_text || '';
+                document.getElementById('modal_display_order').value = dataset.display_order || '';
+                document.getElementById('modal_is_active').checked = dataset.is_active == '1' ? true : false;
             } else {
                 document.getElementById('formId').value = '';
                 document.getElementById('modal_summary_text').value = '';
@@ -295,6 +218,25 @@ $page_title = 'Fire Safety Performance';
                 document.getElementById('modal_is_active').checked = true;
             }
         }
+        // Perbaiki tombol edit agar kirim dataset
+        // Selector tombol edit: gunakan [data-id] dan [data-summary_text]
+        document.querySelectorAll('button[data-id][data-summary_text]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openModal('edit', this.dataset);
+            });
+        });
+        // Tambahkan id pada tombol tambah data dan gunakan event listener
+        // Tambahkan event listener pada tombol tambah data dengan id
+        document.addEventListener('DOMContentLoaded', function() {
+            var btnAdd = document.getElementById('btnAddPerformance');
+            if (btnAdd) {
+                btnAdd.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openModal('add');
+                });
+            }
+        });
         function closeModal() {
             const modal = document.getElementById('modalForm');
             const modalContent = document.getElementById('modalContent');
@@ -303,9 +245,15 @@ $page_title = 'Fire Safety Performance';
             modal.style.opacity = '0';
             setTimeout(() => {
                 modal.classList.add('hidden');
+                // Reset form agar data edit tidak bocor
+                document.getElementById('formModal').reset();
+                document.getElementById('formId').value = '';
+                document.getElementById('formAction').value = 'add';
+                document.getElementById('modalAction').innerText = 'Tambah';
+                document.getElementById('modalIcon').className = 'fas fa-plus text-red-600 mr-2';
+                document.getElementById('modalBtnText').innerText = 'Simpan';
             }, 300);
         }
         </script>
-    </div>
 </body>
 </html>

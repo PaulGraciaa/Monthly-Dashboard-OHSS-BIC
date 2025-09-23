@@ -1,308 +1,221 @@
 <?php
-session_start();
-require_once '../auth.php';
-
-if (!isAdminLoggedIn()) {
-    header('Location: ../login.php');
-    exit();
-}
-
-require_once '../../config/database.php';
-
+require_once 'template_header.php';
 $error = '';
 $success = '';
-$data = null;
-$action = isset($_GET['action']) ? $_GET['action'] : 'list';
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$notif = isset($_SESSION['notif']) ? $_SESSION['notif'] : '';
+unset($_SESSION['notif']);
 
-// CRUD logic for fire training
-switch ($action) {
-    case 'create':
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $serial_number = (int)$_POST['serial_number'];
-            $training_date = $_POST['training_date'];
-            $location = mysqli_real_escape_string($conn, $_POST['location']);
-            $subject = mysqli_real_escape_string($conn, $_POST['subject']);
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-
-            if (empty($location) || empty($subject)) {
-                $error = 'Location dan Subject tidak boleh kosong';
-            } else {
-                $query = "INSERT INTO fire_safety_training (serial_number, training_date, location, subject, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "isssii", $serial_number, $training_date, $location, $subject, $display_order, $is_active);
-                if (mysqli_stmt_execute($stmt)) {
-                    $_SESSION['notif'] = 'Data berhasil ditambahkan';
-                    header('Location: training.php');
-                    exit();
-                } else {
-                    $error = 'Gagal menambahkan data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-    case 'edit':
-        if ($id <= 0) {
-            header('Location: training.php');
-            exit();
-        }
-        $query = "SELECT * FROM fire_safety_training WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-        if (!$data) {
-            header('Location: training.php');
-            exit();
-        }
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $serial_number = (int)$_POST['serial_number'];
-            $training_date = $_POST['training_date'];
-            $location = mysqli_real_escape_string($conn, $_POST['location']);
-            $subject = mysqli_real_escape_string($conn, $_POST['subject']);
-            $display_order = (int)$_POST['display_order'];
-            $is_active = isset($_POST['is_active']) ? 1 : 0;
-            if (empty($location) || empty($subject)) {
-                $error = 'Location dan Subject tidak boleh kosong';
-            } else {
-                $query = "UPDATE fire_safety_training SET serial_number = ?, training_date = ?, location = ?, subject = ?, display_order = ?, is_active = ? WHERE id = ?";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, "isssiii", $serial_number, $training_date, $location, $subject, $display_order, $is_active, $id);
-                if (mysqli_stmt_execute($stmt)) {
-                    $success = 'Data berhasil diperbarui';
-                    $data['serial_number'] = $serial_number;
-                    $data['training_date'] = $training_date;
-                    $data['location'] = $location;
-                    $data['subject'] = $subject;
-                    $data['display_order'] = $display_order;
-                    $data['is_active'] = $is_active;
-                } else {
-                    $error = 'Gagal memperbarui data: ' . mysqli_error($conn);
-                }
-                mysqli_stmt_close($stmt);
-            }
-        }
-        break;
-    case 'delete':
-        if ($id <= 0) {
-            header('Location: training.php');
-            exit();
-        }
-        $query = "UPDATE fire_safety_training SET is_active = 0 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        if (mysqli_stmt_execute($stmt)) {
-            $_SESSION['success_message'] = 'Data berhasil dihapus';
+// Handle tambah data
+if (isset($_POST['add_submit'])) {
+    $serial_number = isset($_POST['serial_number']) ? (int)$_POST['serial_number'] : 0;
+    $training_date = isset($_POST['training_date']) ? $_POST['training_date'] : '';
+    $location = isset($_POST['location']) ? mysqli_real_escape_string($conn, $_POST['location']) : '';
+    $subject = isset($_POST['subject']) ? mysqli_real_escape_string($conn, $_POST['subject']) : '';
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    if (empty($location) || empty($subject)) {
+        $error = 'Location dan Subject tidak boleh kosong';
+    } else {
+        $query = "INSERT INTO fire_safety_training (serial_number, training_date, location, subject, display_order, is_active) VALUES ($serial_number, '$training_date', '$location', '$subject', $display_order, $is_active)";
+        if (mysqli_query($conn, $query)) {
+            $success = 'Data berhasil ditambahkan';
         } else {
-            $_SESSION['error_message'] = 'Gagal menghapus data: ' . mysqli_error($conn);
+            $error = 'Gagal menambahkan data: '.mysqli_error($conn);
         }
-        mysqli_stmt_close($stmt);
-        header('Location: training.php');
-        exit();
-        break;
+    }
 }
 
-// Fetch all data for listing
-$query = "SELECT * FROM fire_safety_training WHERE is_active = 1 ORDER BY display_order, training_date DESC";
-$result = mysqli_query($conn, $query);
-$training_data = [];
-while ($row = mysqli_fetch_assoc($result)) {
-    $training_data[] = $row;
+// Handle edit data
+if (isset($_POST['edit_submit']) && isset($_POST['edit_id'])) {
+    $edit_id = (int)$_POST['edit_id'];
+    $serial_number = isset($_POST['serial_number']) ? (int)$_POST['serial_number'] : 0;
+    $training_date = isset($_POST['training_date']) ? $_POST['training_date'] : '';
+    $location = isset($_POST['location']) ? mysqli_real_escape_string($conn, $_POST['location']) : '';
+    $subject = isset($_POST['subject']) ? mysqli_real_escape_string($conn, $_POST['subject']) : '';
+    $display_order = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    if (empty($location) || empty($subject)) {
+        $error = 'Location dan Subject tidak boleh kosong';
+    } else {
+        $query = "UPDATE fire_safety_training SET serial_number=$serial_number, training_date='$training_date', location='$location', subject='$subject', display_order=$display_order, is_active=$is_active WHERE id=$edit_id";
+        if (mysqli_query($conn, $query)) {
+            $success = 'Data berhasil diperbarui';
+        } else {
+            $error = 'Gagal memperbarui data: '.mysqli_error($conn);
+        }
+    }
 }
 
+// Handle delete data (soft delete)
+if (isset($_GET['delete_id'])) {
+    $delete_id = (int)$_GET['delete_id'];
+    if ($delete_id > 0) {
+        $query = "UPDATE fire_safety_training SET is_active=0 WHERE id=$delete_id";
+        if (mysqli_query($conn, $query)) {
+            $success = 'Data berhasil dihapus';
+        } else {
+            $error = 'Gagal menghapus data: '.mysqli_error($conn);
+        }
+    }
+}
+
+// Ambil data untuk list
+$list = array();
+$result = mysqli_query($conn, "SELECT * FROM fire_safety_training WHERE is_active = 1 ORDER BY display_order ASC, training_date DESC");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $list[] = $row;
+    }
+}
+
+$page_title = 'Fire Safety Training';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fire Safety Training</title>
+    <title><?php echo $page_title; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0A4D9E',
-                        accent: '#EF4444',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @keyframes notifSlideIn {
-            0% { opacity: 0; transform: translateY(-30px) scale(0.95); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes notifFadeOut {
-            to { opacity: 0; transform: translateY(-10px) scale(0.98); }
-        }
-        .notif-animate-in { animation: notifSlideIn 0.5s cubic-bezier(.4,0,.2,1); }
-        .notif-animate-out { animation: notifFadeOut 0.5s cubic-bezier(.4,0,.2,1) forwards; }
-    </style>
 </head>
-<body>
-
-<div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
-    <div class="p-6 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                <i class="fas fa-chalkboard-teacher text-yellow-600 mr-3"></i>
-                Fire Safety Training
-            </h2>
-            <?php if ($action == 'create' || $action == 'edit'): ?>
-                <a href="training.php" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali
-                </a>
-            <?php else: ?>
-                <a href="training.php?action=create" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                    <i class="fas fa-plus mr-1"></i> Add New
-                </a>
-            <?php endif; ?>
+<body class="bg-gray-100">
+<div class="min-h-screen p-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-3">
+                <div class="bg-red-500 p-2 rounded-lg">
+                    <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">Fire Safety Training</h1>
+            </div>
+            <button onclick="document.getElementById('modalAdd').classList.remove('hidden')" 
+                class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded transition duration-200 flex items-center gap-2 shadow-sm">
+                <i class="fas fa-plus"></i>
+                <span>Tambah Data</span>
+            </button>
         </div>
-    </div>
-    <div class="p-6">
-        <?php if ($error): ?>
-            <div id="errorNotifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-red-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(239,68,68,0.15);">
-                <div class="flex-shrink-0">
-                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
-                        <i class="fas fa-exclamation text-red-600"></i>
-                    </span>
-                </div>
-                <div class="flex-1 text-red-800 font-semibold text-sm">
-                    <?= $error ?>
-                </div>
-                <button onclick="closeErrorNotif()" class="ml-2 text-red-400 hover:text-red-700 focus:outline-none">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <script>
-            function closeErrorNotif() {
-                var notif = document.getElementById('errorNotifBox');
-                if (notif) {
-                    notif.classList.remove('notif-animate-in');
-                    notif.classList.add('notif-animate-out');
-                    setTimeout(function(){ notif.remove(); }, 500);
-                }
-            }
-            setTimeout(closeErrorNotif, 5000);
-            </script>
-        <?php endif; ?>
-        <?php if ($success): ?>
-            <div id="successNotifBox" class="fixed top-8 right-8 z-50 min-w-[260px] max-w-xs bg-white border border-green-400 shadow-2xl rounded-xl flex items-center px-5 py-4 gap-3 notif-animate-in" style="box-shadow:0 8px 32px 0 rgba(34,197,94,0.15);">
-                <div class="flex-shrink-0">
-                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
-                        <i class="fas fa-check text-green-600"></i>
-                    </span>
-                </div>
-                <div class="flex-1 text-green-800 font-semibold text-sm">
-                    <?= $success ?>
-                </div>
-                <button onclick="closeSuccessNotif()" class="ml-2 text-green-400 hover:text-green-700 focus:outline-none">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <script>
-            function closeSuccessNotif() {
-                var notif = document.getElementById('successNotifBox');
-                if (notif) {
-                    notif.classList.remove('notif-animate-in');
-                    notif.classList.add('notif-animate-out');
-                    setTimeout(function(){ notif.remove(); }, 500);
-                }
-            }
-            setTimeout(closeSuccessNotif, 5000);
-            </script>
-        <?php endif; ?>
-        <?php if ($action == 'create' || $action == 'edit'): ?>
-            <form method="POST" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="serial_number" class="block text-sm font-medium text-gray-700">Serial Number</label>
-                        <input type="number" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" id="serial_number" name="serial_number" value="<?= $action == 'edit' ? $data['serial_number'] : '' ?>" required min="1">
-                    </div>
-                    <div>
-                        <label for="training_date" class="block text-sm font-medium text-gray-700">Training Date</label>
-                        <input type="date" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" id="training_date" name="training_date" value="<?= $action == 'edit' ? $data['training_date'] : '' ?>" required>
-                    </div>
-                    <div>
-                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                        <input type="text" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" id="location" name="location" value="<?= $action == 'edit' ? htmlspecialchars($data['location']) : '' ?>" required>
-                    </div>
-                    <div>
-                        <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                        <input type="text" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" id="subject" name="subject" value="<?= $action == 'edit' ? htmlspecialchars($data['subject']) : '' ?>" required>
-                    </div>
-                    <div>
-                        <label for="display_order" class="block text-sm font-medium text-gray-700">Display Order</label>
-                        <input type="number" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500" id="display_order" name="display_order" value="<?= $action == 'edit' ? $data['display_order'] : '0' ?>" min="0">
-                    </div>
-                    <div class="flex items-center mt-6">
-                        <input class="h-4 w-4 text-yellow-500 focus:ring-yellow-500 border-gray-300 rounded" type="checkbox" id="is_active" name="is_active" <?= ($action == 'edit' && $data['is_active']) ? 'checked' : '' ?>>
-                        <label class="ml-2 block text-sm text-gray-700" for="is_active">Active</label>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
-                        <i class="fas fa-save mr-1"></i> Save
-                    </button>
-                    <a href="training.php" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold shadow transition-colors duration-200">
-                        <i class="fas fa-times mr-1"></i> Cancel
-                    </a>
-                </div>
-            </form>
-        <?php else: ?>
+        <?php if ($error) { ?>
+            <div class="bg-red-100 border border-red-200 text-red-700 p-3 rounded-md mb-4 text-sm"> <?php echo $error; ?> </div>
+        <?php } ?>
+        <?php if ($success) { ?>
+            <div class="bg-green-100 border border-green-200 text-green-700 p-3 rounded-md mb-4 text-sm"> <?php echo $success; ?> </div>
+        <?php } ?>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="overflow-x-auto">
-                <table class="min-w-full table-auto">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">S/No</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Date</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Location</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Subject</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left">Display Order</th>
-                            <th class="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">Actions</th>
+                <table class="w-full table-fixed">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="w-10 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">No</th>
+                            <th class="w-20 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Serial</th>
+                            <th class="w-24 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Training Date</th>
+                            <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Location</th>
+                            <th class="w-32 py-3 px-2 text-left text-[11px] font-semibold text-gray-600">Subject</th>
+                            <th class="w-12 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Order</th>
+                            <th class="w-24 py-3 px-2 text-center text-[11px] font-semibold text-gray-600">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        <?php if (empty($training_data)): ?>
-                            <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                                    <i class="fas fa-inbox text-4xl mb-2"></i>
-                                    <p>No training data available</p>
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($training_data as $item): ?>
-                                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $item['serial_number'] ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?= date('d-M-y', strtotime($item['training_date'])) ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['location']) ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($item['subject']) ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?= $item['display_order'] ?></td>
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center space-x-2">
-                                            <a href="training.php?action=edit&id=<?= $item['id'] ?>" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
-                                                <i class="fas fa-edit mr-1"></i> Edit
-                                            </a>
-                                            <a href="training.php?action=delete&id=<?= $item['id'] ?>" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200" onclick="return confirm('Are you sure you want to delete this item?')">
-                                                <i class="fas fa-trash mr-1"></i> Delete
-                                            </a>
+                    <tbody>
+                        <?php $no=1; foreach ($list as $row) { ?>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['training_date']; ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['location']); ?>"><?php echo htmlspecialchars($row['location']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['subject']); ?>"><?php echo htmlspecialchars($row['subject']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
+                            <td class="py-2 px-2 text-center flex justify-center space-x-1">
+                                <button onclick="document.getElementById('modalEdit<?php echo $row['id']; ?>').classList.remove('hidden')" 
+                                    class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-edit text-[11px]"></i>
+                                </button>
+                                <a href="?delete_id=<?php echo $row['id']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="p-1 text-gray-500 hover:text-red-500 transition-colors">
+                                    <i class="fas fa-trash text-[11px]"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Modal Edit -->
+                        <div id="modalEdit<?php echo $row['id']; ?>" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-hidden h-full w-full z-50">
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] shadow-xl rounded-lg bg-white">
+                                <form method="POST">
+                                    <input type="hidden" name="edit_id" value="<?php echo $row['id']; ?>">
+                                    <div class="flex justify-between items-center border-b border-gray-200 p-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="bg-red-500 p-2 rounded">
+                                                <i class="fas fa-edit text-white text-sm"></i>
+                                            </div>
+                                            <h3 class="text-lg font-semibold text-gray-800">Edit Data</h3>
                                         </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" 
+                                            class="text-gray-400 hover:text-gray-500 transition-colors">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="p-6">
+                                        <label class="block text-gray-600 text-sm mb-2">Serial Number</label>
+                                        <input type="number" name="serial_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['serial_number']; ?>" required>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Training Date</label>
+                                        <input type="date" name="training_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['training_date']; ?>">
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
+                                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['location']); ?>" required>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Subject</label>
+                                        <input type="text" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['subject']); ?>" required>
+                                        <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
+                                        <input type="number" name="display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['display_order']; ?>">
+                                        <div class="mt-4 flex items-center">
+                                            <input type="checkbox" name="is_active" class="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500" <?php echo ($row['is_active'] ? 'checked' : ''); ?>>
+                                            <label class="ml-2 block text-sm text-gray-600">Set sebagai data aktif</label>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3">
+                                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Batal</button>
+                                        <button type="submit" name="edit_submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"><i class="fas fa-save mr-2"></i>Simpan Perubahan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+<?php } ?>
                     </tbody>
                 </table>
             </div>
-        <?php endif; ?>
+        </div>
+        <!-- Modal Add -->
+        <div id="modalAdd" class="hidden fixed inset-0 bg-black bg-opacity-50 overflow-hidden h-full w-full z-50">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] shadow-xl rounded-lg bg-white">
+                <form method="POST">
+                    <div class="flex justify-between items-center border-b border-gray-200 p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-red-500 p-2 rounded">
+                                <i class="fas fa-plus text-white text-sm"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Tambah Data</h3>
+                        </div>
+                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 transition-colors"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-gray-600 text-sm mb-2">Serial Number</label>
+                        <input type="number" name="serial_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Training Date</label>
+                        <input type="date" name="training_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm">
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
+                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Subject</label>
+                        <input type="text" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required>
+                        <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
+                        <input type="number" name="display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="0">
+                        <div class="mt-4 flex items-center">
+                            <input type="checkbox" name="is_active" class="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500" checked>
+                            <label class="ml-2 block text-sm text-gray-600">Set sebagai data aktif</label>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end space-x-3">
+                        <button type="button" onclick="this.closest('.fixed').classList.add('hidden')" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Batal</button>
+                        <button type="submit" name="add_submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"><i class="fas fa-save mr-2"></i>Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 </body>

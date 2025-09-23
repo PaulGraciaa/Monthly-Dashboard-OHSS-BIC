@@ -58,7 +58,7 @@ if (!function_exists('sanitize')) {
         <div class="max-w-7xl mx-auto px-4 py-1">
             <nav class="flex space-x-4">
                 <a href="../dashboard.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-chart-line mr-1"></i> Dashboard
+                        <i class="fas fa-home"></i> Dashboard
                 </a>
                 <a href="performance.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                     <i class="fas fa-chart-line mr-1"></i> Performance
@@ -86,6 +86,9 @@ if (!function_exists('sanitize')) {
                 </a>
                 <a href="drills.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                     <i class="fas fa-running mr-1"></i> Drills
+                </a>
+                <a href="training.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-chalkboard-teacher mr-1"></i> Training
                 </a>
             </nav>
         </div>
