@@ -36,7 +36,6 @@ INSERT INTO `surveillance_improvements_progress` (`project_title`, `description`
 ('Expand Cameras at Commercial Area (Panasera Area)', '', 'In Progress', 'Cumulative: 40%<br>Increase this month: 0%'),
 ('Upgrading Surveillance System at CCTV Room OPS', 'Was installed server rack, waiting other part and equipment', 'In Progress', 'Cumulative: 70%<br>Increase this month: 20%');
 
--- Tabel untuk CCTV System
 CREATE TABLE IF NOT EXISTS `surveillance_cctv_system` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `category` varchar(255) NOT NULL,
@@ -47,6 +46,15 @@ CREATE TABLE IF NOT EXISTS `surveillance_cctv_system` (
   `notes` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabel untuk distribusi peta CCTV (Surveillance Distribution Map)
+CREATE TABLE IF NOT EXISTS `surveillance_distribution_map` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `image` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -42,9 +42,9 @@ $securityPatrolData = $stmt->fetchAll();
 $stmt = $pdo->query("SELECT * FROM surveillance_qr_scanned ORDER BY id ASC");
 $qrScannedData = $stmt->fetchAll();
 
-// Ambil data Road Map CCTV & Surveillance Mapping
-$stmt = $pdo->query("SELECT * FROM surveillance_roadmap_mapping ORDER BY id ASC");
-$roadmapMappingData = $stmt->fetchAll();
+// Ambil data Distribution Map dari surveillance_distribution_map
+$stmt = $pdo->query("SELECT * FROM surveillance_distribution_map ORDER BY id DESC LIMIT 1");
+$distributionMapData = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -534,16 +534,33 @@ $roadmapMappingData = $stmt->fetchAll();
     <div class="overflow-x-auto page-break-before mt-8">
       <h2 class="text-lg font-bold mb-2">6. Road Map CCTV & Surveillance Mapping(CCTV Monitoring)</h2>
       <div class="w-full flex flex-col items-center">
-        <img src="img/Map.png" alt="Road Map CCTV Batamindo" class="w-full h-auto rounded-lg border-2 border-gray-400 shadow-lg mb-2" style="max-width:100%; min-width:0;">
+        <?php if (!empty($distributionMapData) && !empty($distributionMapData[0]['image'])): ?>
+          <img src="<?php echo htmlspecialchars($distributionMapData[0]['image']); ?>" 
+               alt="Distribution Map" 
+               class="w-full h-auto rounded-lg border-2 border-gray-400 shadow-lg mb-2" 
+               style="max-width:100%; min-width:0;">
+        <?php else: ?>
+          <span class="text-gray-400 italic">Tidak ada gambar peta distribusi</span>
+        <?php endif; ?>
         <span class="text-xs text-gray-600 mt-2 text-center block w-full">Peta lokasi dan distribusi CCTV di Batamindo Industrial Park</span>
-      </div>
+        </div>
     </div>
     <div class="overflow-x-auto mt-8 print-keep-together">
       <div class="print-keep-together grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6 rounded-2xl shadow-2xl border border-gray-200 print:grid-cols-2 print:gap-4">
-        <?php foreach ($roadmapMappingData as $row): ?>
+        <?php 
+        // Get all roadmap images
+        $stmt = $pdo->query("SELECT * FROM surveillance_roadmap_mapping ORDER BY id DESC");
+        $allMaps = $stmt->fetchAll();
+        foreach ($allMaps as $row): 
+        ?>
         <div class="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-2 print:break-inside-avoid">
           <?php if (!empty($row['image'])): ?>
-            <img src="<?php echo htmlspecialchars($row['image']); ?>" alt="Roadmap Image" class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
+            <img src="<?php echo htmlspecialchars($row['image']); ?>" 
+                 alt="<?php echo htmlspecialchars($row['title']); ?>" 
+                 class="w-full max-w-xs h-auto rounded-lg border mb-2 print:max-w-full print:h-auto">
+            <?php if(isset($_SESSION['debug'])): ?>
+              <div class="text-xs text-gray-500">Debug: Image path = <?php echo htmlspecialchars($row['image']); ?></div>
+            <?php endif; ?>
           <?php else: ?>
             <span class="text-gray-400 italic">Tidak ada gambar</span>
           <?php endif; ?>

@@ -140,7 +140,7 @@ if (isset($_SESSION['admin_name'])) {
                 </a>
 
                 <!-- Surveillance Management Module -->
-                <a href="surveillance/index.php" class="module-card group block bg-white rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <a href="surveillance/overall_performance.php" class="module-card group block bg-white rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
                     <div class="flex items-center space-x-4">
                         <div class="p-4 rounded-xl bg-green-100 text-green-600 shadow-sm group-hover:shadow group-hover:bg-green-200 transition-all duration-300">
                             <i class="fas fa-video text-2xl"></i>
@@ -154,7 +154,7 @@ if (isset($_SESSION['admin_name'])) {
                 </a>
 
                 <!-- Fire Safety Management Module -->
-                <a href="firesafety/index.php" class="module-card group block bg-white rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <a href="firesafety/emergency.php" class="module-card group block bg-white rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300 border border-gray-100">
                     <div class="flex items-center space-x-4">
                         <div class="p-4 rounded-xl bg-orange-100 text-orange-600 shadow-sm group-hover:shadow group-hover:bg-orange-200 transition-all duration-300">
                             <i class="fas fa-fire-extinguisher text-2xl"></i>

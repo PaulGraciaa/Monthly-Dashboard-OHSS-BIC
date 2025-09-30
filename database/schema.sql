@@ -50,7 +50,6 @@ CREATE TABLE kpi_lagging (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Tabel Dashboard Statistics
 CREATE TABLE dashboard_stats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     stat_name VARCHAR(100) NOT NULL,
@@ -58,9 +57,6 @@ CREATE TABLE dashboard_stats (
     stat_description TEXT,
     stat_icon VARCHAR(50),
     display_order INT DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabel News/Announcements
