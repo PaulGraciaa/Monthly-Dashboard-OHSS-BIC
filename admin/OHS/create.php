@@ -3,10 +3,16 @@ require_once __DIR__ . '/../auth.php';
 require_once __DIR__ . '/../../config/database.php';
 requireAdminLogin();
 
+if (!function_exists('sanitize')) {
+  function sanitize($data) {
+    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES);
+  }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
   $incident_date = isset($_POST['incident_date']) ? $_POST['incident_date'] : date('Y-m-d');
-  $incident_time = isset($_POST['incident_time']) ? $_POST['incident_time'] : null;
+  $incident_time = isset($_POST['incident_time']) ? $_POST['incident_time'] : NULL;
   $who_name = sanitize(isset($_POST['who_name']) ? $_POST['who_name'] : '');
   $who_npk = sanitize(isset($_POST['who_npk']) ? $_POST['who_npk'] : '');
   $summary = isset($_POST['summary']) ? $_POST['summary'] : '';
@@ -21,20 +27,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $map_image_path = '';
   $upload_dir = __DIR__ . '/../../uploads/ohs/';
   if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
+  // Validasi file photo
   if (isset($_FILES['photo_image']) && $_FILES['photo_image']['error'] == 0) {
-    $ext = pathinfo($_FILES['photo_image']['name'], PATHINFO_EXTENSION);
-    $filename = 'evidence_' . time() . '_' . rand(1000,9999) . '.' . $ext;
-    $path = $upload_dir . $filename;
-    if (move_uploaded_file($_FILES['photo_image']['tmp_name'], $path)) {
-      $photo_image_path = 'uploads/ohs/' . $filename;
+    $allowedTypes = array('image/jpeg', 'image/png', 'image/gif');
+    $fileType = function_exists('mime_content_type') ? mime_content_type($_FILES['photo_image']['tmp_name']) : $_FILES['photo_image']['type'];
+    $validType = false;
+    foreach ($allowedTypes as $type) {
+      if ($fileType == $type) { $validType = true; break; }
+    }
+    if ($validType && $_FILES['photo_image']['size'] <= 5242880) {
+      $ext = pathinfo($_FILES['photo_image']['name'], PATHINFO_EXTENSION);
+      $filename = 'evidence_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+      $path = $upload_dir . $filename;
+      if (move_uploaded_file($_FILES['photo_image']['tmp_name'], $path)) {
+        $photo_image_path = 'uploads/ohs/' . $filename;
+      }
     }
   }
+  // Validasi file map
   if (isset($_FILES['map_image']) && $_FILES['map_image']['error'] == 0) {
-    $ext = pathinfo($_FILES['map_image']['name'], PATHINFO_EXTENSION);
-    $filename = 'map_' . time() . '_' . rand(1000,9999) . '.' . $ext;
-    $path = $upload_dir . $filename;
-    if (move_uploaded_file($_FILES['map_image']['tmp_name'], $path)) {
-      $map_image_path = 'uploads/ohs/' . $filename;
+    $allowedTypes = array('image/jpeg', 'image/png', 'image/gif');
+    $fileType = function_exists('mime_content_type') ? mime_content_type($_FILES['map_image']['tmp_name']) : $_FILES['map_image']['type'];
+    $validType = false;
+    foreach ($allowedTypes as $type) {
+      if ($fileType == $type) { $validType = true; break; }
+    }
+    if ($validType && $_FILES['map_image']['size'] <= 5242880) {
+      $ext = pathinfo($_FILES['map_image']['name'], PATHINFO_EXTENSION);
+      $filename = 'map_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+      $path = $upload_dir . $filename;
+      if (move_uploaded_file($_FILES['map_image']['tmp_name'], $path)) {
+        $map_image_path = 'uploads/ohs/' . $filename;
+      }
     }
   }
 

@@ -112,10 +112,10 @@ $page_title = 'Fire Safety Repair Impairment';
         </div>
         
         <?php if ($error) { ?>
-            <div class="alert alert-danger"><?php echo $error; ?></div>
+            <div class="alert alert-danger"><?php echo htmlspecialchars($error, ENT_QUOTES); ?></div>
         <?php } ?>
         <?php if ($success) { ?>
-            <div class="alert alert-success"><?php echo $success; ?></div>
+            <div class="alert alert-success"><?php echo htmlspecialchars($success, ENT_QUOTES); ?></div>
         <?php } ?>
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -143,7 +143,7 @@ $page_title = 'Fire Safety Repair Impairment';
                         ?>
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['category']); ?>"><?php echo htmlspecialchars($row['category']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?></td>
                             <?php foreach ($months as $m) { ?>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row[$m.'_count']; ?></td>
                             <?php } ?>
@@ -188,7 +188,7 @@ $page_title = 'Fire Safety Repair Impairment';
                                                 <label class="block text-gray-600 text-sm mb-2">Category</label>
                                                 <input type="text" name="category" 
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" 
-                                                    value="<?php echo htmlspecialchars($row['category']); ?>" required>
+                                                    value="<?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?>" required>
                                             </div>
                                             <div class="col-span-4">
                                                 <label class="block text-gray-600 text-sm mb-2">Year</label>

@@ -6,7 +6,7 @@ requireAdminLogin();
 // Function sanitize jika belum ada
 if (!function_exists('sanitize')) {
     function sanitize($data) {
-        return htmlspecialchars(strip_tags(trim($data)));
+        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES);
     }
 }
 
@@ -20,17 +20,17 @@ $row = $stmt->fetch();
 if (!$row) { header('Location: index.php'); exit; }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
-  $incident_date = isset($_POST['incident_date']) ? $_POST['incident_date'] : date('Y-m-d');
-  $incident_time = isset($_POST['incident_time']) ? $_POST['incident_time'] : null;
-  $who_name = sanitize(isset($_POST['who_name']) ? $_POST['who_name'] : '');
-  $who_npk = sanitize(isset($_POST['who_npk']) ? $_POST['who_npk'] : '');
-  $summary = isset($_POST['summary']) ? $_POST['summary'] : '';
-  $result = isset($_POST['result']) ? $_POST['result'] : '';
-  $root_causes = isset($_POST['root_causes']) ? $_POST['root_causes'] : '';
-  $key_takeaways = isset($_POST['key_takeaways']) ? $_POST['key_takeaways'] : '';
-  $corrective_actions = isset($_POST['corrective_actions']) ? $_POST['corrective_actions'] : '';
-  $status = isset($_POST['status']) ? $_POST['status'] : 'published';
+    $title = sanitize(isset($_POST['title']) ? $_POST['title'] : '');
+    $incident_date = isset($_POST['incident_date']) ? $_POST['incident_date'] : date('Y-m-d');
+    $incident_time = isset($_POST['incident_time']) ? $_POST['incident_time'] : NULL;
+    $who_name = sanitize(isset($_POST['who_name']) ? $_POST['who_name'] : '');
+    $who_npk = sanitize(isset($_POST['who_npk']) ? $_POST['who_npk'] : '');
+    $summary = isset($_POST['summary']) ? $_POST['summary'] : '';
+    $result = isset($_POST['result']) ? $_POST['result'] : '';
+    $root_causes = isset($_POST['root_causes']) ? $_POST['root_causes'] : '';
+    $key_takeaways = isset($_POST['key_takeaways']) ? $_POST['key_takeaways'] : '';
+    $corrective_actions = isset($_POST['corrective_actions']) ? $_POST['corrective_actions'] : '';
+    $status = isset($_POST['status']) ? $_POST['status'] : 'published';
 
   // Gunakan path gambar yang sudah ada sebagai default
   $photo_image_path = isset($row['photo_image_path']) ? $row['photo_image_path'] : '';
@@ -43,56 +43,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // Fungsi untuk memproses upload file dengan validasi
   function processFileUpload($fileKey, $uploadDir, $currentPath) {
-    if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] == 0) {
-      // Validasi tipe file
-      $allowedTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
-      $fileType = mime_content_type($_FILES[$fileKey]['tmp_name']);
-      
-      if (!in_array($fileType, $allowedTypes)) {
-        return array('success' => false, 'path' => $currentPath, 'error' => 'Jenis file tidak diizinkan');
-      }
-      
-      // Validasi ukuran file (maksimal 5MB)
-      if ($_FILES[$fileKey]['size'] > 5 * 1024 * 1024) {
-        return array('success' => false, 'path' => $currentPath, 'error' => 'Ukuran file terlalu besar (maksimal 5MB)');
-      }
-      
-      $ext = pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION);
-      $filename = $fileKey . '_' . time() . '_' . rand(1000,9999) . '.' . $ext;
-      $path = $uploadDir . $filename;
-      
-      if (move_uploaded_file($_FILES[$fileKey]['tmp_name'], $path)) {
-        // Hapus file lama jika ada dan bukan file default
-        if (!empty($currentPath) && file_exists(__DIR__ . '/../../' . $currentPath)) {
-          @unlink(__DIR__ . '/../../' . $currentPath);
+        if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] == 0) {
+            // Validasi tipe file
+            $allowedTypes = array('image/jpeg', 'image/png', 'image/gif');
+            if (function_exists('mime_content_type')) {
+                $fileType = mime_content_type($_FILES[$fileKey]['tmp_name']);
+            } else {
+                $fileType = $_FILES[$fileKey]['type'];
+            }
+            $validType = false;
+            foreach ($allowedTypes as $type) {
+                if ($fileType == $type) {
+                    $validType = true;
+                    break;
+                }
+            }
+            if (!$validType) {
+                return array('success' => false, 'path' => $currentPath, 'error' => 'Jenis file tidak diizinkan');
+            }
+            // Validasi ukuran file (maksimal 5MB)
+            if ($_FILES[$fileKey]['size'] > 5242880) {
+                return array('success' => false, 'path' => $currentPath, 'error' => 'Ukuran file terlalu besar (maksimal 5MB)');
+            }
+            $ext = pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION);
+            $filename = $fileKey . '_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+            $path = $uploadDir . $filename;
+            if (move_uploaded_file($_FILES[$fileKey]['tmp_name'], $path)) {
+                if (!empty($currentPath) && file_exists(__DIR__ . '/../../' . $currentPath)) {
+                    @unlink(__DIR__ . '/../../' . $currentPath);
+                }
+                return array('success' => true, 'path' => 'uploads/ohs/' . $filename);
+            }
         }
-        return array('success' => true, 'path' => 'uploads/ohs/' . $filename);
-      }
+    return array('success' => true, 'path' => $currentPath);
+  }
+
+    // Proses upload untuk photo_image
+    $photoResult = processFileUpload('photo_image', $upload_dir, $photo_image_path);
+    if (!$photoResult['success']) {
+        die($photoResult['error']);
     }
-    return array('success' => true, 'path' => $currentPath); // Tidak ada file yang diupload, gunakan yang lama
-  }
+    // Validasi folder evidence photo
+    if (strpos($photoResult['path'], 'uploads/ohs/') !== 0 && !empty($photoResult['path'])) {
+        die('File evidence photo harus masuk ke folder uploads/ohs/');
+    }
+    $photo_image_path = $photoResult['path'];
 
-  // Proses upload untuk photo_image
-  $photoResult = processFileUpload('photo_image', $upload_dir, $photo_image_path);
-  if (!$photoResult['success']) {
-    // Handle error upload photo
-    die($photoResult['error']);
-  }
-  $photo_image_path = $photoResult['path'];
+    // Proses upload untuk map_image
+    $mapResult = processFileUpload('map_image', $upload_dir, $map_image_path);
+    if (!$mapResult['success']) {
+        die($mapResult['error']);
+    }
+    // Validasi folder map image
+    if (strpos($mapResult['path'], 'uploads/ohs/') !== 0 && !empty($mapResult['path'])) {
+        die('File map harus masuk ke folder uploads/ohs/');
+    }
+    $map_image_path = $mapResult['path'];
 
-  // Proses upload untuk map_image
-  $mapResult = processFileUpload('map_image', $upload_dir, $map_image_path);
-  if (!$mapResult['success']) {
-    // Handle error upload map
-    die($mapResult['error']);
-  }
-  $map_image_path = $mapResult['path'];
+    $stmt = $pdo->prepare('UPDATE ohs_incidents SET title=?, incident_date=?, incident_time=?, who_name=?, who_npk=?, summary=?, result=?, root_causes=?, key_takeaways=?, corrective_actions=?, map_image_path=?, photo_image_path=?, status=?, updated_at=NOW() WHERE id=?');
+    $stmt->execute(array($title, $incident_date, $incident_time, $who_name, $who_npk, $summary, $result, $root_causes, $key_takeaways, $corrective_actions, $map_image_path, $photo_image_path, $status, $id));
 
-  $stmt = $pdo->prepare('UPDATE ohs_incidents SET title=?, incident_date=?, incident_time=?, who_name=?, who_npk=?, summary=?, result=?, root_causes=?, key_takeaways=?, corrective_actions=?, map_image_path=?, photo_image_path=?, status=?, updated_at=NOW() WHERE id=?');
-  $stmt->execute(array($title, $incident_date, $incident_time, $who_name, $who_npk, $summary, $result, $root_causes, $key_takeaways, $corrective_actions, $map_image_path, $photo_image_path, $status, $id));
-
-  header('Location: index.php');
-  exit;
+        header('Location: index.php');
+        exit;
 }
 ?>
 <!DOCTYPE html>
@@ -307,5 +319,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </form>
     </main>
+<script>
+// Drag and drop & show filename for photo and map evidence
+document.addEventListener('DOMContentLoaded', function() {
+    function showFileName(input, labelId) {
+        var label = document.getElementById(labelId);
+        if (input.files && input.files.length > 0) {
+            label.textContent = input.files[0].name;
+        } else {
+            label.textContent = '';
+        }
+    }
+
+    // Photo evidence
+    var photoDropArea = document.querySelector('input#photo-image').closest('.border-dashed');
+    var photoInput = document.getElementById('photo-image');
+    var photoFileLabel = document.createElement('div');
+    photoFileLabel.id = 'photo-file-label';
+    photoFileLabel.className = 'text-xs text-blue-700 mt-2';
+    photoDropArea.appendChild(photoFileLabel);
+    if (photoDropArea && photoInput) {
+        photoInput.addEventListener('change', function() {
+            showFileName(photoInput, 'photo-file-label');
+        });
+        photoDropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            photoDropArea.classList.add('bg-blue-50');
+        });
+        photoDropArea.addEventListener('dragleave', function(e) {
+            photoDropArea.classList.remove('bg-blue-50');
+        });
+        photoDropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            photoDropArea.classList.remove('bg-blue-50');
+            if (e.dataTransfer.files.length > 0) {
+                photoInput.files = e.dataTransfer.files;
+                showFileName(photoInput, 'photo-file-label');
+            }
+        });
+    }
+
+    // Map evidence
+    var mapDropArea = document.querySelector('input#map-image').closest('.border-dashed');
+    var mapInput = document.getElementById('map-image');
+    var mapFileLabel = document.createElement('div');
+    mapFileLabel.id = 'map-file-label';
+    mapFileLabel.className = 'text-xs text-blue-700 mt-2';
+    mapDropArea.appendChild(mapFileLabel);
+    if (mapDropArea && mapInput) {
+        mapInput.addEventListener('change', function() {
+            showFileName(mapInput, 'map-file-label');
+        });
+        mapDropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            mapDropArea.classList.add('bg-blue-50');
+        });
+        mapDropArea.addEventListener('dragleave', function(e) {
+            mapDropArea.classList.remove('bg-blue-50');
+        });
+        mapDropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            mapDropArea.classList.remove('bg-blue-50');
+            if (e.dataTransfer.files.length > 0) {
+                mapInput.files = e.dataTransfer.files;
+                showFileName(mapInput, 'map-file-label');
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>

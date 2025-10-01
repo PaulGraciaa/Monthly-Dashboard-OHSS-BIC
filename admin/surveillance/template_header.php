@@ -86,11 +86,13 @@ if (!function_exists('sanitize')) {
                     <a href="roadmap_mapping.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                         <i class="fas fa-map mr-1"></i> Roadmap Mapping
                     </a>
+                        <a href="distribution.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-truck mr-1"></i> Distribution
+                        </a>
                 </nav>
             </div>
         </div>
     </div>
-
     <div class="container mx-auto px-4 py-8">
         <?php if (!isset($_SESSION)) { session_start(); } ?>
         <?php if (!empty($_SESSION['notif'])): ?>

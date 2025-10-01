@@ -224,9 +224,9 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
 
   <!-- Main Content -->
   <main class="main-content flex-1 fadein show">
-    <div class="container mx-auto px-4 max-w-7xl">
+  <div class="container mx-auto px-2 sm:px-4 max-w-full">
       <!-- KPI Cards (horizontal, lebih kecil) -->
-      <div class="flex flex-row gap-3 mb-3">
+  <div class="flex flex-col sm:flex-row gap-3 mb-3">
         <?php if (!empty($stats)): ?>
           <?php foreach ($stats as $stat): ?>
           <div class="bg-white p-2 rounded-xl text-center flex-1 flex flex-col justify-center items-center min-w-[70px] h-20">
@@ -242,9 +242,9 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
       </div>
       
       <!-- KPI, Chart, Golden Rules dalam satu grid utama -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 my-1 items-stretch">
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 my-1 items-stretch">
         <!-- Kolom 1: KPI (diperpanjang) -->
-        <div class="lg:col-span-6 bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
+  <div class="lg:col-span-6 bg-white p-4 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
           <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
             <i class="fas fa-chart-bar text-sm text-primary-blue"></i>
             <h3 class="font-bold text-xs mb-0.5 text-primary-blue">KPI OHSS</h3>
@@ -269,7 +269,7 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
         </div>
         
         <!-- Kolom 2: Life Saving Rules (diperkecil) -->
-        <div class="lg:col-span-3 bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
+  <div class="lg:col-span-3 bg-white p-4 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card min-h-[320px]">
           <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
             <i class="fas fa-shield-alt text-sm text-primary-blue"></i>
             <h3 class="font-bold text-xs mb-0.5 text-primary-blue"><strong>Life Saving Rules & BASCOM</strong></h3>
@@ -331,7 +331,7 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
         </div>
         
         <!-- Kolom 3: Performance dan News (Kanan) -->
-        <div class="lg:col-span-3 flex flex-col gap-3 h-full">
+  <div class="lg:col-span-3 flex flex-col gap-3 h-full min-h-[320px]">
           <!-- Performance -->
           <div class="bg-white p-2 rounded-xl shadow-md border border-blue-100 flex flex-col kpi-card flex-1">
             <div class="flex items-center gap-2 mb-2 border-b border-blue-100 pb-1">
@@ -377,14 +377,14 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
 
       <!-- Activities Carousel - Improved Version -->
       <section class="mb-1">
-        <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 overflow-hidden p-3">
+  <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 overflow-x-auto p-2 sm:p-4">
           <div class="flex items-center justify-center mb-3">
             <h3 class="text-lg font-bold text-primary-blue tracking-wide"><strong>Activities of the Month</strong></h3>
           </div>
             <?php if (!empty($activities)): ?>
-              <div class="flex gap-6 overflow-x-hidden py-3 px-2 activities-auto-scroll">
+              <div class="flex gap-4 sm:gap-6 overflow-x-auto py-3 px-1 sm:px-2 activities-auto-scroll">
                 <?php foreach ($activities as $activity): ?>
-                <div class="min-w-[300px] max-w-xs flex-shrink-0">
+                <div class="min-w-[220px] sm:min-w-[300px] max-w-xs flex-shrink-0">
                   <div class="relative h-56 w-full rounded-2xl overflow-hidden shadow-xl group border border-gray-200">
                     <img src="<?php echo $activity['image_path']; ?>" alt="<?php echo htmlspecialchars($activity['title']); ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -397,7 +397,7 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
                 <?php endforeach; ?>
                 <!-- Duplikat konten agar looping seamless -->
                 <?php foreach ($activities as $activity): ?>
-                <div class="min-w-[300px] max-w-xs flex-shrink-0">
+                <div class="min-w-[220px] sm:min-w-[300px] max-w-xs flex-shrink-0">
                   <div class="relative h-56 w-full rounded-2xl overflow-hidden shadow-xl group border border-gray-200">
                     <img src="<?php echo $activity['image_path']; ?>" alt="<?php echo htmlspecialchars($activity['title']); ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

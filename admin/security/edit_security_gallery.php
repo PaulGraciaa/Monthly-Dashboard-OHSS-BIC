@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <?php if ($error): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            <?php echo $error; ?>
+                            <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
                         </div>
                     <?php endif; ?>
 
@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Judul Foto <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" name="title" required 
-                                       value="<?php echo htmlspecialchars($gallery['title']); ?>"
+                                       value="<?php echo htmlspecialchars($gallery['title'], ENT_QUOTES); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: Patroli Siang Hari">
                             </div>
@@ -190,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </label>
                                 <textarea name="description" rows="3"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                                          placeholder="Deskripsi singkat tentang foto ini"><?php echo htmlspecialchars($gallery['description']); ?></textarea>
+                                          placeholder="Deskripsi singkat tentang foto ini"><?php echo htmlspecialchars($gallery['description'], ENT_QUOTES); ?></textarea>
                             </div>
 
                             <!-- Current Photo -->
@@ -199,11 +199,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Foto Saat Ini
                                 </label>
                                 <div class="flex items-center space-x-4">
-                                    <img src="../<?php echo htmlspecialchars($gallery['photo_path']); ?>" 
-                                         alt="<?php echo htmlspecialchars(isset($gallery['photo_alt']) ? $gallery['photo_alt'] : $gallery['title']); ?>" 
+                             <img src="../<?php echo htmlspecialchars($gallery['photo_path'], ENT_QUOTES); ?>" 
+                                 alt="<?php echo htmlspecialchars(isset($gallery['photo_alt']) ? $gallery['photo_alt'] : $gallery['title'], ENT_QUOTES); ?>" 
                                          class="w-32 h-32 object-cover rounded border">
                                     <div>
-                                        <p class="text-sm text-gray-600"><?php echo htmlspecialchars(isset($gallery['photo_alt']) ? $gallery['photo_alt'] : 'Tidak ada deskripsi'); ?></p>
+                                        <p class="text-sm text-gray-600"><?php echo htmlspecialchars(isset($gallery['photo_alt']) ? $gallery['photo_alt'] : 'Tidak ada deskripsi', ENT_QUOTES); ?></p>
                                         <p class="text-xs text-gray-500 mt-1">Kategori: <?php echo ucfirst($gallery['category']); ?></p>
                                     </div>
                                 </div>
@@ -225,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Teks Alternatif Foto
                                 </label>
                                 <input type="text" name="photo_alt"
-                                       value="<?php echo htmlspecialchars($gallery['photo_alt']); ?>"
+                                       value="<?php echo htmlspecialchars($gallery['photo_alt'], ENT_QUOTES); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Deskripsi foto untuk aksesibilitas">
                             </div>

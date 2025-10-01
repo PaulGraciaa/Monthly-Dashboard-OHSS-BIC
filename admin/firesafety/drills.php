@@ -159,9 +159,9 @@ if ($result) {
                                     <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
                                     <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $item['serial_number']; ?></td>
                                     <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo date('d-M-y', strtotime($item['drill_date'])); ?></td>
-                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['location']); ?>"><?php echo htmlspecialchars($item['location']); ?></td>
-                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['subject']); ?>"><?php echo htmlspecialchars($item['subject']); ?></td>
-                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['drill_type']); ?>"><?php echo htmlspecialchars($item['drill_type']); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['location'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($item['location'], ENT_QUOTES); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['subject'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($item['subject'], ENT_QUOTES); ?></td>
+                                    <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($item['drill_type'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($item['drill_type'], ENT_QUOTES); ?></td>
                                     <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $item['display_order']; ?></td>
                                     <td class="py-2 px-2 text-center flex justify-center space-x-1">
                                         <button onclick="openModal('edit', <?php echo $item['id']; ?>)" class="p-1 text-gray-500 hover:text-red-500 transition-colors">

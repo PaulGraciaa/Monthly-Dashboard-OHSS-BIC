@@ -126,22 +126,22 @@ $page_title = 'Emergency Details';
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo date('d-M-y', strtotime($row['incident_date'])); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['category']); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['sub_category']); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['location']); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['description']); ?>"><?php echo htmlspecialchars($row['description']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['sub_category'], ENT_QUOTES); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
                             <td class="py-2 px-2 text-center flex justify-center space-x-1">
-                                <button class="p-1 text-gray-500 hover:text-red-500 transition-colors"
-                                        data-id="<?php echo $row['id']; ?>"
-                                        data-serial_number="<?php echo $row['serial_number']; ?>"
-                                        data-incident_date="<?php echo $row['incident_date']; ?>"
-                                        data-category="<?php echo htmlspecialchars($row['category']); ?>"
-                                        data-sub_category="<?php echo htmlspecialchars($row['sub_category']); ?>"
-                                        data-location="<?php echo htmlspecialchars($row['location']); ?>"
-                                        data-description="<?php echo htmlspecialchars($row['description']); ?>"
-                                        data-display_order="<?php echo $row['display_order']; ?>"
-                                        data-is_active="<?php echo $row['is_active']; ?>">
+                <button class="p-1 text-gray-500 hover:text-red-500 transition-colors"
+                    data-id="<?php echo $row['id']; ?>"
+                    data-serial_number="<?php echo $row['serial_number']; ?>"
+                    data-incident_date="<?php echo $row['incident_date']; ?>"
+                    data-category="<?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?>"
+                    data-sub_category="<?php echo htmlspecialchars($row['sub_category'], ENT_QUOTES); ?>"
+                    data-location="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>"
+                    data-description="<?php echo htmlspecialchars($row['description'], ENT_QUOTES); ?>"
+                    data-display_order="<?php echo $row['display_order']; ?>"
+                    data-is_active="<?php echo $row['is_active']; ?>">
                                     <i class="fas fa-edit text-[11px]"></i>
                                 </button>
                                 <a href="details.php?delete=<?php echo $row['id']; ?>" onclick="return confirm('Yakin hapus data ini?')" class="p-1 text-gray-500 hover:text-red-500 transition-colors">

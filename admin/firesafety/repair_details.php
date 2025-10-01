@@ -124,9 +124,9 @@ $page_title = 'Fire Safety Repair Details';
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['repair_date']; ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['project_name']); ?>"><?php echo htmlspecialchars($row['project_name']); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['location']); ?>"><?php echo htmlspecialchars($row['location']); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['status']); ?>"><?php echo htmlspecialchars($row['status']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['project_name'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['project_name'], ENT_QUOTES); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['status'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['status'], ENT_QUOTES); ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
                             <td class="py-2 px-2 text-center flex justify-center space-x-1">
                                 <button onclick="document.getElementById('modalEdit<?php echo $row['id']; ?>').classList.remove('hidden')" 
@@ -162,11 +162,11 @@ $page_title = 'Fire Safety Repair Details';
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Repair Date</label>
                                         <input type="date" name="repair_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['repair_date']; ?>">
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Project Name</label>
-                                        <input type="text" name="project_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['project_name']); ?>" required>
+                                        <input type="text" name="project_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['project_name'], ENT_QUOTES); ?>" required>
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
-                                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['location']); ?>" required>
+                                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>" required>
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Status</label>
-                                        <textarea name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required><?php echo htmlspecialchars($row['status']); ?></textarea>
+                                        <textarea name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" required><?php echo htmlspecialchars($row['status'], ENT_QUOTES); ?></textarea>
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
                                         <input type="number" name="display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['display_order']; ?>">
                                         <div class="mt-4 flex items-center">

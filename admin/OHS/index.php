@@ -5,7 +5,7 @@ requireAdminLogin();
 
 // Fungsi sanitize untuk keamanan input
 function sanitize($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
+  return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES);
 }
 
 // Handle delete incident
@@ -94,17 +94,17 @@ if ($view === 'ptw') {
     $records = $stmt->fetchAll();
 
     // Calculate totals
-    $totals = array(
-        'num_ptw' => 0,
-        'general' => 0,
-        'hot_work' => 0,
-        'lifting' => 0,
-        'excavation' => 0,
-        'electrical' => 0,
-        'work_high' => 0,
-        'radiography' => 0,
-        'manpower' => 0
-    );
+  $totals = array(
+    'num_ptw' => 0,
+    'general' => 0,
+    'hot_work' => 0,
+    'lifting' => 0,
+    'excavation' => 0,
+    'electrical' => 0,
+    'work_high' => 0,
+    'radiography' => 0,
+    'manpower' => 0
+  );
     
     foreach ($records as $r) {
         $totals['num_ptw'] += (int)$r['num_ptw'];

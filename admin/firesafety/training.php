@@ -121,8 +121,8 @@ $page_title = 'Fire Safety Training';
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['training_date']; ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['location']); ?>"><?php echo htmlspecialchars($row['location']); ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['subject']); ?>"><?php echo htmlspecialchars($row['subject']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['subject'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['subject'], ENT_QUOTES); ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
                             <td class="py-2 px-2 text-center flex justify-center space-x-1">
                                 <button onclick="document.getElementById('modalEdit<?php echo $row['id']; ?>').classList.remove('hidden')" 
@@ -158,9 +158,9 @@ $page_title = 'Fire Safety Training';
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Training Date</label>
                                         <input type="date" name="training_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['training_date']; ?>">
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Location</label>
-                                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['location']); ?>" required>
+                                        <input type="text" name="location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>" required>
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Subject</label>
-                                        <input type="text" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['subject']); ?>" required>
+                                        <input type="text" name="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo htmlspecialchars($row['subject'], ENT_QUOTES); ?>" required>
                                         <label class="block text-gray-600 text-sm mb-2 mt-4">Display Order</label>
                                         <input type="number" name="display_order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" value="<?php echo $row['display_order']; ?>">
                                         <div class="mt-4 flex items-center">

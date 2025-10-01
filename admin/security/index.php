@@ -58,7 +58,9 @@ requireAdminLogin();
             }
             
             document.getElementById(tab).classList.add('active');
-            var indexMap = { personnel: 0, gallery: 1 };
+            var indexMap = {};
+            indexMap['personnel'] = 0;
+            indexMap['gallery'] = 1;
             var buttons = document.querySelectorAll('.tab-btn');
             var idx = indexMap[tab];
             if (buttons[idx]) buttons[idx].classList.add('active');

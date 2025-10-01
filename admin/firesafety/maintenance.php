@@ -97,12 +97,12 @@ if ($result) {
             </div>
             <?php if (!empty($error)): ?>
             <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800">
-                <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars((string)$error); ?>
+                <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars((string)$error, ENT_QUOTES); ?>
             </div>
             <?php endif; ?>
             <?php if (!empty($success)): ?>
             <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-green-50 border-green-200 text-green-800">
-                <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars((string)$success); ?>
+                <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars((string)$success, ENT_QUOTES); ?>
             </div>
             <?php endif; ?>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -130,14 +130,14 @@ if ($result) {
                             <tr class="border-b border-gray-100 hover:bg-gray-50">
                                 <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['serial_number']; ?></td>
                                 <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['maintenance_date']; ?></td>
-                                <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['location']); ?></td>
+                                <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?></td>
                                 <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
                                 <td class="py-2 px-2 text-center flex justify-center space-x-1">
                                     <button onclick="openModal('edit', this.dataset)"
                                             data-id="<?php echo $row['id']; ?>"
                                             data-serial_number="<?php echo $row['serial_number']; ?>"
                                             data-maintenance_date="<?php echo $row['maintenance_date']; ?>"
-                                            data-location="<?php echo htmlspecialchars($row['location']); ?>"
+                                            data-location="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>"
                                             data-display_order="<?php echo $row['display_order']; ?>"
                                             class="p-1 text-gray-500 hover:text-red-500 transition-colors">
                                         <i class="fas fa-edit text-[11px]"></i>

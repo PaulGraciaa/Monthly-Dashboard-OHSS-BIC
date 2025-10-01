@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     $form_action = isset($_POST['action']) ? $_POST['action'] : 'add';
     $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-    $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-    $month_values = [];
+    $months = array('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec');
+    $month_values = array();
     foreach ($months as $m) {
         $key = $m . '_value';
         $month_values[$key] = isset($_POST[$key]) ? (int)$_POST[$key] : 0;
@@ -134,7 +134,7 @@ $page_title = 'Emergency Activation';
                         <?php $grand_total = 0; foreach (["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"] as $m) { $grand_total += (int)$row[$m.'_value']; } ?>
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="py-2 px-2 text-[11px] text-gray-700 text-center"><?php echo $row['id']; ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['category']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?></td>
                             <?php foreach (["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"] as $m): ?>
                             <td class="py-2 px-2 text-[11px] text-gray-700 text-center"><?php echo $row[$m.'_value']; ?></td>
                             <?php endforeach; ?>

@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <?php if ($error): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            <?php echo $error; ?>
+                            <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
                         </div>
                     <?php endif; ?>
 
@@ -128,8 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Jabatan <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text" name="position" required 
-                                       value="<?php echo htmlspecialchars($personnel['position']); ?>"
+                    <input type="text" name="position" required 
+                        value="<?php echo htmlspecialchars($personnel['position'], ENT_QUOTES); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Contoh: Executive, Inspector, dll">
                             </div>
@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </label>
                                 <textarea name="personnel_names" rows="4"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                                          placeholder="Masukkan nama-nama personel (satu nama per baris)"><?php echo htmlspecialchars($personnel['personnel_names']); ?></textarea>
+                                          placeholder="Masukkan nama-nama personel (satu nama per baris)"><?php echo htmlspecialchars($personnel['personnel_names'], ENT_QUOTES); ?></textarea>
                             </div>
 
                             <!-- Description -->
@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </label>
                                 <textarea name="description" rows="3"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                                          placeholder="Deskripsi singkat tentang jabatan ini"><?php echo htmlspecialchars($personnel['description']); ?></textarea>
+                                          placeholder="Deskripsi singkat tentang jabatan ini"><?php echo htmlspecialchars($personnel['description'], ENT_QUOTES); ?></textarea>
                             </div>
 
                             <!-- Current Photo -->
@@ -183,11 +183,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     Foto Saat Ini
                                 </label>
                                 <div class="flex items-center space-x-4">
-                                    <img src="../<?php echo htmlspecialchars($personnel['photo_path']); ?>" 
-                                         alt="<?php echo htmlspecialchars(isset($personnel['photo_alt']) ? $personnel['photo_alt'] : 'Security Photo'); ?>" 
+                             <img src="../<?php echo htmlspecialchars($personnel['photo_path'], ENT_QUOTES); ?>" 
+                                 alt="<?php echo htmlspecialchars(isset($personnel['photo_alt']) ? $personnel['photo_alt'] : 'Security Photo', ENT_QUOTES); ?>" 
                                          class="w-24 h-24 object-cover rounded border">
                                     <div>
-                                        <p class="text-sm text-gray-600"><?php echo htmlspecialchars(isset($personnel['photo_alt']) ? $personnel['photo_alt'] : 'Tidak ada deskripsi'); ?></p>
+                                        <p class="text-sm text-gray-600"><?php echo htmlspecialchars(isset($personnel['photo_alt']) ? $personnel['photo_alt'] : 'Tidak ada deskripsi', ENT_QUOTES); ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -208,8 +208,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Teks Alternatif Foto
                                 </label>
-                                <input type="text" name="photo_alt"
-                                       value="<?php echo htmlspecialchars($personnel['photo_alt']); ?>"
+                    <input type="text" name="photo_alt"
+                        value="<?php echo htmlspecialchars($personnel['photo_alt'], ENT_QUOTES); ?>"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-blue"
                                        placeholder="Deskripsi foto untuk aksesibilitas">
                             </div>

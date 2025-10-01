@@ -47,7 +47,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'edit' && isset($_POST['id'])
     $Feb = isset($_POST['Feb']) ? (int)$_POST['Feb'] : 0;
     $Mar = isset($_POST['Mar']) ? (int)$_POST['Mar'] : 0;
     $Apr = isset($_POST['Apr']) ? (int)$_POST['Apr'] : 0;
-    $May = isset($_POST['May']) ? (int)$_Post['May'] : 0;
+    $May = isset($_POST['May']) ? (int)$_POST['May'] : 0;
     $Jun = isset($_POST['Jun']) ? (int)$_POST['Jun'] : 0;
     $Jul = isset($_POST['Jul']) ? (int)$_POST['Jul'] : 0;
     $Aug = isset($_POST['Aug']) ? (int)$_POST['Aug'] : 0;
@@ -121,12 +121,12 @@ if ($result) {
         </div>
         <?php if (!empty($error)): ?>
         <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars($error); ?>
+            <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
         </div>
         <?php endif; ?>
         <?php if (!empty($success)): ?>
         <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-green-50 border-green-200 text-green-800">
-            <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars($success); ?>
+            <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars($success, ENT_QUOTES); ?>
         </div>
         <?php endif; ?>
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -156,7 +156,7 @@ if ($result) {
                         <?php foreach ($enforcement as $row): ?>
                         <?php $total = $row['Jan'] + $row['Feb'] + $row['Mar'] + $row['Apr'] + $row['May'] + $row['Jun'] + $row['Jul'] + $row['Aug'] + $row['Sep'] + $row['Oct'] + $row['Nov'] + $row['Dec']; ?>
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['category']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $row['year']; ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
                             <?php foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m): ?>
@@ -166,7 +166,7 @@ if ($result) {
                             <td class="py-2 px-2 text-center flex justify-center space-x-1">
                                 <button onclick="openModal('edit', this.dataset)"
                                         data-id="<?php echo $row['id']; ?>"
-                                        data-category="<?php echo htmlspecialchars($row['category']); ?>"
+                                        data-category="<?php echo htmlspecialchars($row['category'], ENT_QUOTES); ?>"
                                         data-year="<?php echo $row['year']; ?>"
                                         data-display_order="<?php echo $row['display_order']; ?>"
                                         <?php foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m): ?>

@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <?php if ($error): ?>
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                            <?php echo $error; ?>
+                            <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
                         </div>
                     <?php endif; ?>
 

@@ -101,12 +101,12 @@ $page_title = 'Fire Safety Performance';
         </div>
         <?php if ($error): ?>
         <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-red-50 border-red-200 text-red-800">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?php echo $error; ?>
+            <i class="fas fa-exclamation-circle mr-2"></i> <?php echo htmlspecialchars($error, ENT_QUOTES); ?>
         </div>
         <?php endif; ?>
         <?php if ($success): ?>
         <div class="mb-4 px-6 py-4 rounded-lg shadow-md border bg-green-50 border-green-200 text-green-800">
-            <i class="fas fa-check-circle mr-2"></i> <?php echo $success; ?>
+            <i class="fas fa-check-circle mr-2"></i> <?php echo htmlspecialchars($success, ENT_QUOTES); ?>
         </div>
         <?php endif; ?>
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -132,12 +132,12 @@ $page_title = 'Fire Safety Performance';
                         <?php foreach ($data as $i => $row): ?>
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $i + 1; ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['summary_text']); ?>"><?php echo htmlspecialchars($row['summary_text']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 truncate" title="<?php echo htmlspecialchars($row['summary_text'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['summary_text'], ENT_QUOTES); ?></td>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row['display_order']; ?></td>
                             <td class="py-2 px-2 text-center flex justify-center space-x-1">
                                 <button onclick="openModal('edit', this.dataset)"
                                         data-id="<?php echo $row['id']; ?>"
-                                        data-summary_text="<?php echo htmlspecialchars($row['summary_text']); ?>"
+                                        data-summary_text="<?php echo htmlspecialchars($row['summary_text'], ENT_QUOTES); ?>"
                                         data-display_order="<?php echo $row['display_order']; ?>"
                                         data-is_active="<?php echo $row['is_active']; ?>"
                                         class="p-1 text-gray-500 hover:text-red-500 transition-colors">

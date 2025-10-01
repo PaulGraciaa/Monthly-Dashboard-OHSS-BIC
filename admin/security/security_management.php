@@ -114,17 +114,17 @@ $gallery = $stmt->fetchAll();
                             <?php foreach ($personnel as $index => $item): ?>
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="px-4 py-3"><?php echo $index + 1; ?></td>
-                                <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($item['position']); ?></td>
+                                <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($item['position'], ENT_QUOTES); ?></td>
                                 <td class="px-4 py-3"><?php echo $item['personnel_count']; ?> personel</td>
                                 <td class="px-4 py-3">
                                     <div class="max-w-xs">
-                                        <?php echo nl2br(htmlspecialchars($item['personnel_names'])); ?>
+                                        <?php echo nl2br(htmlspecialchars($item['personnel_names'], ENT_QUOTES)); ?>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <?php if ($item['photo_path']): ?>
-                                        <img src="../<?php echo htmlspecialchars($item['photo_path']); ?>" 
-                                             alt="<?php echo htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : 'Security Photo'); ?>" 
+                                        <img src="../<?php echo htmlspecialchars($item['photo_path'], ENT_QUOTES); ?>" 
+                                             alt="<?php echo htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : 'Security Photo', ENT_QUOTES); ?>" 
                                              class="w-16 h-16 object-cover rounded">
                                     <?php else: ?>
                                         <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
@@ -165,9 +165,9 @@ $gallery = $stmt->fetchAll();
                     <?php foreach ($gallery as $item): ?>
                     <div class="bg-gray-50 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
                         <div class="relative">
-                            <img src="../<?php echo htmlspecialchars($item['photo_path']); ?>" 
-                                 alt="<?php echo htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : $item['title']); ?>" 
-                                 class="w-full h-48 object-cover">
+                       <img src="../<?php echo htmlspecialchars($item['photo_path'], ENT_QUOTES); ?>" 
+                           alt="<?php echo htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : $item['title'], ENT_QUOTES); ?>" 
+                           class="w-full h-48 object-cover">
                             <div class="absolute top-2 right-2">
                                 <span class="bg-primary-blue text-white px-2 py-1 rounded text-xs">
                                     <?php echo ucfirst($item['category']); ?>
@@ -175,8 +175,8 @@ $gallery = $stmt->fetchAll();
                             </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-semibold text-gray-800 mb-2"><?php echo htmlspecialchars($item['title']); ?></h3>
-                            <p class="text-gray-600 text-sm mb-3"><?php echo htmlspecialchars($item['description']); ?></p>
+                            <h3 class="font-semibold text-gray-800 mb-2"><?php echo htmlspecialchars($item['title'], ENT_QUOTES); ?></h3>
+                            <p class="text-gray-600 text-sm mb-3"><?php echo htmlspecialchars($item['description'], ENT_QUOTES); ?></p>
                             <div class="flex space-x-2">
                                 <a href="edit_security_gallery.php?id=<?php echo $item['id']; ?>" 
                                    class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">

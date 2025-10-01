@@ -5,7 +5,7 @@ requireAdminLogin();
 
 if (!function_exists('sanitize')) {
     function sanitize($data) {
-        return htmlspecialchars(strip_tags(trim($data)));
+        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES);
     }
 }
 ?>

@@ -60,7 +60,7 @@ $months = array('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov
                     <?php $no=1; while($row = mysqli_fetch_assoc($result)): ?>
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="py-2 px-2 text-[11px] text-gray-700"><?php echo $no++; ?></td>
-                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['equipment_type']); ?>"><?php echo htmlspecialchars($row['equipment_type']); ?></td>
+                            <td class="py-2 px-2 text-[11px] text-gray-700 font-medium truncate" title="<?php echo htmlspecialchars($row['equipment_type'], ENT_QUOTES); ?>"><?php echo htmlspecialchars($row['equipment_type'], ENT_QUOTES); ?></td>
                             <?php $grand_total = 0; foreach($months as $m): $grand_total += $row[$m.'_count']; ?>
                             <td class="py-2 px-2 text-[11px] text-gray-600 text-center"><?php echo $row[$m.'_count']; ?></td>
                             <?php endforeach; ?>
@@ -102,7 +102,7 @@ $months = array('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov
                                                 <label class="block text-gray-600 text-sm mb-2">Equipment Type</label>
                                                 <input type="text" name="equipment_type" 
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-sm" 
-                                                    value="<?php echo htmlspecialchars($row['equipment_type']); ?>" required>
+                                                    value="<?php echo htmlspecialchars($row['equipment_type'], ENT_QUOTES); ?>" required>
                                             </div>
                                             <div class="col-span-4">
                                                 <label class="block text-gray-600 text-sm mb-2">Display Order</label>

@@ -81,7 +81,7 @@ $activities = array();
 $result = $mysqli->query("SELECT * FROM activities ORDER BY activity_date DESC");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
-        $activities[] = $row;
+    $activities[] = $row;
     }
 }
 ?>
@@ -285,10 +285,10 @@ if ($result) {
                           }
                           ?>
                           <img src="<?php echo $full_img_path; ?>" 
-                              alt="<?php echo htmlspecialchars($activity['title']); ?>" 
+                              alt="<?php echo htmlspecialchars($activity['title'], ENT_QUOTES); ?>" 
                               class="w-full h-48 object-cover transform hover:scale-105 transition-transform duration-500">
                                 <div class="absolute top-4 right-4 flex space-x-2">
-                                    <button type="button" onclick="openEditModal(<?php echo $activity['id']; ?>, '<?php echo htmlspecialchars(addslashes($activity['title'])); ?>', '<?php echo htmlspecialchars(addslashes($activity['description'])); ?>', '<?php echo $activity['activity_date']; ?>', '<?php echo htmlspecialchars(addslashes($activity['image_path'])); ?>')"
+                                    <button type="button" onclick="openEditModal(<?php echo $activity['id']; ?>, '<?php echo htmlspecialchars(addslashes($activity['title']), ENT_QUOTES); ?>', '<?php echo htmlspecialchars(addslashes($activity['description']), ENT_QUOTES); ?>', '<?php echo $activity['activity_date']; ?>', '<?php echo htmlspecialchars(addslashes($activity['image_path']), ENT_QUOTES); ?>')"
                                             class="bg-white text-red-600 p-2 rounded-lg shadow-md hover:shadow-lg hover:bg-red-50 transition-all duration-300">
                                         <i class="fas fa-edit"></i>
                                     </button>
@@ -305,15 +305,15 @@ if ($result) {
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-3">
                                     <h3 class="text-xl font-bold text-gray-800 truncate" 
-                                        title="<?php echo htmlspecialchars($activity['title']); ?>">
-                                        <?php echo htmlspecialchars($activity['title']); ?>
+                                        title="<?php echo htmlspecialchars($activity['title'], ENT_QUOTES); ?>">
+                                        <?php echo htmlspecialchars($activity['title'], ENT_QUOTES); ?>
                                     </h3>
                                     <span class="px-3 py-1 bg-red-50 text-red-600 rounded-full text-sm font-medium">
                                         <?php echo date('d M Y', strtotime($activity['activity_date'])); ?>
                                     </span>
                                 </div>
                                 <p class="text-gray-600 mb-4 line-clamp-3">
-                                    <?php echo nl2br(htmlspecialchars($activity['description'])); ?>
+                                    <?php echo nl2br(htmlspecialchars($activity['description'], ENT_QUOTES)); ?>
                                 </p>
                             </div>
                         </div>
