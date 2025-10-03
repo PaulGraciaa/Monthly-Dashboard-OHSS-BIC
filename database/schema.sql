@@ -136,9 +136,6 @@ CREATE TABLE security_personnel (
     position VARCHAR(100) NOT NULL,
     personnel_count INT DEFAULT 0,
     personnel_names TEXT,
-    photo_path VARCHAR(255),
-    photo_alt VARCHAR(255),
-    description TEXT,
     display_order INT DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_by INT,
@@ -151,10 +148,6 @@ CREATE TABLE security_personnel (
 CREATE TABLE security_gallery (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    description TEXT,
-    photo_path VARCHAR(255) NOT NULL,
-    photo_alt VARCHAR(255),
-    category VARCHAR(100) DEFAULT 'patrol',
     display_order INT DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_by INT,
@@ -556,3 +549,39 @@ INSERT INTO fire_safety_enforcement (category, `Jan`, `Feb`, `Mar`, `Apr`, `May`
 VALUES
 ('No of Premises', 9, 36, 25, 7, 5, 6, 0, 0, 0, 0, 0, 0, 2025, 1, 1),
 ('Non-Compliance Cases', 3, 5, 13, 1, 2, 3, 0, 0, 0, 0, 0, 0, 2025, 2, 1);
+
+-- Tabel Security Incidents
+CREATE TABLE IF NOT EXISTS security_incidents (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    incident_date DATE NOT NULL,
+    incident_time TIME,
+    who_name VARCHAR(100),
+    who_npk VARCHAR(50),
+    summary TEXT,
+    result TEXT,
+    root_causes TEXT,
+    key_takeaways TEXT,
+    corrective_actions TEXT,
+    map_image_path VARCHAR(255),
+    photo_image_path VARCHAR(255),
+    status ENUM('draft','published','archived') DEFAULT 'published',
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
+);
+
+-- Contoh data untuk security_incidents
+INSERT INTO security_incidents (
+    title, incident_date, incident_time, who_name, who_npk, summary, result, root_causes, key_takeaways, corrective_actions, map_image_path, photo_image_path, status
+) VALUES (
+    'Pencurian di Gudang A', '2025-07-10', '14:30:00',
+    'Petugas Keamanan 1', '12345',
+    'Terjadi pencurian di Gudang A. Beberapa barang elektronik hilang dicuri oleh oknum yang tidak bertanggung jawab.',
+    'Barang yang hilang berhasil dilacak dan ditemukan kembali. Pelaku pencurian telah ditangkap.',
+    '1. Sistem keamanan gudang yang kurang memadai.\n2. Tidak ada CCTV di area strategis.\n3. Kurangnya patroli di malam hari.',
+    '1. Meningkatkan sistem keamanan gudang dengan menambah jumlah CCTV dan penerangan yang cukup.\n2. Melakukan patroli rutin setiap malam oleh petugas keamanan.\n3. Segera memperbaiki kerusakan pada pintu dan jendela gudang.',
+    '✅ Penambahan CCTV di 5 titik strategis (Selesai)\n✅ Pemasangan lampu penerangan di sekitar gudang (Selesai)\n🕒 Jadwal patroli malam ditingkatkan frekuensinya (Dalam Proses)\n✅ Perbaikan pintu dan jendela gudang yang rusak (Selesai)',
+    NULL, NULL, 'published'
+);
