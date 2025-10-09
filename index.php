@@ -118,6 +118,26 @@
       transform: translateY(-5px);
       box-shadow: 0 12px 20px rgba(0,0,0,0.15);
     }
+    .activity-card,
+    [class*="min-w-"],
+    [class*="max-w-"] {
+      min-width: 220px;
+      max-width: 320px;
+      width: 90vw;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .activity-card img,
+    [class*="min-w-"] img,
+    [class*="max-w-"] img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 16px;
+      display: block;
+    }
   </style>
 </head>
 <body class="bg-background-color text-gray-800 font-sans min-h-screen flex flex-col">
@@ -377,12 +397,12 @@ $lsr_bascom = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC")->f
 
       <!-- Activities Carousel - Improved Version -->
       <section class="mb-1">
-  <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 overflow-x-auto p-2 sm:p-4">
+  <div class="relative w-full rounded-xl bg-white shadow-md border border-blue-100 p-2 sm:p-4">
           <div class="flex items-center justify-center mb-3">
             <h3 class="text-lg font-bold text-primary-blue tracking-wide"><strong>Activities of the Month</strong></h3>
           </div>
             <?php if (!empty($activities)): ?>
-              <div class="flex gap-4 sm:gap-6 overflow-x-auto py-3 px-1 sm:px-2 activities-auto-scroll">
+              <div class="flex gap-4 sm:gap-6 py-3 px-1 sm:px-2 activities-auto-scroll">
                 <?php foreach ($activities as $activity): ?>
                 <div class="min-w-[220px] sm:min-w-[300px] max-w-xs flex-shrink-0">
                   <div class="relative h-56 w-full rounded-2xl overflow-hidden shadow-xl group border border-gray-200">

@@ -9,18 +9,6 @@ $personnel = $stmt->fetchAll();
 $stmt = $pdo->query("SELECT * FROM security_gallery WHERE is_active = 1 ORDER BY display_order, id");
 $gallery = $stmt->fetchAll();
 ?>
-
-<?php
-require_once 'config/database.php';
-
-// Get security personnel data
-$stmt = $pdo->query("SELECT * FROM security_personnel WHERE is_active = 1 ORDER BY display_order, id");
-$personnel = $stmt->fetchAll();
-
-// Get security gallery data
-$stmt = $pdo->query("SELECT * FROM security_gallery WHERE is_active = 1 ORDER BY display_order, id");
-$gallery = $stmt->fetchAll();
-?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

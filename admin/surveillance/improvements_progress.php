@@ -155,7 +155,7 @@ if ($result) {
                 </div>
                 
                 <div class="flex space-x-4">
-                    <button type="submit" class="bg-header-footer-bg hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium">
                         <i class="fas <?php echo $edit_data ? 'fa-save' : 'fa-plus'; ?> mr-2"></i>
                         <?php echo $edit_data ? 'Update' : 'Tambah'; ?>
                     </button>

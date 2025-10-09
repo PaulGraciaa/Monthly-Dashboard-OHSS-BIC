@@ -1,12 +1,14 @@
 <?php
+// session_start() akan dipanggil di setiap file utama (personnel.php, gallery.php, dll)
+// Ini adalah praktik yang lebih baik untuk memastikannya dipanggil di awal.
 require_once '../auth.php';
 require_once '../../config/database.php';
 requireAdminLogin();
 
-// Fungsi sanitasi sederhana
+// Fungsi sanitasi sederhana akan digunakan dari sini
 if (!function_exists('sanitize')) {
     function sanitize($data) {
-        return htmlspecialchars(strip_tags(trim($data)));
+        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
     }
 }
 ?>
@@ -15,7 +17,7 @@ if (!function_exists('sanitize')) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title : 'Security Management'; ?> - OHSS</title>
+    <title><?php echo isset($page_title) ? sanitize($page_title) : 'Security Management'; ?> - OHSS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -32,17 +34,15 @@ if (!function_exists('sanitize')) {
     </script>
 </head>
 <body class="bg-gray-100 font-sans">
-    <!-- Red Header Section (Security) -->
     <div class="bg-gradient-to-r from-red-600 to-red-800">
-        <header class="text-white py-4">
+        <header class="text-white py-2">
             <div class="max-w-7xl mx-auto px-4">
-                <!-- Company Header -->
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center space-x-4">
-                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-12 w-auto bg-white p-1 rounded">
+                        <img src="../../img/batamindo.png" alt="Batamindo" class="h-10 w-auto bg-white p-1 rounded">
                         <div>
-                            <h1 class="text-2xl font-bold text-white">Batamindo Industrial Park</h1>
-                            <p class="text-red-200">OHS Security System Management</p>
+                            <h1 class="text-xl font-bold text-white leading-tight">Batamindo Industrial Park</h1>
+                            <p class="text-red-200 text-sm leading-tight">OHS Security System Management</p>
                         </div>
                     </div>
                     <div class="hidden md:flex items-center space-x-3">
@@ -50,7 +50,7 @@ if (!function_exists('sanitize')) {
                             <p class="text-sm text-white">Welcome, Admin</p>
                             <p class="text-xs text-red-200"><?php echo date('l, d F Y'); ?></p>
                         </div>
-                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150">
+                        <a href="../logout.php" class="bg-white hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150">
                             <i class="fas fa-sign-out-alt mr-1"></i> Logout
                         </a>
                     </div>
@@ -58,27 +58,27 @@ if (!function_exists('sanitize')) {
             </div>
         </header>
 
-        <!-- Navigation -->
         <div class="border-t border-red-500/30">
-            <div class="max-w-7xl mx-auto px-4 py-2">
-                <nav class="flex space-x-4">
-                    <a href="../dashboard.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+            <div class="max-w-7xl mx-auto px-4 py-1">
+                <nav class="flex space-x-2">
+                    <a href="../dashboard.php" class="text-red-100 hover:text-white px-2.5 py-1.5 rounded-md text-sm font-medium">
                         <i class="fas fa-chart-line mr-1"></i> Dashboard
                     </a>
-                    <a href="gallery.php" class="text-white bg-red-700/80 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="gallery.php" class="text-red-100 hover:text-white px-2.5 py-1.5 rounded-md text-sm font-medium">
                         <i class="fas fa-images mr-1"></i> Security Gallery
                     </a>
-                    <a href="personnel.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="personnel.php" class="text-red-100 hover:text-white px-2.5 py-1.5 rounded-md text-sm font-medium">
                         <i class="fas fa-users mr-1"></i> Personnel
                     </a>
-                    <a href="incident_lesson.php" class="text-red-100 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="incident_lesson.php" class="text-red-100 hover:text-white px-2.5 py-1.5 rounded-md text-sm font-medium">
                         <i class="fas fa-book mr-1"></i> Incident & Lessons
+                    </a>
                 </nav>
             </div>
         </div>
     </div>
-    <div class="container mx-auto px-4 py-8">
-        <?php if (!isset($_SESSION)) { session_start(); } ?>
+    <div class="container mx-auto px-4 py-6">
+        <?php // Menghapus 'if (!isset($_SESSION)) { session_start(); }' dari sini. ?>
         <?php if (!empty($_SESSION['notif'])): ?>
         <style>
         @keyframes notifSlideIn {
