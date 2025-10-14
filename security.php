@@ -8,6 +8,10 @@ $personnel = $stmt->fetchAll();
 // Get security gallery data
 $stmt = $pdo->query("SELECT * FROM security_gallery WHERE is_active = 1 ORDER BY display_order, id");
 $gallery = $stmt->fetchAll();
+
+// Get incident lesson data
+$stmt = $pdo->query("SELECT * FROM security_incidents ORDER BY incident_date DESC, id DESC");
+$incidents = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -327,6 +331,90 @@ $gallery = $stmt->fetchAll();
         </tbody>
       </table>
     </div>
+    <!-- INCIDENT LESSON SECTION -->
+    <div class="max-w-6xl mx-auto px-4 mt-10 mb-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">INCIDENT & ACCIDENT REPORT & SHARING LESSON LEARNT (if any)</h2>
+      <?php if (!empty($incidents)): ?>
+        <?php foreach ($incidents as $incident): ?>
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            <div>
+              <?php if (!empty($incident['photo_image_path'])): ?>
+                <div class="mb-3">
+                  <img src="<?= htmlspecialchars($incident['photo_image_path']) ?>" alt="Evidence Photo" class="w-full h-56 object-cover rounded-lg border shadow mb-2" />
+                  <div class="text-xs text-gray-500 text-center">Evidence Photo</div>
+                </div>
+              <?php endif; ?>
+              <?php if (!empty($incident['map_image_path'])): ?>
+                <div class="mb-3">
+                  <img src="<?= htmlspecialchars($incident['map_image_path']) ?>" alt="Incident Map" class="w-full h-40 object-cover rounded-lg border shadow mb-2" />
+                  <div class="text-xs text-gray-500 text-center">Incident Map</div>
+                </div>
+              <?php endif; ?>
+            </div>
+            <div>
+              <div class="font-bold text-lg mb-2">Lesson Learned: <?= htmlspecialchars(isset($incident['title']) && $incident['title'] ? $incident['title'] : '-') ?></div>
+              <div class="italic text-sm text-gray-600 mb-2">Date: <?= isset($incident['incident_date']) && $incident['incident_date'] ? date('d F Y', strtotime($incident['incident_date'])) : '-' ?><?php if (!empty($incident['incident_time'])): ?> | Time: <?= htmlspecialchars($incident['incident_time']) ?> WIB<?php endif; ?></div>
+              <div class="mb-2">
+                <span class="font-semibold">Incident Summary:</span>
+                <ul class="list-disc ml-6 text-sm">
+                  <li><b>Who:</b>
+                    <?php
+                      $who_name = isset($incident['who_name']) ? trim($incident['who_name']) : '';
+                      $who_npk = isset($incident['who_npk']) ? trim($incident['who_npk']) : '';
+                      if ($who_name && $who_npk) {
+                        echo htmlspecialchars($who_name) . ' (NPK: ' . htmlspecialchars($who_npk) . ')';
+                      } elseif ($who_name) {
+                        echo htmlspecialchars($who_name);
+                      } elseif ($who_npk) {
+                        echo 'npk: ' . htmlspecialchars($who_npk);
+                      } else {
+                        echo '-';
+                      }
+                    ?>
+                  </li>
+                  <li><b>Summary:</b> <?= htmlspecialchars(isset($incident['summary']) ? $incident['summary'] : '-') ?></li>
+                  <li><b>Result:</b> <?= htmlspecialchars(isset($incident['result']) ? $incident['result'] : '-') ?></li>
+                </ul>
+              </div>
+              <?php if (!empty($incident['root_causes'])): ?>
+              <div class="mb-2">
+                <span class="font-semibold">Root Causes:</span>
+                <ul class="list-decimal ml-6 text-sm">
+                  <?php foreach (explode("\n", $incident['root_causes']) as $cause): ?>
+                  <li><?= htmlspecialchars(trim($cause)) ?></li>
+                  <?php endforeach; ?>
+                </ul>
+              </div>
+              <?php endif; ?>
+              <?php if (!empty($incident['key_takeaways'])): ?>
+              <div class="mb-2">
+                <span class="font-semibold">Key Takeaways:</span>
+                <ul class="list-disc ml-6 text-sm">
+                  <?php foreach (explode("\n", $incident['key_takeaways']) as $take): ?>
+                  <li><?= htmlspecialchars(trim($take)) ?></li>
+                  <?php endforeach; ?>
+                </ul>
+              </div>
+              <?php endif; ?>
+            </div>
+          </div>
+          <?php if (!empty($incident['corrective_actions'])): ?>
+          <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+            <span class="font-semibold text-blue-900 mb-2 block"><i class="fas fa-check-circle text-green-500 mr-1"></i>Corrective Actions:</span>
+            <ul class="ml-6 text-sm">
+              <?php foreach (explode("\n", $incident['corrective_actions']) as $action): ?>
+              <li><?= htmlspecialchars(trim($action)) ?></li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+          <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+      <div class="text-gray-400 text-center py-6">Tidak ada incident lesson yang tercatat.</div>
+      <?php endif; ?>
+    </div>
   </main>
 
 <!-- Galeri Patroli BBT Tower -->
@@ -336,11 +424,19 @@ $gallery = $stmt->fetchAll();
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
     <?php foreach ($gallery as $item): ?>
     <div class="relative bg-white rounded-lg shadow overflow-hidden flex items-center justify-center gallery-fadein">
-      <img src="<?= htmlspecialchars($item['photo_path']) ?>" 
-           alt="<?= htmlspecialchars(isset($item['photo_alt']) ? $item['photo_alt'] : $item['title']) ?>" 
+      <?php $photo_path = isset($item['photo_path']) && $item['photo_path'] ? $item['photo_path'] : 'img/no-image.png'; ?>
+      <img src="<?= htmlspecialchars($photo_path) ?>" 
+           alt="<?= htmlspecialchars((isset($item['photo_alt']) && $item['photo_alt']) ? $item['photo_alt'] : (isset($item['title']) ? $item['title'] : '')) ?>" 
            class="object-cover w-full h-48 gallery-photo">
       <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2">
-        <?= htmlspecialchars($item['description']) ?>
+        <?php
+          $galleryTitle = isset($item['title']) && $item['title'] ? $item['title'] : '';
+          $galleryDesc = isset($item['description']) && $item['description'] ? $item['description'] : '';
+          echo htmlspecialchars($galleryTitle);
+          if ($galleryDesc) {
+            echo ' - ' . htmlspecialchars($galleryDesc);
+          }
+        ?>
       </div>
     </div>
     <?php endforeach; ?>

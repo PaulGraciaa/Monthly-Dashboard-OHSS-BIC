@@ -1,16 +1,16 @@
 <?php
-// session_start() akan dipanggil di setiap file utama (personnel.php, gallery.php, dll)
-// Ini adalah praktik yang lebih baik untuk memastikannya dipanggil di awal.
-require_once '../auth.php';
-require_once '../../config/database.php';
-requireAdminLogin();
-
-// Fungsi sanitasi sederhana akan digunakan dari sini
-if (!function_exists('sanitize')) {
-    function sanitize($data) {
-        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
-    }
+// Pastikan session sudah dimulai di file utama
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
+
+// Cek jika sudah di-include di file yang sudah memanggil auth.php
+if (!function_exists('requireAdminLogin')) {
+    require_once '../auth.php';
+    require_once '../../config/database.php';
+    requireAdminLogin();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -78,7 +78,6 @@ if (!function_exists('sanitize')) {
         </div>
     </div>
     <div class="container mx-auto px-4 py-6">
-        <?php // Menghapus 'if (!isset($_SESSION)) { session_start(); }' dari sini. ?>
         <?php if (!empty($_SESSION['notif'])): ?>
         <style>
         @keyframes notifSlideIn {

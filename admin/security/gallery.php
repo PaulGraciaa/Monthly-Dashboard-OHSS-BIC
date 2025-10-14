@@ -1,10 +1,15 @@
 <?php
-session_start(); // Mulai sesi di baris pertama
+session_start();
 require_once '../auth.php';
 require_once '../../config/database.php';
 requireAdminLogin();
 
-// CRUD baru untuk gallery
+// Fungsi sanitasi
+function sanitize($data) {
+    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
+}
+
+// CRUD untuk gallery
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
@@ -16,11 +21,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Upload foto baru jika ada
         if (isset($_FILES['photo_file']) && $_FILES['photo_file']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = '../../uploads/security/';
-            if (!is_dir($uploadDir)) { mkdir($uploadDir, 0777, true); }
+            if (!is_dir($uploadDir)) { 
+                mkdir($uploadDir, 0777, true); 
+            }
+            
+            // Validasi tipe file
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            $fileType = mime_content_type($_FILES['photo_file']['tmp_name']);
+            
+            if (!in_array($fileType, $allowedTypes)) {
+                $_SESSION['error'] = "Invalid file type. Only JPG, PNG and GIF are allowed.";
+                header("Location: gallery.php");
+                exit();
+            }
+
             $filename = uniqid('gallery_', true) . '_' . basename($_FILES['photo_file']['name']);
             $targetPath = $uploadDir . $filename;
+            
             if (move_uploaded_file($_FILES['photo_file']['tmp_name'], $targetPath)) {
                 $photo_path = 'uploads/security/' . $filename;
+            } else {
+                $_SESSION['error'] = "Failed to upload file.";
+                header("Location: gallery.php");
+                exit();
             }
         }
 
@@ -69,20 +92,27 @@ require_once 'template_header.php';
                 </button>
             </div>
             
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span><?php echo $_SESSION['error']; ?></span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.style.display='none'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 <?php foreach ($gallery as $item): ?>
                 <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group relative">
                     <div class="relative h-72 flex items-center justify-center bg-gray-100 overflow-hidden">
-                        <?php if (!empty($item['photo_path']) && file_exists('../../' . $item['photo_path'])): ?>
-                            <img src="<?php echo '../../' . sanitize($item['photo_path']); ?>" 
-                                alt="<?php echo sanitize($item['title']); ?>" 
-                                class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105">
-                        <?php else: ?>
-                            <div class="text-gray-400 text-center p-4">
-                                <i class="fas fa-image text-4xl mb-2"></i>
-                                <p>Image not found</p>
-                            </div>
-                        <?php endif; ?>
+                        <img src="<?php echo '../../' . sanitize($item['photo_path']); ?>"
+                             alt="<?php echo sanitize($item['title']); ?>"
+                             class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                             onerror="this.onerror=null;this.src='../../img/no-image.png';">
                         <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <div class="flex gap-3">
                                 <button onclick="openModal('edit', <?php echo htmlspecialchars(json_encode($item), ENT_QUOTES, 'UTF-8'); ?>)" 
@@ -194,6 +224,14 @@ require_once 'template_header.php';
             const photoInput = document.getElementById('photoFileInput');
             
             function openModal(type, data) {
+                // Helper: enable/disable all form fields
+                function setFormFieldsDisabled(disabled) {
+                    const fields = form.querySelectorAll('input, textarea, select');
+                    fields.forEach(f => {
+                        if (f.type !== 'hidden') f.disabled = !!disabled;
+                    });
+                }
+
                 form.reset();
                 formContent.classList.remove('hidden');
                 deleteConfirmation.classList.add('hidden');
@@ -204,6 +242,7 @@ require_once 'template_header.php';
                 dropText.classList.remove('hidden');
 
                 if (type === 'create') {
+                    setFormFieldsDisabled(false);
                     modalAction.value = 'save';
                     modalId.value = '';
                     modalPhotoPath.value = '';
@@ -211,6 +250,7 @@ require_once 'template_header.php';
                     modalSubtitle.textContent = 'Fill in the details below';
                     modalSaveBtn.innerHTML = '<i class="fas fa-save"></i><span>Save</span>';
                 } else if (type === 'edit') {
+                    setFormFieldsDisabled(false);
                     modalAction.value = 'save';
                     modalId.value = data.id;
                     modalTitleInput.value = data.title;
@@ -225,7 +265,9 @@ require_once 'template_header.php';
                         dropText.classList.add('hidden');
                     }
                 } else if (type === 'delete') {
+                    setFormFieldsDisabled(true);
                     modalAction.value = 'delete';
+                    modalId.disabled = false; // id harus tetap enabled agar terkirim
                     modalId.value = data;
                     formContent.classList.add('hidden');
                     deleteConfirmation.classList.remove('hidden');
@@ -240,6 +282,9 @@ require_once 'template_header.php';
             function closeModal() {
                 modal.classList.add('pointer-events-none', 'opacity-0');
                 modal.querySelector('.bg-white').classList.add('scale-95');
+                // Enable all fields again
+                const fields = form.querySelectorAll('input, textarea, select');
+                fields.forEach(f => f.disabled = false);
             }
             
             form.addEventListener('submit', function() {
