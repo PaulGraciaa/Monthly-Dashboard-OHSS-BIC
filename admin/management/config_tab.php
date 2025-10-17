@@ -64,6 +64,7 @@ try {
         }
     </script>
 </head>
+<link rel="icon" type="image/png" href="../../img/logo_safety.png" />
 <body class="bg-gray-50 min-h-screen">
 
 

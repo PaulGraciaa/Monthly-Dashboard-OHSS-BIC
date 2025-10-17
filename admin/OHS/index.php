@@ -129,6 +129,7 @@ if ($view === 'ptw') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<link rel="icon" type="image/png" href="../../img/logo_safety.png" />
 <body class="bg-gray-50 font-sans">
     <!-- Header and Navigation -->
     <header class="bg-gradient-to-r from-red-600 to-red-800 text-white py-4 shadow-lg mb-6">

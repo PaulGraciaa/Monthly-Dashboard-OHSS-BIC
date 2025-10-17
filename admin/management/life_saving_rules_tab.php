@@ -83,6 +83,7 @@ $data = $pdo->query("SELECT * FROM life_saving_rules ORDER BY id DESC");
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <link rel="icon" type="image/png" href="../../img/logo_safety.png" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life Saving Rules & BASCOM Management</title>

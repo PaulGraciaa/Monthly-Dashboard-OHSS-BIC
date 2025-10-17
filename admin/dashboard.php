@@ -58,6 +58,8 @@ if (isset($_SESSION['admin_name'])) {
         }
     </style>
 </head>
+    <link rel="icon" type="image/png" href="../../img/logo_safety.png" />
+
 <body class="bg-gray-50 font-sans min-h-screen flex flex-col">
     <!-- Header -->
     <header class="gradient-bg text-white shadow-lg">

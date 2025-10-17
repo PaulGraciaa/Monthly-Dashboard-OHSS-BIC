@@ -13,6 +13,7 @@ if (!function_exists('sanitize')) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="../../img/logo_safety.png" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title : 'Surveillance Management'; ?> - OHSS</title>
